@@ -16,8 +16,7 @@
 
 			default:
 				throw new Error(`event ${event} not handled`);
-		}
-		
+		}		
 	})
 
 	function handleMessage(event) {
@@ -25,6 +24,7 @@
 	}
 
 	window.game = game;
+	window._ = _;
 </script> 
 
 
