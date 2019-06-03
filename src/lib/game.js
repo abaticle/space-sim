@@ -1,7 +1,7 @@
 import ECS from "./ecs/ecs";
 import _ from "lodash";
+//import { building, extractor, factory, planet, BuildingSystem, assemblages } from "./imports"
 import { building, extractor, factory } from "./components/building";
-import { inventory } from "./components/inventory";
 import { planet } from "./components/planet";
 import BuildingSystem from "./systems/building";
 import items from "./data/items";
@@ -172,11 +172,12 @@ export default class Game extends Observable{
         const {id, time} = items[resource];
 
         this.ecs.set(id, building, "extractor", "resource"); 
-        this.ecs.set(time, building, "extractor", "time");         
+        this.ecs.set(time, building, "extractor", "time");      
+        this.ecs.set(planet, building, "building", "planetId");
     }
 
     createFactory(planet, produce) {
-        const building = this.ecs.createEntity(["building", "factory"]); //"inventory"
+        const building = this.ecs.createEntity(["building", "factory"]); 
 
         this.ecs.set(planet, building, "building", "planetId");
         this.ecs.set("Factory MK1", building, "building", "desc"); 
@@ -191,7 +192,6 @@ export default class Game extends Observable{
         this.ecs.registerComponent(extractor);
         this.ecs.registerComponent(factory);
         this.ecs.registerComponent(planet);
-        this.ecs.registerComponent(inventory);
     }
 
 

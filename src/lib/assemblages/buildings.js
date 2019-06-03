@@ -1,4 +1,4 @@
-const Assemblages = {
+const buildings = {
     extractorMk1: {
         components: ["building", "extractor"],
         data: {
@@ -31,4 +31,4 @@ const Assemblages = {
     }
 }
 
-export default Assemblages;
+export default buildings;
