@@ -1,9 +1,9 @@
 const planet = {
     name: "planet",
     desc: "",
-    posX: 0,
-    posY: 0,
-    items: {}
+    items: {},
+    size: 0,
+    parent: undefined
 }
 
 export { planet };

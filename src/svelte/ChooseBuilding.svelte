@@ -1,10 +1,7 @@
 <script>
     import buildings from "../lib/data/buildings";
 
-
     export let isActive = false;
-
-
 </script>
 
 

@@ -11,6 +11,10 @@ export default class BuildingSystem {
         this.ecs = ecs;
     }
 
+    init() {
+        
+    }
+
 
     /**
      * Add an item to a component

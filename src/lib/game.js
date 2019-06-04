@@ -3,7 +3,10 @@ import _ from "lodash";
 //import { building, extractor, factory, planet, BuildingSystem, assemblages } from "./imports"
 import { building, extractor, factory } from "./components/building";
 import { planet } from "./components/planet";
+import { position } from "./components/position";
 import BuildingSystem from "./systems/building";
+import MoveSystem from "./systems/move";
+import DrawSystem from "./systems/draw";
 import items from "./data/items";
 import assemblages from "./assemblages/buildings"
 
@@ -44,8 +47,13 @@ export default class Game extends Observable{
         this.registerComponents();
         this.createEntities();   
         this.createSystems();
+        this.initSystems();
 
         requestAnimationFrame(this.update.bind(this))
+    }
+
+    initSystems() {
+        this.systems.forEach(s => s.init());
     }
 
     /**
@@ -141,28 +149,21 @@ export default class Game extends Observable{
     }
 
     createSystems() {
-        this.systems.push(new BuildingSystem(this.ecs))
+        this.systems.push(new BuildingSystem(this.ecs));
+        this.systems.push(new MoveSystem(this.ecs));
+        this.systems.push(new DrawSystem(this.ecs));
     }
 
-    createPlanet(name) {
-        let planet = this.ecs.createEntity(["planet"]);
+    createPlanet(name, size, x, y) {
+        let planet = this.ecs.createEntity(["planet", "position"]);
 
         this.ecs.set(name, planet, "planet", "name");
+        this.ecs.set(size, planet, "planet", "size");
+
+        this.ecs.set(x, planet, "position", "x");
+        this.ecs.set(y, planet, "position", "y");
 
         return planet;
-    }
-
-    createExtractorOld(planet, resource) {
-        const building = this.ecs.createEntity(["building", "extractor"]);
-
-        this.ecs.set(planet, building, "building", "planetId");
-        this.ecs.set("Extractor MK1", building, "building", "desc"); 
-
-        const item = items[resource];
-
-        this.ecs.set(item.id, building, "extractor", "resource"); 
-        this.ecs.set(item.time, building, "extractor", "time"); 
-
     }
 
 
@@ -192,27 +193,41 @@ export default class Game extends Observable{
         this.ecs.registerComponent(extractor);
         this.ecs.registerComponent(factory);
         this.ecs.registerComponent(planet);
+        this.ecs.registerComponent(position);
     }
 
 
     createEntities() {
         let planet;
 
-        planet = this.createPlanet("Test 1");
+        let sun = this.createPlanet("Sun", 90, 800, 400)
+
+        let earth = this.createPlanet("Earth", 30, 400, 400);
         
-        this.createExtractor(planet, "ironOre");
-        this.createExtractor(planet, "ironOre");
-        this.createExtractor(planet, "ironOre");
-        this.createExtractor(planet, "copperOre");
-        this.createFactory(planet, "ironBar");
-        this.createFactory(planet, "copperBar");     
-        this.createFactory(planet, "electricComponent");                      
+        this.createExtractor(earth, "ironOre");
+        this.createExtractor(earth, "ironOre");
+        this.createExtractor(earth, "ironOre");
+        this.createExtractor(earth, "copperOre");
+        this.createFactory(earth, "ironBar");
+        this.createFactory(earth, "copperBar");     
+        this.createFactory(earth, "electricComponent");                      
 
         
-        planet = this.createPlanet("Test 2");
-        this.createExtractor(planet, "ironOre");
-        this.createExtractor(planet, "ironOre");
-        this.createFactory(planet, "ironBar");          
+        let moon = this.createPlanet("Moon", 10, 320, 400);
+        this.createExtractor(moon, "ironOre");
+        this.createExtractor(moon, "ironOre");
+        this.createFactory(moon, "ironBar");          
+
+        this.ecs.set(earth, moon, "planet", "parent");
+        this.ecs.set(sun, earth, "planet", "parent");
+
+        /*
+        _.times(10, (i) => {
+            planet = this.createPlanet("sattelite"+i);
+            this.createExtractor(planet, "ironOre");
+            this.createExtractor(planet, "ironOre");
+            this.createFactory(planet, "ironBar");                 
+        })*/
     }
 }
 
