@@ -3,7 +3,7 @@ const planet = {
     desc: "",
     items: {},
     size: 0,
-    parent: undefined
+    parentId: undefined
 }
 
 export { planet };

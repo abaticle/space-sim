@@ -157,7 +157,7 @@ export default class Game extends Observable{
     createPlanet(name, size, x, y) {
         let planet = this.ecs.createEntity(["planet", "position"]);
 
-        this.ecs.set(name, planet, "planet", "name");
+        this.ecs.set(name, planet, "planet", "desc");
         this.ecs.set(size, planet, "planet", "size");
 
         this.ecs.set(x, planet, "position", "x");
@@ -218,8 +218,8 @@ export default class Game extends Observable{
         this.createExtractor(moon, "ironOre");
         this.createFactory(moon, "ironBar");          
 
-        this.ecs.set(earth, moon, "planet", "parent");
-        this.ecs.set(sun, earth, "planet", "parent");
+        this.ecs.set(earth, moon, "planet", "parentId");
+        this.ecs.set(sun, earth, "planet", "parentId");
 
         /*
         _.times(10, (i) => {

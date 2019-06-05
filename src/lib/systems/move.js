@@ -17,11 +17,32 @@ export default class MoveSystem {
         return [nx, ny];
     }
 
+    movePlanet(id) {
+        let { position, planet } = this.ecs.get(id);
+
+        let parentPos = this.ecs.get(planet.parentId, "position");
+
+        let r = this.rotate(parentPos.x, parentPos.y, position.x, position.y, 0.8)
+        position.x = r[0]
+        position.y = r[1]
+
+        return r;
+    }
+
     update(dt) {
 
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
-        planets.forEach(planetId => {
+
+        //Move earth 
+        //this.movePlanet(1)
+
+        //Move moon
+        this.movePlanet(9)
+
+
+        
+        /*planets.forEach(planetId => {
 
             let { position, planet } = this.ecs.get(planetId);
 
@@ -34,9 +55,7 @@ export default class MoveSystem {
                 position.y = r[1]
 
             }
-
-            //position.x += 1;
-        })
+        })*/
     }
 
 }
