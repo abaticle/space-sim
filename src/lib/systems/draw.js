@@ -21,6 +21,11 @@ export default class DrawSystem {
     }
 
 
+    onClick(e) {
+        console.log(e)
+    }
+
+
     //TODO: utiliser une fonction de leasing pour l'animation
     onScroll(e) {
 
@@ -65,6 +70,8 @@ export default class DrawSystem {
 
     initKonva() {
 
+        this.width = document.getElementById("map").offsetWidth;
+
         let stage = new Konva.Stage({
             container: 'map',
             width: this.width,
@@ -95,18 +102,34 @@ export default class DrawSystem {
                 position,
                 planet
             } = this.ecs.get(planetId);
-
             
             //Draw planet :
-            layer.add(new Konva.Circle({
+            let circle = new Konva.Circle({
                 x: position.x,
                 y: position.y,
                 radius: planet.size,
-                stroke: "white",
-                strokeWidth: 2,
+                //stroke: "white",
+                //strokeWidth: 2,
                 id: "planet-" + planetId.toString(),
                 name: "planet"
-            }));
+            });
+
+            //Planet selection
+            circle.on("click", this.onClick.bind(this))
+
+            circle.on("click", function(e) {
+                console.log(e)
+            })
+
+            if (planet.name === "Sun") {
+                circle.fill("#fff5b1")
+            } else {
+                circle.fill("#f1f8ff");
+                circle.stroke("white");
+                circle.strokeWidth(2);
+            }
+
+            layer.add(circle);
 
 
             //Draw planet orbit

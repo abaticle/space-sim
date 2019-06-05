@@ -229,11 +229,54 @@ export default class Game extends Observable{
 
 
     createEntities() {
-            
+        
+        let params = [
+            //{name: "Sun", dist: 0, speed: 0, size: 695},
+            {name: "Mercury", dist: 0.4, speed: 47, size: 2.4},
+            {name: "Venus", dist: 0.7, speed: 35, size: 6},
+            {name: "Earth", dist: 1, speed: 30, size: 6.3},
+            {name: "Mars", dist: 1.5, speed: 24, size: 3.4},
+            {name: "Jupiter", dist: 5.2, speed: 13, size: 70},
+            {name: "Saturn", dist: 9.5, speed: 9.7, size: 58},
+            {name: "Uranus", dist: 19.2, speed: 6.8, size: 25},
+            {name: "Neptune", dist: 30.1, speed: 5.4, size: 24.6},
+        ];
+
+        let sun = this.createPlanet("Sun", 350, 0, 0);
+        this.ecs.set("Sun", sun, "planet", "name");
+
+        params.forEach(param => {
+            let p = this.createPlanet(param.name, param.size * 2, 695 + (param.dist*1000), 0);
+
+            this.ecs.set(param.name, p, "planet", "name");
+            this.ecs.set(sun, p, "planet", "parentId");
+            this.ecs.set(param.speed / 10, p, "planet", "speed");
+        });
+
+        this.updatePlanetsChildrens();
+
+/*      
+
+        Planet  | Distance | Speed
+        -----------------------------------
+        Mercury | 0.4   AU | 47     Km/s
+        Venus   | 0.7   AU | 35     Km/s 
+        Earth   | 1     AU | 30     Km/s
+        Mars    | 1.5   AU | 24     Km/s
+        Jupiter | 5.2   AU | 13     Km/s
+        Saturn  | 9.5   AU | 9.7    Km/s
+        Uranus  | 19.2  AU | 6.8    Km/s
+        Neptune | 30.1  AU | 5.4    Km/s
+
+*/
+
+
+
+
 /*
         this.createSolarSystem();
         this.updatePlanetsChildrens();
-*/
+
     
         let sun = this.createPlanet("Sun", 90, 800, 400);
         let earth = this.createPlanet("Earth", 30, 400, 400); 
@@ -266,7 +309,7 @@ export default class Game extends Observable{
         this.ecs.set(0.5, mars, "planet", "speed");
 
         this.updatePlanetsChildrens();
-        
+        */
     }
 }
 

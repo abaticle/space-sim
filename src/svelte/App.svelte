@@ -37,16 +37,16 @@
 
     <div class="columns"> 
     
-        <div class="column is-one-third" id="map">
+        <div class="column is-two-thirds" id="map">
 		</div>
 
-	<!--
+	
 		<div class="column">
 			{#each planets as planet} 
 			<Planet planet={planet} on:message={handleMessage}></Planet>
 			{/each}
 		</div>
-	-->
+<!---->
 	
     </div>
 
