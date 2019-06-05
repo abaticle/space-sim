@@ -7,8 +7,8 @@ export default class ECS {
         this.entitiesComponents = {}
         this.components = {};
         this._cache = {};
+        this._cacheFunctions = {};
     }
-
 
     clearAll() {
         this.entities = [];

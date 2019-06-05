@@ -10,9 +10,8 @@ export default class DrawSystem {
         this.height = window.innerHeight;
     }
 
+    initKonva() {
 
-
-    init() {
         let stage = new Konva.Stage({
             container: 'map',   
             width: this.width,
@@ -51,34 +50,20 @@ export default class DrawSystem {
         stage.add(layer);
 
         this.layer = layer;
+    }
 
-        /*
-        let anim = new Konva.Animation((frame) => {
+    initData() {
+        this.planets = this.ecs.searchEntities(["planet", "position"]);
+    }
 
-            let planets = this.ecs.searchEntities(["planet", "position"]);
-        
-            planets.forEach(planetId => {
-                let { position, planet } = this.ecs.get(planetId);
-    
-                let circle = this.layer.findOne("#" + planetId);
-    
-                if (!circle) {
-                    throw new Error(`Error planet ${circle} doesn't exists in Konva`);
-                }
-    
-                circle.setX(position.x)
-                circle.setY(position.y)
-            });
-        })
-        anim.start();
-        */
+    init() {
+        this.initKonva();
+        this.initData();
     }
 
 
-    update(dt) { 
-        let planets = this.ecs.searchEntities(["planet", "position"]);
-        
-        planets.forEach(planetId => {
+    update(dt) {         
+        this.planets.forEach(planetId => {
             let { position, planet } = this.ecs.get(planetId);
 
             let circle = this.layer.findOne("#" + planetId);
@@ -88,12 +73,7 @@ export default class DrawSystem {
             }
 
             circle.setX(position.x)
-            circle.setY(position.y)
-
-            if (planetId === 1) {
-               // console.log("pos", position.x, " / circle ", circle.getX())
-            }
-            
+            circle.setY(position.y)            
         });
 
         this.layer.draw();
