@@ -33,7 +33,6 @@ export default class Game extends Observable{
     constructor() {
         super();
 
-        this.tick = 0;
         this.speed = 1;
         this.ecs = new ECS();
         this.systems = [];
@@ -71,19 +70,9 @@ export default class Game extends Observable{
             system.update(dt)
         });
 
-        //Draw
-        //if (this.tick % 5 === 0) {
-            this.draw(dt);
-        //}
-        
+        this.draw(dt);        
         
         requestAnimationFrame(this.update.bind(this));
-
-        this.tick++;
-
-        if (this.tick > 10000) {
-            this.tick = 0;
-        }
     }
 
 
@@ -207,9 +196,7 @@ export default class Game extends Observable{
 
                 if (childrens.length === 0) {
                     return;
-                }
-
-                else {
+                } else {
                     childrens.forEach(p => {
                         planet.childrenIds.push(p._id)
                         getChildren(p._id)
@@ -221,9 +208,33 @@ export default class Game extends Observable{
         })
     }
 
+    createSolarSystem() {
+        let sun = this.createPlanet("Sun", 90, 800, 800);
+
+        let nPlanets = _.random(5, 10);
+
+        _.times(_.random(5, 10), (i) => {
+            let size = _.random(15, 35);
+            let speed = _.random(-2, 2);
+            
+
+            let p = this.createPlanet("Planet " + i, size, 800 - ((i + 1)*_.random(150, 200)), 800);
+
+            this.ecs.set(sun, p, "planet", "parentId");
+            this.ecs.set(speed, p, "planet", "speed");            
+        });
+
+        this.updatePlanetsChildrens();
+    }
+
 
     createEntities() {
-
+            
+/*
+        this.createSolarSystem();
+        this.updatePlanetsChildrens();
+*/
+    
         let sun = this.createPlanet("Sun", 90, 800, 400);
         let earth = this.createPlanet("Earth", 30, 400, 400); 
         let moon = this.createPlanet("Moon", 10, 320, 400);    
@@ -250,19 +261,12 @@ export default class Game extends Observable{
         this.ecs.set(sun, earth, "planet", "parentId");
         this.ecs.set(sun, mars, "planet", "parentId");
 
-        this.ecs.set(1.5, moon, "planet", "speed");
+        this.ecs.set(3, moon, "planet", "speed");
         this.ecs.set(0.1, earth, "planet", "speed");
         this.ecs.set(0.5, mars, "planet", "speed");
 
         this.updatePlanetsChildrens();
-
-        /*
-        _.times(10, (i) => {
-            planet = this.createPlanet("sattelite"+i);
-            this.createExtractor(planet, "ironOre");
-            this.createExtractor(planet, "ironOre");
-            this.createFactory(planet, "ironBar");                 
-        })*/
+        
     }
 }
 

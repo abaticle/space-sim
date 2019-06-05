@@ -6,34 +6,46 @@ export default class MoveSystem {
     }
 
     init() {
-        /*this.planets = this.ecs.searchEntities(["planet", "position"]).map(id => {
-            return {
-                _id: id,
-                data: this.ecs.get(id)
-            }
-        });*/
+
     }
 
+    /**
+     * Get new posititon for an item rotation
+     * @param {number} cx Rotation axle x pos
+     * @param {*} cy Rotation axle y pos
+     * @param {*} x Item x to rotate
+     * @param {*} y Item y to rotate
+     * @param {*} angle Angle in degree
+     */
     rotate(cx, cy, x, y, angle) {
-        let radians = (Math.PI / 180) * angle,
-            cos = Math.cos(radians),
-            sin = Math.sin(radians),
-            nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
-            ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
-        
-        return {x: nx, y: ny}
-        //return [nx, ny];
+        let radians = (Math.PI / 180) * angle;
+        let cos = Math.cos(radians);
+        let sin = Math.sin(radians);
+        let nx = (cos * (x - cx)) + (sin * (y - cy)) + cx;
+        let ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+
+        return {
+            x: nx,
+            y: ny
+        }
     }
 
-    
+    /**
+     * Move a planet 
+     * @param {number} id Entity Id
+     * @param {*} dt Time difference
+     */
     movePlanet(id, dt) {
-        let { position, planet } = this.ecs.get(id);
+        let {
+            position,
+            planet
+        } = this.ecs.get(id);
 
         //Save planet position
         let t = {
             x: position.x,
             y: position.y
-        }       
+        }
 
         if (planet.parentId !== undefined) {
 
@@ -52,15 +64,15 @@ export default class MoveSystem {
             //And move all childrens :
             planet.childrenIds.forEach(childrenId => {
                 let p = this.ecs.get(childrenId, "position");
+                
                 p.x += t.x
                 p.y += t.y
             })
-            
+
         }
     }
 
     update(dt) {
-
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
         planets.forEach(id => {

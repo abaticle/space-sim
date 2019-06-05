@@ -13,6 +13,14 @@ export default class DrawSystem {
     }
 
 
+    distance(pointFrom, pointTo) {
+        var xDist = pointFrom.x - pointTo.x;
+        var yDist = pointFrom.y - pointTo.y;
+        
+        return Math.sqrt(xDist * xDist + yDist * yDist);
+    }
+
+
     //TODO: utiliser une fonction de leasing pour l'animation
     onScroll(e) {
 
@@ -88,6 +96,8 @@ export default class DrawSystem {
                 planet
             } = this.ecs.get(planetId);
 
+            
+            //Draw planet :
             layer.add(new Konva.Circle({
                 x: position.x,
                 y: position.y,
@@ -98,6 +108,25 @@ export default class DrawSystem {
                 name: "planet"
             }));
 
+
+            //Draw planet orbit
+            if (planet.parentId !== undefined) {
+                let positionParent = this.ecs.get(planet.parentId, "position")
+
+                let radius = this.distance(position, positionParent)
+
+                layer.add(new Konva.Circle({
+                    x: positionParent.x,
+                    y: positionParent.y,
+                    radius: radius,
+                    stroke: "white",
+                    strokeWidth: 0.3    ,
+                    id: "planet-orbite-" + planetId.toString(),
+                    name: "planet"
+                }));
+            }
+
+            //Drawn planet name :
             let text = new Konva.Text({
                 x: position.x,
                 y: position.y + planet.size + 10,
@@ -115,32 +144,43 @@ export default class DrawSystem {
     }
 
     init() {
-        this.initKonva();
         this.initData();
+        this.initKonva();
         this.initPlanets();
     }
 
 
     update(dt) {
+        
         this.planets.forEach(planetId => {
+
             let {
                 position,
                 planet
             } = this.ecs.get(planetId);
 
-            let circle = this.layer.findOne("#planet-" + planetId);
-            let text = this.layer.findOne("#planet-text-" + planetId)
+            let planetDraw = this.layer.findOne("#planet-" + planetId);
+            let orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
+            let textDraw = this.layer.findOne("#planet-text-" + planetId);
+            
 
-            if (!circle) {
-                throw new Error(`Error planet ${circle} doesn't exists in Konva`);
+            if (!planetDraw) {
+                throw new Error(`Error planet #planet-${planetId} doesn't exists in Konva`);
             }
 
-            circle.setX(position.x)
-            circle.setY(position.y)
+            planetDraw.setX(position.x)
+            planetDraw.setY(position.y)
 
-            text.setX(position.x)
-            text.setY(position.y + planet.size + 10)
-            text.offsetX(text.width() / 2)
+            if (planet.parentId !== undefined) {
+                let parentPosition = this.ecs.get(planet.parentId, "position");
+
+                orbiteDraw.setX(parentPosition.x)
+                orbiteDraw.setY(parentPosition.y)
+            }
+
+            textDraw.setX(position.x)
+            textDraw.setY(position.y + planet.size + 10)
+            textDraw.offsetX(textDraw.width() / 2)
         });
 
         this.layer.batchDraw();
