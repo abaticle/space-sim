@@ -10,6 +10,8 @@ export default class DrawSystem {
         this.stage;
 
         this.scaleBy = 1.1;
+
+        this.actions = []
     }
 
 
@@ -21,8 +23,24 @@ export default class DrawSystem {
     }
 
 
-    onClick(e) {
-        console.log(e)
+    onClick(event) {
+        let id = event.target.id();
+
+        if (id.startsWith("planet")) {
+            
+            //Get entity id as number from shape id
+            let entityId = parseInt(id.split("-")[1]);
+
+            if (typeof entityId !== "number") {
+                throw new Error(`No entity found from id ${target.id()}`);
+            }
+
+            this.actions.push("DISPLAY_PLANET", {
+                data: {
+                    id
+                }
+            })
+        }
     }
 
 
@@ -82,7 +100,8 @@ export default class DrawSystem {
         let layer = new Konva.Layer();        
 
         stage.on('wheel', this.onScroll.bind(this));
-        
+        stage.on("click", this.onClick.bind(this))
+
         stage.add(layer);
 
         this.layer = layer;
@@ -115,11 +134,14 @@ export default class DrawSystem {
             });
 
             //Planet selection
+            /*            
             circle.on("click", this.onClick.bind(this))
 
             circle.on("click", function(e) {
                 console.log(e)
             })
+            */
+
 
             if (planet.name === "Sun") {
                 circle.fill("#fff5b1")
@@ -145,7 +167,8 @@ export default class DrawSystem {
                     stroke: "white",
                     strokeWidth: 0.3    ,
                     id: "planet-orbite-" + planetId.toString(),
-                    name: "planet"
+                    name: "planet-orbite",
+                    listening: false
                 }));
             }
 
@@ -157,7 +180,8 @@ export default class DrawSystem {
                 text: planet.desc,
                 fill: "white",
                 id: "planet-text-" + planetId.toString(),
-                name: "planet-text"
+                name: "planet-text",
+                listening: false
             });
 
             text.offsetX(text.width() / 2);
@@ -173,7 +197,7 @@ export default class DrawSystem {
     }
 
 
-    update(dt) {
+    update(dt, actions) {
         
         this.planets.forEach(planetId => {
 
@@ -207,5 +231,7 @@ export default class DrawSystem {
         });
 
         this.layer.batchDraw();
+
+        
     }
 }

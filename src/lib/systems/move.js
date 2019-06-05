@@ -72,7 +72,7 @@ export default class MoveSystem {
         }
     }
 
-    update(dt) {
+    update(dt, actions) {
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
         planets.forEach(id => {

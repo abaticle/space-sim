@@ -72,7 +72,7 @@ export default class BuildingSystem {
     }
 
 
-    update(dt, time) {
+    update(dt, actions) {
         this.buildings = this.ecs.searchEntities(["building"]);
 
         _.each(this.buildings, (buildingId) => {

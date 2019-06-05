@@ -66,9 +66,13 @@ export default class Game extends Observable{
         dt *= this.speed;
         
         //Update entities
+        let actions = [];
+
         _.each(this.systems, system => {
-            system.update(dt)
+            system.update(dt, actions)
         });
+
+        
 
         this.draw(dt);        
         
@@ -185,8 +189,44 @@ export default class Game extends Observable{
         this.ecs.registerComponent(position);
     }
 
+    createEntities() {        
+        let paramsPlanets = [
+            //{name: "Sun", dist: 0, speed: 0, size: 695},
+            {name: "Mercury", dist: 0.4, speed: 47, size: 2.4},
+            {name: "Venus", dist: 0.7, speed: 35, size: 6},
+            {name: "Earth", dist: 1, speed: 30, size: 6.3},
+            {name: "Mars", dist: 1.5, speed: 24, size: 3.4},
+            {name: "Jupiter", dist: 5.2, speed: 13, size: 70},
+            {name: "Saturn", dist: 9.5, speed: 9.7, size: 58},
+            {name: "Uranus", dist: 19.2, speed: 6.8, size: 25},
+            {name: "Neptune", dist: 30.1, speed: 5.4, size: 24.6},
+        ];
 
-    updatePlanetsChildrens() {
+        let sun = this.createPlanet("Sun", 350, 0, 0);
+        this.ecs.set("Sun", sun, "planet", "name");
+        this.ecs.set("star", sun, "planet", "type");
+
+        paramsPlanets.forEach(param => {
+            let p = this.createPlanet(param.name, param.size * 2, 695 + (param.dist*1000), 0);
+
+            if (param.name === "Earth") {
+                this.ecs.set(true, p, "planet", "owned");
+
+                this.createExtractor(p, "ironOre");
+                this.createExtractor(p, "ironOre");
+                this.createExtractor(p, "ironOre");                
+            }
+
+            this.ecs.set("planet", p, "planet", "type")
+            this.ecs.set(param.name, p, "planet", "name");
+            this.ecs.set(sun, p, "planet", "parentId");
+            this.ecs.set(param.speed / 30, p, "planet", "speed");
+        });
+
+        this._updatePlanetsChildrens();
+    }
+
+    _updatePlanetsChildrens() {
         let planets = this.ecs.searchEntities("planet").map(id => this.ecs.get(id, "planet"));
 
         planets.forEach(planet => {
@@ -206,110 +246,6 @@ export default class Game extends Observable{
 
             getChildren(planet._id);
         })
-    }
-
-    createSolarSystem() {
-        let sun = this.createPlanet("Sun", 90, 800, 800);
-
-        let nPlanets = _.random(5, 10);
-
-        _.times(_.random(5, 10), (i) => {
-            let size = _.random(15, 35);
-            let speed = _.random(-2, 2);
-            
-
-            let p = this.createPlanet("Planet " + i, size, 800 - ((i + 1)*_.random(150, 200)), 800);
-
-            this.ecs.set(sun, p, "planet", "parentId");
-            this.ecs.set(speed, p, "planet", "speed");            
-        });
-
-        this.updatePlanetsChildrens();
-    }
-
-
-    createEntities() {
-        
-        let params = [
-            //{name: "Sun", dist: 0, speed: 0, size: 695},
-            {name: "Mercury", dist: 0.4, speed: 47, size: 2.4},
-            {name: "Venus", dist: 0.7, speed: 35, size: 6},
-            {name: "Earth", dist: 1, speed: 30, size: 6.3},
-            {name: "Mars", dist: 1.5, speed: 24, size: 3.4},
-            {name: "Jupiter", dist: 5.2, speed: 13, size: 70},
-            {name: "Saturn", dist: 9.5, speed: 9.7, size: 58},
-            {name: "Uranus", dist: 19.2, speed: 6.8, size: 25},
-            {name: "Neptune", dist: 30.1, speed: 5.4, size: 24.6},
-        ];
-
-        let sun = this.createPlanet("Sun", 350, 0, 0);
-        this.ecs.set("Sun", sun, "planet", "name");
-
-        params.forEach(param => {
-            let p = this.createPlanet(param.name, param.size * 2, 695 + (param.dist*1000), 0);
-
-            this.ecs.set(param.name, p, "planet", "name");
-            this.ecs.set(sun, p, "planet", "parentId");
-            this.ecs.set(param.speed / 10, p, "planet", "speed");
-        });
-
-        this.updatePlanetsChildrens();
-
-/*      
-
-        Planet  | Distance | Speed
-        -----------------------------------
-        Mercury | 0.4   AU | 47     Km/s
-        Venus   | 0.7   AU | 35     Km/s 
-        Earth   | 1     AU | 30     Km/s
-        Mars    | 1.5   AU | 24     Km/s
-        Jupiter | 5.2   AU | 13     Km/s
-        Saturn  | 9.5   AU | 9.7    Km/s
-        Uranus  | 19.2  AU | 6.8    Km/s
-        Neptune | 30.1  AU | 5.4    Km/s
-
-*/
-
-
-
-
-/*
-        this.createSolarSystem();
-        this.updatePlanetsChildrens();
-
-    
-        let sun = this.createPlanet("Sun", 90, 800, 400);
-        let earth = this.createPlanet("Earth", 30, 400, 400); 
-        let moon = this.createPlanet("Moon", 10, 320, 400);    
-        let mars = this.createPlanet("Mars", 20, 600, 400);   
-
-        console.log("sun id :", sun)
-        console.log("earth id :", earth)
-        console.log("moon id :", moon)
-        console.log("mars id :", mars)
-
-        this.createExtractor(earth, "ironOre");
-        this.createExtractor(earth, "ironOre");
-        this.createExtractor(earth, "ironOre");
-        this.createExtractor(earth, "copperOre");
-        this.createFactory(earth, "ironBar");
-        this.createFactory(earth, "copperBar");     
-        this.createFactory(earth, "electricComponent");     
-        this.createExtractor(moon, "ironOre");
-        this.createExtractor(moon, "ironOre");
-        this.createFactory(moon, "ironBar");  
-        
-        
-        this.ecs.set(earth, moon, "planet", "parentId");
-        this.ecs.set(sun, earth, "planet", "parentId");
-        this.ecs.set(sun, mars, "planet", "parentId");
-
-        this.ecs.set(3, moon, "planet", "speed");
-        this.ecs.set(0.1, earth, "planet", "speed");
-        this.ecs.set(0.5, mars, "planet", "speed");
-
-        this.updatePlanetsChildrens();
-        */
     }
 }
 
