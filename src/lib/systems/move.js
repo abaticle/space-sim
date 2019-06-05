@@ -25,48 +25,48 @@ export default class MoveSystem {
         //return [nx, ny];
     }
 
-    movePlanet(id) {
+    
+    movePlanet(id, dt) {
         let { position, planet } = this.ecs.get(id);
 
-        let parentPos = this.ecs.get(planet.parentId, "position");
+        //Save planet position
+        let t = {
+            x: position.x,
+            y: position.y
+        }       
+
+        if (planet.parentId !== undefined) {
+
+            //Rotate planet :
+            let parentPos = this.ecs.get(planet.parentId, "position");
+
+            let r = this.rotate(parentPos.x, parentPos.y, position.x, position.y, planet.speed * dt);
+
+            position.x = r.x
+            position.y = r.y
+
+            t.x = position.x - t.x
+            t.y = position.y - t.y
 
 
-        //TODO : rotation speed depends on dt
-        let r = this.rotate(parentPos.x, parentPos.y, position.x, position.y, 0.8);
-
-        position.x = r.x
-        position.y = r.y
-
-        return r;
+            //And move all childrens :
+            planet.childrenIds.forEach(childrenId => {
+                let p = this.ecs.get(childrenId, "position");
+                p.x += t.x
+                p.y += t.y
+            })
+            
+        }
     }
 
     update(dt) {
 
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
+        planets.forEach(id => {
+            this.movePlanet(id, dt);
+        })
 
-        //Move earth 
-        //this.movePlanet(1)
-
-        //Move moon
-        this.movePlanet(9)
-
-
-        
-        /*planets.forEach(planetId => {
-
-            let { position, planet } = this.ecs.get(planetId);
-
-            if (planet.parent !== undefined) {
-                let parentPos = this.ecs.get(planet.parent, "position");
-
-                let r = this.rotate(parentPos.x, parentPos.y, position.x, position.y, 1)
-
-                position.x = r[0]
-                position.y = r[1]
-
-            }
-        })*/
     }
 
 }

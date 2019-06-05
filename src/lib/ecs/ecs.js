@@ -142,6 +142,7 @@ export default class ECS {
             }
 
             this.entitiesComponents[name][entityId] = _.cloneDeep(this.components[name]);
+            this.entitiesComponents[name][entityId]["_id"] = entityId;
         })
 
         return this;

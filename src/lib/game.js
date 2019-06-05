@@ -197,29 +197,64 @@ export default class Game extends Observable{
     }
 
 
+    updatePlanetsChildrens() {
+        let planets = this.ecs.searchEntities("planet").map(id => this.ecs.get(id, "planet"));
+
+        planets.forEach(planet => {
+            
+            function getChildren(id) {
+                let childrens = planets.filter(p => p.parentId === id);
+
+                if (childrens.length === 0) {
+                    return;
+                }
+
+                else {
+                    childrens.forEach(p => {
+                        planet.childrenIds.push(p._id)
+                        getChildren(p._id)
+                    })
+                }
+            }
+
+            getChildren(planet._id);
+        })
+    }
+
+
     createEntities() {
-        let planet;
 
-        let sun = this.createPlanet("Sun", 90, 800, 400)
+        let sun = this.createPlanet("Sun", 90, 800, 400);
+        let earth = this.createPlanet("Earth", 30, 400, 400); 
+        let moon = this.createPlanet("Moon", 10, 320, 400);    
+        let mars = this.createPlanet("Mars", 20, 600, 400);   
 
-        let earth = this.createPlanet("Earth", 30, 400, 400);
-        
+        console.log("sun id :", sun)
+        console.log("earth id :", earth)
+        console.log("moon id :", moon)
+        console.log("mars id :", mars)
+
         this.createExtractor(earth, "ironOre");
         this.createExtractor(earth, "ironOre");
         this.createExtractor(earth, "ironOre");
         this.createExtractor(earth, "copperOre");
         this.createFactory(earth, "ironBar");
         this.createFactory(earth, "copperBar");     
-        this.createFactory(earth, "electricComponent");                      
-
+        this.createFactory(earth, "electricComponent");     
+        this.createExtractor(moon, "ironOre");
+        this.createExtractor(moon, "ironOre");
+        this.createFactory(moon, "ironBar");  
         
-        let moon = this.createPlanet("Moon", 10, 320, 400);
-        this.createExtractor(moon, "ironOre");
-        this.createExtractor(moon, "ironOre");
-        this.createFactory(moon, "ironBar");          
-
+        
         this.ecs.set(earth, moon, "planet", "parentId");
         this.ecs.set(sun, earth, "planet", "parentId");
+        this.ecs.set(sun, mars, "planet", "parentId");
+
+        this.ecs.set(1.5, moon, "planet", "speed");
+        this.ecs.set(0.1, earth, "planet", "speed");
+        this.ecs.set(0.5, mars, "planet", "speed");
+
+        this.updatePlanetsChildrens();
 
         /*
         _.times(10, (i) => {

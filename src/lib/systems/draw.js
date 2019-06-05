@@ -3,27 +3,90 @@ export default class DrawSystem {
     constructor(ecs) {
         this.ecs = ecs;
         
-        //this.canvas;
-        //this.ctx;
-
         this.width = window.innerWidth;
         this.height = window.innerHeight;
+        
+        this.layer;
+        this.stage;
+
+        this.scaleBy = 1.1;
+    }
+
+
+    //TODO: utiliser une fonction de leasing pour l'animation
+    onScroll(e) {
+
+        let stage = this.stage;
+
+        e.evt.preventDefault();
+        
+        let oldScale = stage.scaleX();
+
+        let mousePointTo = {
+            x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+            y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+        };
+
+        let newScale = e.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
+        let newScaleText = e.evt.deltaY > 0 ? oldScale * this.scaleBy : oldScale / this.scaleBy;
+
+        stage.scale({
+            x: newScale,
+            y: newScale
+        });
+
+        let newPos = {
+            x: -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
+            y: -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
+        };
+
+        let texts = stage.find("Text");
+ 
+        texts.forEach(text => {
+            text.scale({
+                x: newScaleText,
+                y: newScaleText
+            })
+        });
+
+        let a = 1;
+
+        stage.position(newPos);
+        stage.batchDraw();
     }
 
     initKonva() {
 
         let stage = new Konva.Stage({
-            container: 'map',   
+            container: 'map',
             width: this.width,
-            height: this.height
+            height: this.height,
+            draggable: true
         });
 
-        let layer = new Konva.Layer();
+        let layer = new Konva.Layer();        
 
-        let planets = this.ecs.searchEntities(["planet", "position"]);
+        stage.on('wheel', this.onScroll.bind(this));
         
-        planets.forEach(planetId => {
-            let { position, planet } = this.ecs.get(planetId);
+        stage.add(layer);
+
+        this.layer = layer;
+        this.stage = stage;
+    }
+
+    initData() {
+        this.planets = this.ecs.searchEntities(["planet", "position"]);
+    }
+
+    initPlanets() {
+
+        this.planets.forEach(planetId => {
+            let layer = this.layer;
+
+            let {
+                position,
+                planet
+            } = this.ecs.get(planetId);
 
             layer.add(new Konva.Circle({
                 x: position.x,
@@ -31,99 +94,55 @@ export default class DrawSystem {
                 radius: planet.size,
                 stroke: "white",
                 strokeWidth: 2,
-                id: planetId.toString()
+                id: "planet-" + planetId.toString(),
+                name: "planet"
             }));
 
-            let text = new Konva.Text({                
+            let text = new Konva.Text({
                 x: position.x,
                 y: position.y + planet.size + 10,
                 fontSize: 12,
                 text: planet.desc,
-                fill: "white"
+                fill: "white",
+                id: "planet-text-" + planetId.toString(),
+                name: "planet-text"
             });
-            
+
             text.offsetX(text.width() / 2);
 
             layer.add(text);
-        });        
-        
-        stage.add(layer);
-
-        this.layer = layer;
-    }
-
-    initData() {
-        this.planets = this.ecs.searchEntities(["planet", "position"]);
+        });
     }
 
     init() {
         this.initKonva();
         this.initData();
+        this.initPlanets();
     }
 
 
-    update(dt) {         
+    update(dt) {
         this.planets.forEach(planetId => {
-            let { position, planet } = this.ecs.get(planetId);
+            let {
+                position,
+                planet
+            } = this.ecs.get(planetId);
 
-            let circle = this.layer.findOne("#" + planetId);
+            let circle = this.layer.findOne("#planet-" + planetId);
+            let text = this.layer.findOne("#planet-text-" + planetId)
 
             if (!circle) {
                 throw new Error(`Error planet ${circle} doesn't exists in Konva`);
             }
 
             circle.setX(position.x)
-            circle.setY(position.y)            
+            circle.setY(position.y)
+
+            text.setX(position.x)
+            text.setY(position.y + planet.size + 10)
+            text.offsetX(text.width() / 2)
         });
 
-        this.layer.draw();
+        this.layer.batchDraw();
     }
-
-    /**
-     * With vanilla canva :
-     */
-    initOld() {
-        
-
-        let canvas = document.createElement("canvas");
-        let div = document.getElementById("map");
-        let ctx = canvas.getContext("2d");
-
-        this.canvas = canvas;
-        this.ctx = ctx;
-
-        canvas.width = this.width;
-        canvas.height = this.height;
-        div.appendChild(canvas);    
-        
-    }
-
-    drawPlanetOld(x, y, size) {
-        let ctx = this.ctx;
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, 2 * Math.PI);
-        ctx.stroke();
-    }
-
-
-    updateOld(dt) {
-        let planets = this.ecs.searchEntities(["planet", "position"]);
-
-        this.ctx.clearRect(0,0,this.width,this.height);
-
-        planets.forEach(planetId => {
-
-            let { position, planet } = this.ecs.get(planetId);
-
-            this.drawPlanet(position.x, position.y, planet.size)
-
-        })
-
-        let ctx = this.ctx;
-
-
-    }
-
 }
