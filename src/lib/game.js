@@ -1,6 +1,5 @@
-import ECS from "./ecs/ecs";
+import ECS from "./modules/ecs";
 import _ from "lodash";
-//import { building, extractor, factory, planet, BuildingSystem, assemblages } from "./imports"
 import { building, extractor, factory } from "./components/building";
 import { planet } from "./components/planet";
 import { position } from "./components/position";
@@ -8,25 +7,8 @@ import BuildingSystem from "./systems/building";
 import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
 import items from "./data/items";
-import assemblages from "./assemblages/buildings"
-
-class Observable {
-    constructor() {
-      this.observers = [];
-    }
-  
-    subscribe(f) {
-      this.observers.push(f);
-    }
-  
-    unsubscribe(f) {
-      this.observers = this.observers.filter(subscriber => subscriber !== f);
-    }
-  
-    notify(event, data) {
-      this.observers.forEach(observer => observer(event, data));
-    }
-  }
+import assemblages from "./assemblages/buildings";
+import Observable from "./modules/observable";
 
 export default class Game extends Observable{
 
@@ -48,7 +30,7 @@ export default class Game extends Observable{
         this.createSystems();
         this.initSystems();
 
-        requestAnimationFrame(this.update.bind(this))
+        requestAnimationFrame(this.update.bind(this));
     }
 
     initSystems() {
@@ -70,13 +52,16 @@ export default class Game extends Observable{
 
         _.each(this.systems, system => {
             system.update(dt, actions)
-        });
-
-        
+        });        
 
         this.draw(dt);        
         
         requestAnimationFrame(this.update.bind(this));
+
+        //Display FPS
+        let fps = (1 / (dt)).toFixed(0);
+        fps += " fps"
+        document.getElementById("fpsCounter").innerHTML = fps;
     }
 
 

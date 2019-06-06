@@ -12,7 +12,6 @@
 		console.log(event);
 	}
 
-
 	onMount(() => {
 		game.init();
 
@@ -26,34 +25,33 @@
 					throw new Error(`event ${event} not handled`);
 			}		
 		})
-	})
-
-
-
+	});
 
 	window.game = game;
 	window._ = _;
 </script> 
 
-    <div class="columns"> 
-    
-        <div class="column is-two-thirds" id="map">
-		</div>
 
-	
-		<div class="column">
-			{#each planets as planet} 
-			<Planet planet={planet} on:message={handleMessage}></Planet>
-			{/each}
-		</div>
-<!---->
-	
-    </div>
+<style>
+	.counter {
+		position: fixed;
+		top: 10px;
+		left: 10px;
+		color: white
+	}
+</style>
 
-<!--
-<div class="container">
-	{#each planets as planet} 
-	<Planet planet={planet} on:message={handleMessage}></Planet>
-	{/each}
+
+<div id="fpsCounter" class="counter"/>
+
+<div class="columns"> 
+
+	<div class="column is-two-thirds" id="map"/>
+
+	<div class="column">
+		{#each planets as planet} 
+		<Planet planet={planet} on:message={handleMessage}></Planet>
+		{/each}
+	</div>
+
 </div>
--->
