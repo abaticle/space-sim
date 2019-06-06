@@ -3,33 +3,20 @@
 	import Game from "./../lib/game";	
 	import Planet from "./Planet.svelte";
 	import { onMount } from 'svelte';
+	import { displayPlanet } from "./stores"
  
 	
 	const game = new Game();
-
-	let planets = [];
 
 	function handleMessage(event) {
 		console.log(event);
 	}
 
-	onMount(() => {
-		game.init();
-
-		game.subscribe((event, data) => {
-			switch(event) {
-				case "planets":
-					planets = data;
-					break;
-
-				default:
-					throw new Error(`event ${event} not handled`);
-			}		
-		})
-	});
+	onMount(() => game.init());
 
 	window.game = game;
 	window._ = _;
+	
 </script> 
 
 
@@ -48,14 +35,17 @@
 
 <div id="fpsCounter" class="counter"/>
 
-<div class="columns"> 
+<div class="columns"> 	
 
-	<div class="column is-two-thirds hidden" id="map"/>
+	<!-- Map -->
+	<div class="column is-two-thirds" id="map"/>	
 
+
+	<!-- Display planet -->
+	{#if $displayPlanet !== -1}
 	<div class="column">
-		{#each planets as planet} 
-		<Planet planet={planet} on:message={handleMessage}></Planet>
-		{/each}
+		<Planet on:message={handleMessage}></Planet>
 	</div>
+	{/if}
 
 </div>

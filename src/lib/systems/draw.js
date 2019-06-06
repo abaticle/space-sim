@@ -1,11 +1,17 @@
+import {
+    displayPlanet,
+    planet
+} from "../../svelte/stores.js"
+import { get } from 'svelte/store';
+
 export default class DrawSystem {
 
     constructor(ecs, payload) {
         this.ecs = ecs;
         this.payload = payload;
-        
+
         this.width = window.innerWidth;
-        this.height = window.innerHeight;        
+        this.height = window.innerHeight;
         this.layer;
         this.stage;
         this.scaleBy = 1.1;
@@ -15,29 +21,33 @@ export default class DrawSystem {
     distance(pointFrom, pointTo) {
         var xDist = pointFrom.x - pointTo.x;
         var yDist = pointFrom.y - pointTo.y;
-        
+
         return Math.sqrt(xDist * xDist + yDist * yDist);
+    }
+
+
+
+    hidePannel() {
+        displayPlanet.set(-1);
     }
 
 
     onClick(event) {
         let id = event.target.id();
 
-        if (id.startsWith("planet")) {
-            
-            //Get entity id as number from shape id
-            let entityId = parseInt(id.split("-")[1]);
+        switch (true) {
+            case id.startsWith("planet"):
+                let entityId = parseInt(id.split("-")[1]);
 
-            if (typeof entityId !== "number") {
-                throw new Error(`No entity found from id ${target.id()}`);
-            }
-
-            this.payload.events.push({
-                name: "Test",
-                value: {
-                    planet: id
+                if (typeof entityId !== "number") {
+                    throw new Error(`No entity found from id ${target.id()}`);
                 }
-            })
+
+                displayPlanet.set(entityId);
+                break;
+
+            default:
+                this.hidePannel();
         }
     }
 
@@ -48,7 +58,7 @@ export default class DrawSystem {
         let stage = this.stage;
 
         e.evt.preventDefault();
-        
+
         let oldScale = stage.scaleX();
 
         let mousePointTo = {
@@ -70,7 +80,7 @@ export default class DrawSystem {
         };
 
         let texts = stage.find("Text");
- 
+
         texts.forEach(text => {
             text.scale({
                 x: newScaleText,
@@ -86,7 +96,7 @@ export default class DrawSystem {
 
     initKonva() {
 
-        this.width = document.getElementById("map").offsetWidth;
+        //this.width = document.getElementById("map").offsetWidth;
 
         let stage = new Konva.Stage({
             container: 'map',
@@ -95,7 +105,7 @@ export default class DrawSystem {
             draggable: true
         });
 
-        let layer = new Konva.Layer();        
+        let layer = new Konva.Layer();
 
         stage.on('wheel', this.onScroll.bind(this));
         stage.on("click", this.onClick.bind(this))
@@ -119,7 +129,7 @@ export default class DrawSystem {
                 position,
                 planet
             } = this.ecs.get(planetId);
-            
+
             //Draw planet :
             let circle = new Konva.Circle({
                 x: position.x,
@@ -153,7 +163,7 @@ export default class DrawSystem {
                     y: positionParent.y,
                     radius: radius,
                     stroke: "white",
-                    strokeWidth: 0.3    ,
+                    strokeWidth: 0.3,
                     id: "planet-orbite-" + planetId.toString(),
                     name: "planet-orbite",
                     listening: false
@@ -186,7 +196,7 @@ export default class DrawSystem {
 
 
     update(dt) {
-        
+
         this.planets.forEach(planetId => {
 
             let {
@@ -197,7 +207,7 @@ export default class DrawSystem {
             let planetDraw = this.layer.findOne("#planet-" + planetId);
             let orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
             let textDraw = this.layer.findOne("#planet-text-" + planetId);
-            
+
 
             if (!planetDraw) {
                 throw new Error(`Error planet #planet-${planetId} doesn't exists in Konva`);
@@ -217,6 +227,21 @@ export default class DrawSystem {
             textDraw.setY(position.y + planet.size + 10)
             textDraw.offsetX(textDraw.width() / 2)
         });
+
+
+        if (get(displayPlanet) !== -1) {
+            let id = get(planet).id;
+
+            let position = this.ecs.get(id, "position");
+
+            /*this.stage.move({
+                x: position.x,
+                y: position.y
+            })*/
+
+            window.stage = this.stage
+        }
+
 
         this.layer.batchDraw()
 
