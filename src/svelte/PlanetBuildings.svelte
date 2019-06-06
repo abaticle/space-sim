@@ -1,7 +1,9 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import ChooseBuilding from "./ChooseBuilding.svelte";
+
     export let buildings = [];
+    export let planet = 0;
 
     const dispatch = createEventDispatcher();
 
@@ -10,13 +12,6 @@
         return percent.toFixed(2); 
     }
 
-    function onBuyBuildingClick() {
-        dispatch("ACTION_BUY_BUILDING", {
-            test: "ok"
-        })
-    }
-
-
 </script>
 
 <style>
@@ -24,7 +19,7 @@
 
 
 <p>
-    <button class="button is-primary" on:click={onBuyBuildingClick}>Buy new</button>
+    <button class="button is-primary" on:click={() => dispatch('message', {planetId:planet})}>Buy new</button>
     <ChooseBuilding></ChooseBuilding>
 </p>
 

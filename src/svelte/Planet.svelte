@@ -17,7 +17,7 @@
 
         <div class="column">
             <h2 class="subtitle">Buildings</h2>
-            <PlanetBuildings on:message buildings={planet.buildings}></PlanetBuildings>
+            <PlanetBuildings on:message planet={planet._id} buildings={planet.buildings}></PlanetBuildings>
         </div>
     </div>
 </div>

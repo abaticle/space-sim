@@ -1,7 +1,9 @@
 export default class MoveSystem {
 
-    constructor(ecs) {
+    constructor(ecs, payload) {
         this.ecs = ecs;
+        this.payload = payload;
+        
         this.planets = [];
     }
 

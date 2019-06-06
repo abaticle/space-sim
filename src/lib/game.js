@@ -6,6 +6,7 @@ import { position } from "./components/position";
 import BuildingSystem from "./systems/building";
 import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
+import UISystem from "./systems/ui";
 import items from "./data/items";
 import assemblages from "./assemblages/buildings";
 import Observable from "./modules/observable";
@@ -19,6 +20,10 @@ export default class Game extends Observable{
         this.ecs = new ECS();
         this.systems = [];
         this.timeOld = 0;
+
+        this.payload = {
+            events: []
+        };
     }
 
     /**
@@ -48,10 +53,8 @@ export default class Game extends Observable{
         dt *= this.speed;
         
         //Update entities
-        let actions = [];
-
         _.each(this.systems, system => {
-            system.update(dt, actions)
+            system.update(dt)
         });        
 
         this.draw(dt);        
@@ -71,7 +74,7 @@ export default class Game extends Observable{
         let buildings = this.ecs.searchEntities("building");
 
 
-        return _.map(planets, planetId => {
+        let data = _.map(planets, planetId => {
             let planet = this.ecs.get(planetId);
 
 
@@ -120,16 +123,24 @@ export default class Game extends Observable{
 
             return result;
         })
+
+
+        return data.filter(p => p.name === "Earth")
     }
 
     draw(dt, time) {
         this.notify("planets", this.getPlanets());
     }
 
+    getPayload() {
+        return this.payload;
+    }
+
     createSystems() {
-        this.systems.push(new BuildingSystem(this.ecs));
-        this.systems.push(new MoveSystem(this.ecs));
-        this.systems.push(new DrawSystem(this.ecs));
+        this.systems.push(new BuildingSystem(this.ecs, this.payload))
+        this.systems.push(new MoveSystem(this.ecs, this.payload))
+        this.systems.push(new DrawSystem(this.ecs, this.payload))
+        this.systems.push(new UISystem(this.ecs, this.payload))
     }
 
     createPlanet(name, size, x, y) {

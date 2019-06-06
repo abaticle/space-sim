@@ -7,8 +7,9 @@ export default class BuildingSystem {
      * 
      * @param {ECS} ecs 
      */
-    constructor(ecs) {
+    constructor(ecs, payload) {
         this.ecs = ecs;
+        this.payload = payload;
     }
 
     init() {

@@ -1,17 +1,14 @@
 export default class DrawSystem {
 
-    constructor(ecs) {
+    constructor(ecs, payload) {
         this.ecs = ecs;
+        this.payload = payload;
         
         this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        
+        this.height = window.innerHeight;        
         this.layer;
         this.stage;
-
         this.scaleBy = 1.1;
-
-        this.actions = []
     }
 
 
@@ -35,9 +32,10 @@ export default class DrawSystem {
                 throw new Error(`No entity found from id ${target.id()}`);
             }
 
-            this.actions.push("DISPLAY_PLANET", {
-                data: {
-                    id
+            this.payload.events.push({
+                name: "Test",
+                value: {
+                    planet: id
                 }
             })
         }
@@ -133,22 +131,12 @@ export default class DrawSystem {
                 name: "planet"
             });
 
-            //Planet selection
-            /*            
-            circle.on("click", this.onClick.bind(this))
-
-            circle.on("click", function(e) {
-                console.log(e)
-            })
-            */
-
-
             if (planet.name === "Sun") {
                 circle.fill("#fff5b1")
             } else {
-                circle.fill("#f1f8ff");
-                circle.stroke("white");
-                circle.strokeWidth(2);
+                circle.fill("#f1f8ff")
+                circle.stroke("white")
+                circle.strokeWidth(2)
             }
 
             layer.add(circle);
@@ -184,20 +172,20 @@ export default class DrawSystem {
                 listening: false
             });
 
-            text.offsetX(text.width() / 2);
+            text.offsetX(text.width() / 2)
 
             layer.add(text);
         });
     }
 
     init() {
-        this.initData();
-        this.initKonva();
-        this.initPlanets();
+        this.initData()
+        this.initKonva()
+        this.initPlanets()
     }
 
 
-    update(dt, actions) {
+    update(dt) {
         
         this.planets.forEach(planetId => {
 
@@ -230,8 +218,7 @@ export default class DrawSystem {
             textDraw.offsetX(textDraw.width() / 2)
         });
 
-        this.layer.batchDraw();
+        this.layer.batchDraw()
 
-        
     }
 }

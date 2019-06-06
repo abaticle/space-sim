@@ -6,6 +6,7 @@
  
 	
 	const game = new Game();
+
 	let planets = [];
 
 	function handleMessage(event) {
@@ -39,6 +40,9 @@
 		left: 10px;
 		color: white
 	}
+	.hidden {
+		display: none;
+	}
 </style>
 
 
@@ -46,7 +50,7 @@
 
 <div class="columns"> 
 
-	<div class="column is-two-thirds" id="map"/>
+	<div class="column is-two-thirds hidden" id="map"/>
 
 	<div class="column">
 		{#each planets as planet} 
