@@ -1,14 +1,14 @@
 import {
     displayPlanet,
     planet
-} from "../../svelte/stores.js"
+} from "../../svelte/stores.js";
 import { get } from 'svelte/store';
+import Tools from "./../modules/tools";
 
 export default class DrawSystem {
 
-    constructor(ecs, payload) {
+    constructor(ecs) {
         this.ecs = ecs;
-        this.payload = payload;
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -16,15 +16,6 @@ export default class DrawSystem {
         this.stage;
         this.scaleBy = 1.1;
     }
-
-
-    distance(pointFrom, pointTo) {
-        var xDist = pointFrom.x - pointTo.x;
-        var yDist = pointFrom.y - pointTo.y;
-
-        return Math.sqrt(xDist * xDist + yDist * yDist);
-    }
-
 
 
     hidePannel() {
@@ -98,22 +89,24 @@ export default class DrawSystem {
 
         //this.width = document.getElementById("map").offsetWidth;
 
-        let stage = new Konva.Stage({
+        this.stage = new Konva.Stage({
             container: 'map',
             width: this.width,
             height: this.height,
             draggable: true
         });
 
-        let layer = new Konva.Layer();
+        this.layer = new Konva.Layer({
+            id: "planet-layer"
+        });
 
-        stage.on('wheel', this.onScroll.bind(this));
-        stage.on("click", this.onClick.bind(this))
+        this.stage.on('wheel', this.onScroll.bind(this));
+        this.stage.on("click", this.onClick.bind(this))
 
-        stage.add(layer);
+        this.stage.add(this.layer);
 
-        this.layer = layer;
-        this.stage = stage;
+        //TODO:Remove for build
+        window.stage = this.stage;
     }
 
     initData() {
@@ -156,7 +149,7 @@ export default class DrawSystem {
             if (planet.parentId !== undefined) {
                 let positionParent = this.ecs.get(planet.parentId, "position")
 
-                let radius = this.distance(position, positionParent)
+                let radius = Tools.distance(position, positionParent)
 
                 layer.add(new Konva.Circle({
                     x: positionParent.x,
@@ -204,24 +197,26 @@ export default class DrawSystem {
                 planet
             } = this.ecs.get(planetId);
 
+            
+            //Move planet :
             let planetDraw = this.layer.findOne("#planet-" + planetId);
-            let orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
-            let textDraw = this.layer.findOne("#planet-text-" + planetId);
-
-
-            if (!planetDraw) {
-                throw new Error(`Error planet #planet-${planetId} doesn't exists in Konva`);
-            }
 
             planetDraw.setX(position.x)
             planetDraw.setY(position.y)
 
+
+            //Move planet orbit :
             if (planet.parentId !== undefined) {
+                let orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
                 let parentPosition = this.ecs.get(planet.parentId, "position");
 
                 orbiteDraw.setX(parentPosition.x)
                 orbiteDraw.setY(parentPosition.y)
             }
+
+
+            //Move planet text: 
+            let textDraw = this.layer.findOne("#planet-text-" + planetId);
 
             textDraw.setX(position.x)
             textDraw.setY(position.y + planet.size + 10)
@@ -238,12 +233,12 @@ export default class DrawSystem {
                 x: position.x,
                 y: position.y
             })*/
-
-            window.stage = this.stage
         }
 
 
         this.layer.batchDraw()
 
     }
+
+
 }

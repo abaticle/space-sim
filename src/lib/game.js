@@ -20,10 +20,6 @@ export default class Game extends Observable{
         this.ecs = new ECS();
         this.systems = [];
         this.timeOld = 0;
-
-        this.payload = {
-            events: []
-        };
     }
 
     /**
@@ -35,11 +31,17 @@ export default class Game extends Observable{
         this.createSystems();
         this.initSystems();
 
+        //this.initUpdate();
+
         requestAnimationFrame(this.update.bind(this));
     }
 
     initSystems() {
         this.systems.forEach(s => s.init());
+    }
+
+    initUpdate() {
+        requestAnimationFrame(this.update.bind(this));
     }
 
     /**
@@ -53,15 +55,20 @@ export default class Game extends Observable{
         dt *= this.speed;
         
         //Update entities
+        
         _.each(this.systems, system => {
-            system.update(dt)
+            system.update(dt);
         });        
 
-        this.draw(dt);        
+        //this.draw(dt);        
         
         requestAnimationFrame(this.update.bind(this));
 
         //Display FPS
+        this.updateFPS(dt);
+    }
+
+    updateFPS(dt) {
         let fps = (1 / (dt)).toFixed(0);
         fps += " fps"
         document.getElementById("fpsCounter").innerHTML = fps;
@@ -132,10 +139,6 @@ export default class Game extends Observable{
         this.notify("planets", this.getPlanets());
     }
 
-    getPayload() {
-        return this.payload;
-    }
-
     createSystems() {
         this.systems.push(new BuildingSystem(this.ecs, this.payload))
         this.systems.push(new MoveSystem(this.ecs, this.payload))
@@ -151,6 +154,8 @@ export default class Game extends Observable{
 
         this.ecs.set(x, planet, "position", "x");
         this.ecs.set(y, planet, "position", "y");
+
+        if (name === "Earth") console.log("Earth id: " + planet)
 
         return planet;
     }

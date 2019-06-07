@@ -7,9 +7,8 @@ export default class BuildingSystem {
      * 
      * @param {ECS} ecs 
      */
-    constructor(ecs, payload) {
+    constructor(ecs) {
         this.ecs = ecs;
-        this.payload = payload;
     }
 
     init() {
@@ -76,6 +75,72 @@ export default class BuildingSystem {
     update(dt, actions) {
         this.buildings = this.ecs.searchEntities(["building"]);
 
+
+        /*this.buildings.forEach(id => {
+            const {
+                building, 
+                factory,
+                extractor
+            } = this.ecs.get(id);
+
+            if (factory) {
+
+                //Get items from planet 
+                if (!factory.canWork && factory.produce) {
+                    let {recipe} = items[factory.produce];
+
+                    //Check if planet has enough material
+                    factory.canWork = this.canProduce(recipe, planet.items); 
+                    
+                    if (factory.canWork) {
+
+                        //And if ok transfer from planet to factory
+                        _.forOwn(recipe, (value, key) => {
+                            this.removeItem(planet.items, key, value);
+                            this.addItem(factory.items, key, value);
+                        });
+                    }
+                }
+
+                //Work
+                if (factory.canWork) {
+                    factory.workstep += dt;
+                }
+
+                //Produce
+                if (factory.workstep > items[factory.produce].time) {
+                    factory.workstep = 0;
+                    factory.canWork = false;
+
+                    let {recipe} = items[factory.produce];
+
+                    _.forOwn(recipe, (value, key) => {
+                        this.removeItem(factory.items, key, value);
+                    });                    
+
+                    this.addItem(planet.items, factory.produce, 1);
+                }
+            }
+
+
+            if (extractor) {
+
+                if (extractor.resource) {
+                    let produce = items[extractor.resource];
+
+                    extractor.workstep += dt;
+
+                    if (extractor.workstep >= produce.time) {
+                        extractor.workstep = 0;
+
+                        this.addItem(planet.items, produce.produce, 1);
+
+                        //console.log("planet extracted", planet.items)
+                    }
+                }
+            }
+        })*/
+
         _.each(this.buildings, (buildingId) => {
 
             let building = this.ecs.get(buildingId, "building");
@@ -97,10 +162,7 @@ export default class BuildingSystem {
                         _.forOwn(recipe, (value, key) => {
                             this.removeItem(planet.items, key, value);
                             this.addItem(factory.items, key, value);
-                        });        
-                        
-                        //console.log("planet", planet.items);
-                        //console.log("factory", factory.items);
+                        });
                     }
                 }
 

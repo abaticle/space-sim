@@ -17,6 +17,7 @@ export default class UISystem {
     }
 
     getPlanet(planetId) {
+
         let result = {
             id: planetId,
             name: this.ecs.get(planetId, "planet", "name"),
@@ -24,6 +25,7 @@ export default class UISystem {
             items: []
         };
 
+        //Planet buildings :
         this.ecs
             .searchEntities("building")
             .filter(id => this.ecs.get(id, "building", "planetId") === planetId)
@@ -61,6 +63,8 @@ export default class UISystem {
                 result.buildings.push(map);
             })
 
+
+        //Planet items
         Object
             .entries(this.ecs.get(planetId, "planet", "items"))
             .forEach(pair => {
