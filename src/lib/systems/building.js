@@ -7,8 +7,9 @@ export default class BuildingSystem {
      * 
      * @param {ECS} ecs 
      */
-    constructor(ecs) {
+    constructor(ecs, actions) {
         this.ecs = ecs;
+        this.actions = actions;
     }
 
     init() {

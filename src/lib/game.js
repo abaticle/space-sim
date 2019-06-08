@@ -10,14 +10,15 @@ import UISystem from "./systems/ui";
 import items from "./data/items";
 import assemblages from "./assemblages/buildings";
 import Observable from "./modules/observable";
+import ActionsManager from "./modules/actions";
 
 export default class Game extends Observable{
 
     constructor() {
         super();
-
-        this.speed = 1;
+        this.speed = 5;
         this.ecs = new ECS();
+        this.actions = new ActionsManager();
         this.systems = [];
         this.timeOld = 0;
     }
@@ -30,9 +31,6 @@ export default class Game extends Observable{
         this.createEntities();   
         this.createSystems();
         this.initSystems();
-
-        //this.initUpdate();
-
         requestAnimationFrame(this.update.bind(this));
     }
 
@@ -40,8 +38,11 @@ export default class Game extends Observable{
         this.systems.forEach(s => s.init());
     }
 
-    initUpdate() {
-        requestAnimationFrame(this.update.bind(this));
+    createSystems() {
+        this.systems.push(new BuildingSystem(this.ecs, this.actions))
+        this.systems.push(new MoveSystem(this.ecs, this.actions))
+        this.systems.push(new DrawSystem(this.ecs, this.actions))
+        this.systems.push(new UISystem(this.ecs, this.actions))
     }
 
     /**
@@ -53,14 +54,10 @@ export default class Game extends Observable{
         this.timeOld = time;
 
         dt *= this.speed;
-        
-        //Update entities
-        
+                
         _.each(this.systems, system => {
             system.update(dt);
-        });        
-
-        //this.draw(dt);        
+        }); 
         
         requestAnimationFrame(this.update.bind(this));
 
@@ -74,77 +71,6 @@ export default class Game extends Observable{
         document.getElementById("fpsCounter").innerHTML = fps;
     }
 
-
-    getPlanets() {
-
-        let planets = this.ecs.searchEntities("planet");
-        let buildings = this.ecs.searchEntities("building");
-
-
-        let data = _.map(planets, planetId => {
-            let planet = this.ecs.get(planetId);
-
-
-            let result = {
-                _id: planetId,
-                name: planet.planet.name,
-                buildings: [],
-                items: []
-            };
-
-            result.buildings = _.filter(_.map(buildings, id => {
-                let building = this.ecs.get(id);
-
-                switch(true) {
-                    case _.has(building, "extractor"):
-                        return {
-                            _id: id,
-                            planetId: building.building.planetId,
-                            desc: building.building.desc,
-                            workstep: building.extractor.workstep,
-                            produce: items[building.extractor.resource].desc,
-                            time: building.extractor.time
-                        }
-
-                    case _.has(building, "factory"):
-                        return {
-                            _id: id,
-                            planetId: building.building.planetId,
-                            desc: building.building.desc,
-                            workstep: building.factory.workstep,
-                            produce: items[building.factory.produce].desc,
-                            time: building.factory.time
-                        }
-                }
-            }), {'planetId': planetId});
-
-
-            result.items = _.map(_.toPairs(planet.planet.items), a => {
-                return { 
-                    id:a[0], 
-                    desc:items[a[0]].desc, 
-                    count: a[1] 
-                }
-            });
-
-
-            return result;
-        })
-
-
-        return data.filter(p => p.name === "Earth")
-    }
-
-    draw(dt, time) {
-        this.notify("planets", this.getPlanets());
-    }
-
-    createSystems() {
-        this.systems.push(new BuildingSystem(this.ecs, this.payload))
-        this.systems.push(new MoveSystem(this.ecs, this.payload))
-        this.systems.push(new DrawSystem(this.ecs, this.payload))
-        this.systems.push(new UISystem(this.ecs, this.payload))
-    }
 
     createPlanet(name, size, x, y) {
         let planet = this.ecs.createEntity(["planet", "position"]);
@@ -203,9 +129,16 @@ export default class Game extends Observable{
             {name: "Neptune", dist: 30.1, speed: 5.4, size: 24.6},
         ];
 
+        let paramsSattelites = [
+            {name: "Moon", parent: "Earth", dist: 1.10, speed: 150, size: 1.7}
+        ]
+
         let sun = this.createPlanet("Sun", 350, 0, 0);
         this.ecs.set("Sun", sun, "planet", "name");
         this.ecs.set("star", sun, "planet", "type");
+
+
+        let earthId;
 
         paramsPlanets.forEach(param => {
             let p = this.createPlanet(param.name, param.size * 2, 695 + (param.dist*1000), 0);
@@ -213,16 +146,36 @@ export default class Game extends Observable{
             if (param.name === "Earth") {
                 this.ecs.set(true, p, "planet", "owned");
 
+                /*_.times(40, () => {
+                    this.createExtractor(p, "ironOre");    
+                })*/
                 this.createExtractor(p, "ironOre");
                 this.createExtractor(p, "ironOre");
-                this.createExtractor(p, "ironOre");                
+                this.createExtractor(p, "ironOre");         
+                
+                earthId = p;
             }
 
             this.ecs.set("planet", p, "planet", "type")
             this.ecs.set(param.name, p, "planet", "name");
             this.ecs.set(sun, p, "planet", "parentId");
-            this.ecs.set(param.speed / 30, p, "planet", "speed");
+            this.ecs.set(param.speed / 80, p, "planet", "speed");
         });
+
+        paramsSattelites.forEach(param => {
+            let p = this.createPlanet(param.name, param.size * 2, 695 + (param.dist*1000), 0);
+
+            if (param.name === "Moon") {
+                this.ecs.set(true, p, "planet", "owned");          
+            }
+
+            this.ecs.set("planet", p, "planet", "type")
+            this.ecs.set(param.name, p, "planet", "name");
+            this.ecs.set(earthId, p, "planet", "parentId");
+            this.ecs.set(param.speed / 30, p, "planet", "speed");
+
+
+        })
 
         this._updatePlanetsChildrens();
     }

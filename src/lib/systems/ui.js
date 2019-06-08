@@ -1,21 +1,56 @@
-import {
-    displayPlanet,
-    planet
-} from "../../svelte/stores.js";
+import { planet } from "../../svelte/stores.js";
 import { get } from 'svelte/store';
 import items from "../data/items";
 
 export default class UISystem {
 
-    constructor(ecs, payload) {
+    constructor(ecs, actions) {
         this.ecs = ecs;
-        this.payload = payload;
+        this.actions = actions;
     }
 
     init() {
 
     }
 
+    update(dt) {
+        const actions = this.actions.getActions();
+
+        actions.map(({ action, payload }, i) => {
+            switch (action) {
+
+                //Display right panel 
+                case "displayPanel":
+
+                    switch(payload.type) {
+                        case "planet":
+                            planet.set(this.getPlanet(payload.planetId));
+                            break;
+
+                        default:
+                            throw new Error(`Unexepected envent ${action} / ${JSON.stringify(payload)}`);
+                    }
+
+                    
+                    break;
+                
+
+                //Remove planet
+                case "removePanel": 
+                    planet.set(undefined);
+
+                    this.actions.removeAction(i);
+                    this.actions.removeAction("displayPanel")
+                    break;
+            }
+        })
+
+    }
+
+    /**
+     * Get planet informations
+     * @param {number} planetId 
+     */
     getPlanet(planetId) {
 
         let result = {
@@ -78,17 +113,4 @@ export default class UISystem {
         return result;
     }
 
-    update(dt, payload) {
-
-        if (get(displayPlanet) !== -1) {
-            let planetId = get(displayPlanet);
-
-            planet.set(this.getPlanet(planetId));
-        }
-        /*payload.events = payload.events.filter(e => {
-            if (e.name === "DisplayPlanet") {
-                
-            }
-        })*/
-    }
 }

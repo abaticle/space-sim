@@ -2,8 +2,9 @@ import Tools from "../modules/tools";
 
 export default class MoveSystem {
 
-    constructor(ecs) {
+    constructor(ecs, actions) {
         this.ecs = ecs;
+        this.actions = actions;
         
         this.planets = [];
     }

@@ -1,14 +1,10 @@
-import {
-    displayPlanet,
-    planet
-} from "../../svelte/stores.js";
-import { get } from 'svelte/store';
 import Tools from "./../modules/tools";
 
 export default class DrawSystem {
 
-    constructor(ecs) {
+    constructor(ecs, actions) {
         this.ecs = ecs;
+        this.actions = actions;
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -19,7 +15,7 @@ export default class DrawSystem {
 
 
     hidePannel() {
-        displayPlanet.set(-1);
+        //planet.set(undefined);
     }
 
 
@@ -28,17 +24,20 @@ export default class DrawSystem {
 
         switch (true) {
             case id.startsWith("planet"):
-                let entityId = parseInt(id.split("-")[1]);
+                let planetId = parseInt(id.split("-")[1]);
 
-                if (typeof entityId !== "number") {
+                if (typeof planetId !== "number") {
                     throw new Error(`No entity found from id ${target.id()}`);
                 }
 
-                displayPlanet.set(entityId);
+                this.actions.addAction("displayPanel", {
+                    type: "planet",
+                    planetId
+                })
                 break;
 
             default:
-                this.hidePannel();
+                this.actions.addAction("removePanel")
         }
     }
 
@@ -46,40 +45,38 @@ export default class DrawSystem {
     //TODO: utiliser une fonction de leasing pour l'animation
     onScroll(e) {
 
-        let stage = this.stage;
+        const stage = this.stage;
 
         e.evt.preventDefault();
 
-        let oldScale = stage.scaleX();
+        const oldScale = stage.scaleX();
 
-        let mousePointTo = {
+        const mousePointTo = {
             x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
             y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
         };
 
-        let newScale = e.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
-        let newScaleText = e.evt.deltaY > 0 ? oldScale * this.scaleBy : oldScale / this.scaleBy;
+        const newScale = e.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
+        const newScaleText = e.evt.deltaY > 0 ? oldScale * this.scaleBy : oldScale / this.scaleBy;
 
         stage.scale({
             x: newScale,
             y: newScale
         });
 
-        let newPos = {
+        const newPos = {
             x: -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
             y: -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
         };
 
-        let texts = stage.find("Text");
+        const texts = stage.find("Text");
 
         texts.forEach(text => {
             text.scale({
-                x: newScaleText,
-                y: newScaleText
+                x: 1 / newScale,
+                y: 1 / newScale
             })
         });
-
-        let a = 1;
 
         stage.position(newPos);
         stage.batchDraw();
@@ -166,7 +163,7 @@ export default class DrawSystem {
             //Drawn planet name :
             let text = new Konva.Text({
                 x: position.x,
-                y: position.y + planet.size + 10,
+                y: position.y + planet.size + 15,
                 fontSize: 12,
                 text: planet.desc,
                 fill: "white",
@@ -212,6 +209,17 @@ export default class DrawSystem {
 
                 orbiteDraw.setX(parentPosition.x)
                 orbiteDraw.setY(parentPosition.y)
+
+                let scale = this.stage.getScale();
+
+                orbiteDraw.setStrokeWidth(0.2/scale.x);
+
+                /*
+                if (scale.x < 0.5) {
+                    orbiteDraw.setStrokeWidth(1);
+                } else {
+                    orbiteDraw.setStrokeWidth(0.3)
+                }*/
             }
 
 
@@ -222,19 +230,6 @@ export default class DrawSystem {
             textDraw.setY(position.y + planet.size + 10)
             textDraw.offsetX(textDraw.width() / 2)
         });
-
-
-        if (get(displayPlanet) !== -1) {
-            let id = get(planet).id;
-
-            let position = this.ecs.get(id, "position");
-
-            /*this.stage.move({
-                x: position.x,
-                y: position.y
-            })*/
-        }
-
 
         this.layer.batchDraw()
 
