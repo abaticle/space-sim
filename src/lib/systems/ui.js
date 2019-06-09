@@ -14,6 +14,7 @@ export default class UISystem {
     }
 
     update(dt) {
+        
         const actions = this.actions.getActions();
 
         actions.map(({ action, payload }, i) => {

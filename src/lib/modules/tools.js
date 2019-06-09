@@ -1,5 +1,23 @@
 export default class Tools {
-    
+
+    /**
+     * Move pointFrom toward pointTo with a speed
+     * @param {{x: number, y: number}} pointFrom Object with x, y properties
+     * @param {{x: number, y: number}} pointTo Target with x, y properties
+     * @param {number} speed Object speed
+     * @return {{x: number, y: number, angle: number}} New point with angle in degree
+     */
+    static moveToward(pointFrom, pointTo, speed) {
+        let dx = pointTo.x - pointFrom.x;
+        let dy = pointTo.y - pointFrom.y;
+
+        let angle = Math.atan(dy, dx);
+
+        var velX = Math.cos(angle) * speed;
+        var velY = Math.sin(angle) * speed;
+    }
+
+
     /**
     * Get new posititon for an item rotation
     * @param {number} cx Rotation axle x pos
@@ -24,7 +42,7 @@ export default class Tools {
    /**
     * Calculate distance between 2 points
     * @param {object} pointFrom Origin object with x, y properties
-    * @param {*} pointTo Target object with x, y properties 
+    * @param {object} pointTo Target object with x, y properties 
     */
     static distance(pointFrom, pointTo) {
         var xDist = pointFrom.x - pointTo.x;

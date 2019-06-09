@@ -106,19 +106,16 @@ export default class DrawSystem {
         window.stage = this.stage;
     }
 
-    initData() {
-        this.planets = this.ecs.searchEntities(["planet", "position"]);
-    }
-
     initPlanets() {
+        let planets = this.ecs.searchEntities(["planet", "position"])
 
-        this.planets.forEach(planetId => {
+        planets.forEach(id => {
             let layer = this.layer;
 
             let {
                 position,
                 planet
-            } = this.ecs.get(planetId);
+            } = this.ecs.get(id);
 
             //Draw planet :
             let circle = new Konva.Circle({
@@ -127,7 +124,7 @@ export default class DrawSystem {
                 radius: planet.size,
                 //stroke: "white",
                 //strokeWidth: 2,
-                id: "planet-" + planetId.toString(),
+                id: "planet-" + id.toString(),
                 name: "planet"
             });
 
@@ -154,7 +151,7 @@ export default class DrawSystem {
                     radius: radius,
                     stroke: "white",
                     strokeWidth: 0.3,
-                    id: "planet-orbite-" + planetId.toString(),
+                    id: "planet-orbite-" + id.toString(),
                     name: "planet-orbite",
                     listening: false
                 }));
@@ -167,7 +164,7 @@ export default class DrawSystem {
                 fontSize: 12,
                 text: planet.desc,
                 fill: "white",
-                id: "planet-text-" + planetId.toString(),
+                id: "planet-text-" + id.toString(),
                 name: "planet-text",
                 listening: false
             });
@@ -178,23 +175,80 @@ export default class DrawSystem {
         });
     }
 
+    initSpaceships() {
+
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
+
+        spaceships.forEach(id => {
+            let layer = this.layer
+
+            let {
+                spaceship,
+                position
+            } = this.ecs.get(id)
+
+            let shape = new Konva.Shape({
+                x: position.x,
+                y: position.y,
+                id: "spaceship-" + id.toString(),
+                name: "spaceship",
+                fill: "#f1f8ff",
+                stroke: "white",
+                sceneFunc: (ctx, shape) => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(5, 0);
+                    ctx.lineTo(2.5, -7);
+
+                    //ctx.quadraticCurveTo(150, 100, 260, 170);
+                    ctx.closePath();
+                    ctx.fillStrokeShape(shape);
+                }
+            })
+
+            layer.add(shape)
+
+
+            let text = new Konva.Text({
+                x: position.x,
+                y: position.y + 12,
+                fontSize: 12,
+                text: spaceship.desc,
+                fill: "white",
+                id: "spaceship-text-" + id.toString(),
+                name: "spaceship-text",
+                listening: false
+            })
+
+            text.offsetX(text.width() / 2)
+
+            layer.add(text)
+
+
+
+        })
+
+    }
+
     init() {
-        this.initData()
         this.initKonva()
         this.initPlanets()
+        this.initSpaceships()
     }
 
 
-    update(dt) {
 
-        this.planets.forEach(planetId => {
+    updatePlanets(dt) {
+        let planets = this.ecs.searchEntities(["planet", "position"]);
+
+        planets.forEach(planetId => {
 
             let {
                 position,
                 planet
             } = this.ecs.get(planetId);
 
-            
+
             //Move planet :
             let planetDraw = this.layer.findOne("#planet-" + planetId);
 
@@ -212,14 +266,7 @@ export default class DrawSystem {
 
                 let scale = this.stage.getScale();
 
-                orbiteDraw.setStrokeWidth(0.2/scale.x);
-
-                /*
-                if (scale.x < 0.5) {
-                    orbiteDraw.setStrokeWidth(1);
-                } else {
-                    orbiteDraw.setStrokeWidth(0.3)
-                }*/
+                orbiteDraw.setStrokeWidth(0.2 / scale.x);
             }
 
 
@@ -230,6 +277,31 @@ export default class DrawSystem {
             textDraw.setY(position.y + planet.size + 10)
             textDraw.offsetX(textDraw.width() / 2)
         });
+
+    }
+
+    updateSpaceships(dt) {
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
+
+        spaceships.forEach(id => {
+
+            let {
+                spaceship,
+                position
+            } = this.ecs.get(id)
+
+            let spaceshipDraw = this.layer.findOne("#spaceship-" + id);
+
+            spaceshipDraw.setX(position.x)
+            spaceshipDraw.setY(position.y)
+
+        });
+    }
+
+
+    update(dt) {
+        this.updatePlanets(dt);
+        this.updateSpaceships(dt);
 
         this.layer.batchDraw()
 

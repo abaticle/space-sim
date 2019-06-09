@@ -1,4 +1,5 @@
 import Tools from "../modules/tools";
+import { spaceship } from "../components/spaceship";
 
 export default class MoveSystem {
 
@@ -51,12 +52,61 @@ export default class MoveSystem {
         }
     }
 
-    update(dt, actions) {
-        let planets = this.ecs.searchEntities(["planet", "position"]);
+
+    movePlanets(dt) {
+        let planets = this.ecs.searchEntities(["planet", "position"])
 
         planets.forEach(id => {
-            this.movePlanet(id, dt);
+            this.movePlanet(id, dt)
         })
+    }
+
+    moveSpaceship(id, dt) {
+        const {
+            spaceship,
+            position,
+            spaceshipState
+        } = this.ecs.get(id);
+
+        switch(spaceshipState.state) {
+            case "orbit":
+                //Get planet pos
+                const targetOrbit = this.ecs.get(spaceshipState.orbitAround, "position")
+
+                position.x = targetOrbit.x
+                position.y = targetOrbit.y
+                break;
+
+            case "move":
+                const targetMove = this.ecs.get(spaceshipState.moveTo, "position");
+
+                //Update angle
+
+                //Update post
+
+                break;
+
+            case "stop":
+                break;
+
+            case "transfer":
+                break;
+        }
+    }
+
+    moveSpaceships(dt) {
+        
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
+
+        spaceships.forEach(id => {
+            this.moveSpaceship(id, dt);
+        })
+    }
+
+
+    update(dt, actions) {
+        this.movePlanets(dt);
+        this.moveSpaceships(dt);
 
     }
 
