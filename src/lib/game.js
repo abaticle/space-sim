@@ -154,13 +154,12 @@ export default class Game extends Observable {
         console.log("Spaceship id: ", spaceship);
 
         let earthId = this.getPlanet("Earth");
-
         let earthPos = this.ecs.get(earthId, "position");
 
         this.ecs.set(earthPos.x, spaceship, "position", "x")
         this.ecs.set(earthPos.y, spaceship, "position", "y")
 
-        this.ecs.set(5, spaceship, "spaceship", "speed")
+        this.ecs.set(0.6, spaceship, "spaceship", "speed")
         this.ecs.set("space-1", spaceship, "spaceship", "desc")
 
         const orders = [{
@@ -194,8 +193,8 @@ export default class Game extends Observable {
 
 
 
-        this.ecs.set("orbit", spaceship, "spaceshipState", "state");
-        this.ecs.set(earthId, spaceship, "spaceshipState", "orbitAround");
+        this.ecs.set("move", spaceship, "spaceshipState", "state");
+        this.ecs.set(0, spaceship, "spaceshipState", "moveTo");
 
     }
 
@@ -260,15 +259,15 @@ export default class Game extends Observable {
             size: 1.7
         }]
 
-        let sun = this.createPlanet("Sun", 350, 0, 0);
+        let sun = this.createPlanet("Sun", 800, 0, 0);
         this.ecs.set("Sun", sun, "planet", "name");
         this.ecs.set("star", sun, "planet", "type");
 
 
         let earthId;
 
-        let sizeModifier = 2;
-        let distanceModifier = 5000;
+        let sizeModifier = 20;
+        let distanceModifier = 16000;
         let speedModifier = 0.001;
 
         paramsPlanets.forEach(param => {

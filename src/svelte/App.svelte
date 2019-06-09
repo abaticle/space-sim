@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { displayPlanet, planet } from "./stores"
 	import { get } from 'svelte/store';
+	import Tools from "./../lib/modules/tools";
  
 	
 	const game = new Game();
@@ -20,6 +21,7 @@
 	window._ = _;
 	window.planet = planet;
 	window.get = get;
+	window.Tools = Tools;
 	
 </script> 
 
@@ -40,9 +42,9 @@
 	.right-panel {
 		z-index: 10;
 		background-color: #1f2424;
-		-webkit-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
+		/*-webkit-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
 		-moz-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
-		box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
+		box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);*/
 		position: fixed;
 		right: 10px;
 		top: 10px;

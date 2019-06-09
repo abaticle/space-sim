@@ -28,7 +28,7 @@ const spaceship = {
  * - stop
  *      use: stopX, stopY
  * - transfer
- *      use: transferTo, transferTime, transferCurrent
+ *      use: transferTo/transferFrom, transferTime, transferCurrent
  */
 const spaceshipState = {
     name: "spaceshipState",
@@ -37,6 +37,7 @@ const spaceshipState = {
     moveTo: 0,
     stopX: 0,
     stopY: 0,
+    transferFrom: 0,
     transferTo: 0,
     transferTime: 5,
     transferCurrent: 0

@@ -290,10 +290,20 @@ export default class DrawSystem {
                 position
             } = this.ecs.get(id)
 
+            //Ship position
             let spaceshipDraw = this.layer.findOne("#spaceship-" + id);
 
             spaceshipDraw.setX(position.x)
             spaceshipDraw.setY(position.y)
+            spaceshipDraw.rotation(position.angle + 90);
+
+
+            //Ship text
+            let textDraw = this.layer.findOne("#spaceship-text-" + id);
+
+            textDraw.setX(position.x)
+            textDraw.setY(position.y + 10)
+            textDraw.offsetX(textDraw.width() / 2)
 
         });
     }

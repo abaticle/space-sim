@@ -12,6 +12,12 @@ export default class MoveSystem {
 
     init() {
 
+        //Randomize planet positions 
+        let planets = this.ecs.searchEntities(["planet", "position"])
+
+        planets.forEach(id => {
+            this.movePlanet(id, Math.random() * 10000)
+        })
     }
 
     /**
@@ -71,22 +77,23 @@ export default class MoveSystem {
         switch(spaceshipState.state) {
             case "orbit":
                 //Get planet pos
-                const targetOrbit = this.ecs.get(spaceshipState.orbitAround, "position")
+                const planetPosition = this.ecs.get(spaceshipState.orbitAround, "position")
 
-                position.x = targetOrbit.x
-                position.y = targetOrbit.y
+                position.x = planetPosition.x
+                position.y = planetPosition.y
                 break;
 
             case "move":
-                const targetMove = this.ecs.get(spaceshipState.moveTo, "position");
+                const targetPosition = this.ecs.get(spaceshipState.moveTo, "position");
 
-                //Update angle
+                const nextPosition = Tools.moveToward(position, targetPosition, spaceship.speed);
 
-                //Update post
+                this.ecs.set(nextPosition, id, "position");
 
                 break;
 
             case "stop":
+                
                 break;
 
             case "transfer":
