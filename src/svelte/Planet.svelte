@@ -14,7 +14,7 @@
 </style>
 
 
-<h1 class="title">{$planet.name}</h1>
+<h1 class="title">{$planet.desc}</h1>
 
 <div class="columns">     
 

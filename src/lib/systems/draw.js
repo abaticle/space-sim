@@ -128,7 +128,7 @@ export default class DrawSystem {
                 name: "planet"
             });
 
-            if (planet.name === "Sun") {
+            if (planet.desc === "Sun") {
                 circle.fill("#fff5b1")
             } else {
                 circle.fill("#f1f8ff")

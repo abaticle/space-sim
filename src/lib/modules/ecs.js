@@ -20,7 +20,8 @@ export default class ECS {
 
     /**
      * Create an entity from an assemblage
-     * @param {object} assemblage 
+     * @param {{components: {string[]}, data: {object}}} assemblage 
+     * @returns {number} New entity id
      */
     createFromAssemblage(assemblage) {
         let entity = this.createEntity();
@@ -221,17 +222,16 @@ export default class ECS {
                     let component = this.components[compName];
 
                     //Check component properties
-                    _.forOwn(value, (propValue, propName) => {
-                        if (!_.has(this.components[componentName], propName)) {
+                    _.forOwn(compValue, (propValue, propName) => {
+                        if (this.components[compName][propName] === undefined) {
                             throw new Error(`Property "${propName}" in component "${componentName}" doesn't exists`);
-                        }
-                        if (typeof propValue !== typeof value) {
-                            throw new Error(`Type error`)
                         }
                     })
                 })
 
-                this.entities[entityId] = value;
+                _.forOwn(value, (compValue, compName) => {
+
+                })
                 break;
             
             case "component": 

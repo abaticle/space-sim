@@ -56,7 +56,7 @@ export default class UISystem {
 
         let result = {
             id: planetId,
-            name: this.ecs.get(planetId, "planet", "name"),
+            desc: this.ecs.get(planetId, "planet", "desc"),
             buildings: [],
             items: []
         };

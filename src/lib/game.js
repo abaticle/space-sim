@@ -20,9 +20,11 @@ import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
 import UISystem from "./systems/ui";
 import items from "./data/items";
+import solarSystem from "./data/solar-system";
 import assemblages from "./assemblages/buildings";
 import Observable from "./modules/observable";
 import ActionsManager from "./modules/actions";
+import EntityManager from "./modules/entity-manager";
 
 export default class Game extends Observable {
 
@@ -45,6 +47,26 @@ export default class Game extends Observable {
         this.createSystems();
         this.initSystems();
         requestAnimationFrame(this.update.bind(this));
+
+
+        this.tests();
+    }
+
+
+    tests() {
+        const ecs = this.ecs;
+
+        let factory = new EntityManager(ecs);
+
+        let p = factory.createPlanet({
+            desc: "test",
+            size: 400,
+            owned: true,
+            speed: 2
+        })
+
+        console.assert(ecs.get(p, "planet", "desc") === "test", `createPlanet with desc works`)
+        console.assert(ecs.get(p, "planet", "type") === "planet", `createPlanet default value`)
     }
 
     initSystems() {
@@ -86,21 +108,6 @@ export default class Game extends Observable {
         let fps = (1 / (dt)).toFixed(0);
         fps += " fps"
         document.getElementById("fpsCounter").innerHTML = fps;
-    }
-
-
-    createPlanet(name, size, x, y) {
-        let planet = this.ecs.createEntity(["planet", "position"]);
-
-        this.ecs.set(name, planet, "planet", "desc");
-        this.ecs.set(size, planet, "planet", "size");
-
-        this.ecs.set(x, planet, "position", "x");
-        this.ecs.set(y, planet, "position", "y");
-
-        if (name === "Earth") console.log("Earth id: " + planet)
-
-        return planet;
     }
 
 
@@ -199,140 +206,57 @@ export default class Game extends Observable {
     }
 
     createPlanets() {
-        let paramsPlanets = [
-            //{name: "Sun", dist: 0, speed: 0, size: 695},
-            {
-                name: "Mercury",
-                dist: 0.4,
-                speed: 47,
-                size: 2.4
-            },
-            {
-                name: "Venus",
-                dist: 0.7,
-                speed: 35,
-                size: 6
-            },
-            {
-                name: "Earth",
-                dist: 1,
-                speed: 30,
-                size: 6.3
-            },
-            {
-                name: "Mars",
-                dist: 1.5,
-                speed: 24,
-                size: 3.4
-            },
-            {
-                name: "Jupiter",
-                dist: 5.2,
-                speed: 13,
-                size: 70
-            },
-            {
-                name: "Saturn",
-                dist: 9.5,
-                speed: 9.7,
-                size: 58
-            },
-            {
-                name: "Uranus",
-                dist: 19.2,
-                speed: 6.8,
-                size: 25
-            },
-            {
-                name: "Neptune",
-                dist: 30.1,
-                speed: 5.4,
-                size: 24.6
-            },
-        ];
-
-        let paramsSattelites = [{
-            name: "Moon",
-            parent: "Earth",
-            dist: 1.10,
-            speed: 150,
-            size: 1.7
-        }]
-
-        let sun = this.createPlanet("Sun", 800, 0, 0);
-        this.ecs.set("Sun", sun, "planet", "name");
-        this.ecs.set("star", sun, "planet", "type");
+        let planetList = solarSystem;
 
 
-        let earthId;
+        const modifiers = {
+            size: 20,
+            distance: 16000,
+            speed: 0.001
+        }
 
-        let sizeModifier = 20;
-        let distanceModifier = 16000;
-        let speedModifier = 0.001;
+        const entityManager = new EntityManager(this.ecs);
 
-        paramsPlanets.forEach(param => {
-            let p = this.createPlanet(param.name, param.size * sizeModifier, 695 + (param.dist * distanceModifier), 0);
 
-            if (param.name === "Earth") {
-                this.ecs.set(true, p, "planet", "owned");
-
-                /*_.times(40, () => {
-                    this.createExtractor(p, "ironOre");    
-                })*/
-                this.createExtractor(p, "ironOre");
-                this.createExtractor(p, "ironOre");
-                this.createExtractor(p, "ironOre");
-
-                earthId = p;
-            }
-
-            this.ecs.set("planet", p, "planet", "type")
-            this.ecs.set(param.name, p, "planet", "name");
-            this.ecs.set(sun, p, "planet", "parentId");
-            this.ecs.set(param.speed * speedModifier, p, "planet", "speed");
-        });
-
-        paramsSattelites.forEach(param => {
-            let p = this.createPlanet(param.name, param.size * sizeModifier, 695 + (param.dist * distanceModifier), 0);
-
-            let parentId = this.getPlanet(param.parent);
-
-            if (param.name === "Moon") {
-                this.ecs.set(true, p, "planet", "owned");
-
-                this.createExtractor(p, "ironOre");
-                this.createExtractor(p, "ironOre");
-                this.createExtractor(p, "ironOre");                
-            }
-
-            this.ecs.set("planet", p, "planet", "type")
-            this.ecs.set(param.name, p, "planet", "name");
-            this.ecs.set(parentId, p, "planet", "parentId");
-            this.ecs.set(param.speed * speedModifier, p, "planet", "speed");
+        //Create the sun 
+        const sun = entityManager.createPlanet({
+            type: "star",
+            desc: "Sun",
+            size: 700,
+            x: 0,
+            y: 0
         })
 
-        this._updatePlanetsChildrens();
-    }
 
-    _updatePlanetsChildrens() {
-        let planets = this.ecs.searchEntities("planet").map(id => this.ecs.get(id, "planet"));
+        planetList.forEach(params => {            
 
-        planets.forEach(planet => {
+            //Create each planets 
+            const planet = entityManager.createPlanet({
+                type: "planet",
+                desc: params.name,
+                size: modifiers.size * params.size,
+                x: 700 + (modifiers.distance * params.distance),
+                y: 0,
+                parentId: sun
+            })
 
-            function getChildren(id) {
-                let childrens = planets.filter(p => p.parentId === id);
 
-                if (childrens.length === 0) {
-                    return;
-                } else {
-                    childrens.forEach(p => {
-                        planet.childrenIds.push(p._id)
-                        getChildren(p._id)
-                    })
-                }
+            //And planet sattelites 
+            if (planet["satellites"] !== undefined) {
+
+                planet["satellites"].forEach(params => {
+                    const satellite = entityManager.createPlanet({
+                        type: "satellite",
+                        desc: params.name,
+                        size: modifiers.size * params.size,
+                        x: 700 + (modifiers.distance * params.distance),
+                        y: 0,
+                        parentId: planet
+                    })                    
+                })
             }
-
-            getChildren(planet._id);
         })
+
+        entityManager.updatePlanetsChildrens();
     }
 }
