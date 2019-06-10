@@ -56,6 +56,8 @@ export default class UISystem {
 
         let result = {
             id: planetId,
+            x: this.ecs.get(planetId, "position", "x"),
+            y: this.ecs.get(planetId, "position", "y"),
             desc: this.ecs.get(planetId, "planet", "desc"),
             buildings: [],
             items: []
@@ -82,7 +84,7 @@ export default class UISystem {
                     map = {
                         ...map,
                         workstep: extractor.workstep,
-                        produce: items[extractor.resource].desc,
+                        produce: extractor.resource === "" ? "": items[extractor.resource].desc,
                         time: extractor.time
                     }
                 }

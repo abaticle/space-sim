@@ -1,4 +1,6 @@
 import Tools from "./../modules/tools";
+import { planet } from "./../../svelte/stores";
+import { get } from 'svelte/store';
 
 export default class DrawSystem {
 
@@ -10,7 +12,7 @@ export default class DrawSystem {
         this.height = window.innerHeight;
         this.layer;
         this.stage;
-        this.scaleBy = 1.1;
+        this.scaleBy = 1.3;
     }
 
 
@@ -57,8 +59,7 @@ export default class DrawSystem {
         };
 
         const newScale = e.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
-        const newScaleText = e.evt.deltaY > 0 ? oldScale * this.scaleBy : oldScale / this.scaleBy;
-
+        
         stage.scale({
             x: newScale,
             y: newScale
@@ -104,6 +105,7 @@ export default class DrawSystem {
 
         //TODO:Remove for build
         window.stage = this.stage;
+        window.layer = this.layer;
     }
 
     initPlanets() {
@@ -309,9 +311,25 @@ export default class DrawSystem {
     }
 
 
+
+    updatePosition(dt) {
+        let uiPlanet = get(planet);
+
+        if (get(planet) !== undefined) {
+       /*     this.stage.position({
+                x: (uiPlanet.x ) * -1,
+                y: (uiPlanet.y ) * -1
+            })*/
+        }
+
+
+    }
+
+
     update(dt) {
         this.updatePlanets(dt);
         this.updateSpaceships(dt);
+        this.updatePosition(dt);
 
         this.layer.batchDraw()
 

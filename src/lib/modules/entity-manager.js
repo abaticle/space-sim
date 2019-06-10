@@ -6,8 +6,38 @@ class EntityManager {
         this.ecs = ecs;
     }
 
-    createFactory() {
-        
+    /**
+     * Create a factory
+     * @param {string} option.type Building type
+     * @param {{type:{string}, desc: {string}, speed: {number}, planetId:{number}, price: {object}}} param0 
+     */
+    createFactory({
+        type = "factory",
+        desc = "Factory",
+        speed = 1,
+        planetId = 0,
+        price = {
+            ironBar: 5
+        },
+        produce,
+        time = 0
+    }) {
+        this.ecs.createFromAssemblage({
+            components: ["factory", "building"],
+            data: {
+                building: {
+                    type,
+                    desc,
+                    price,
+                    planetId
+                },
+                factory: {
+                    speed,
+                    produce,
+                    time
+                }
+            }
+        })
     }
 
 
@@ -17,12 +47,14 @@ class EntityManager {
      */
     createExtractor({
         type = "extractor",
-        desc = "",
+        desc = "Extractor",
         speed = 1,
         planetId = 0,
         price = {
             ironBar: 5
-        }
+        },
+        resource,
+        time = 0
     }) {
         this.ecs.createFromAssemblage({
             components: ["extractor", "building"],
@@ -34,7 +66,9 @@ class EntityManager {
                     planetId
                 },
                 extractor: {
-                    speed
+                    speed,
+                    resource,
+                    time
                 }
             }
         })

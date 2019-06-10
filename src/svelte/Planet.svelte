@@ -71,8 +71,14 @@
             {#each $planet.buildings as building}
                 <tr>
                     <td>{building.desc}</td>
+
+                    {#if building.produce === ""} 
+                    <td></td>
+                    <td></td>
+                    {:else}
                     <td>{building.produce}</td>
                     <td><progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}></progress></td>
+                    {/if}
                     <td><button class="button is-primary is-small">Sell</button></td>
                 </tr>
             {/each}

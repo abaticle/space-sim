@@ -48,8 +48,7 @@ export default class Game extends Observable {
         this.initSystems();
         requestAnimationFrame(this.update.bind(this));
 
-
-        this.tests();
+        //this.tests();
     }
 
 
@@ -101,38 +100,12 @@ export default class Game extends Observable {
         });
 
         requestAnimationFrame(this.update.bind(this));
-
     }
 
     updateFPS(dt) {
         let fps = (1 / (dt)).toFixed(0);
         fps += " fps"
         document.getElementById("fpsCounter").innerHTML = fps;
-    }
-
-
-    createExtractor(planet, resource) {
-        const building = this.ecs.createFromAssemblage(assemblages.extractorMk1);
-
-        const {
-            id,
-            time
-        } = items[resource];
-
-        this.ecs.set(id, building, "extractor", "resource");
-        this.ecs.set(time, building, "extractor", "time");
-        this.ecs.set(planet, building, "building", "planetId");
-    }
-
-    createFactory(planet, produce) {
-        const building = this.ecs.createEntity(["building", "factory"]);
-
-        this.ecs.set(planet, building, "building", "planetId");
-        this.ecs.set("Factory MK1", building, "building", "desc");
-
-        const item = items[produce];
-        this.ecs.set(item.id, building, "factory", "produce");
-        this.ecs.set(item.time, building, "factory", "time");
     }
 
     registerComponents() {
@@ -237,21 +210,43 @@ export default class Game extends Observable {
                 size: modifiers.size * params.size,
                 x: 700 + (modifiers.distance * params.distance),
                 y: 0,
-                parentId: sun
+                parentId: sun,
+                speed: modifiers.speed * params.speed
             })
 
 
-            //And planet sattelites 
-            if (planet["satellites"] !== undefined) {
+            //For earth, create factories/extractors
+            if (params.name === "Earth") {
+                window.earth = this.ecs.get(planet);
 
-                planet["satellites"].forEach(params => {
+                for (let i = 0; i < 4; i++) {
+                    entityManager.createExtractor({
+                        planetId: planet,
+                        resource: "ironOre",
+                        time: items.ironOre.time
+                    })
+                }
+
+                entityManager.createFactory({
+                    planetId: planet,
+                    produce: "ironBar",
+                    time: items.ironBar.time
+                })
+            }
+
+
+            //And planet satellites 
+            if (params["satellites"] !== undefined) {
+
+                params["satellites"].forEach(params => {
                     const satellite = entityManager.createPlanet({
                         type: "satellite",
                         desc: params.name,
                         size: modifiers.size * params.size,
                         x: 700 + (modifiers.distance * params.distance),
                         y: 0,
-                        parentId: planet
+                        parentId: planet,
+                        speed: modifiers.speed * params.speed
                     })                    
                 })
             }
