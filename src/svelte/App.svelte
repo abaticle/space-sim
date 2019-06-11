@@ -3,16 +3,21 @@
 	import Game from "./../lib/game";	
 	import Planet from "./Planet.svelte";
 	import { onMount } from 'svelte';
-	import { displayPlanet, planet } from "./stores"
+	import { chooseBuilding, planet } from "./stores"
 	import { get } from 'svelte/store';
 	import Tools from "./../lib/modules/tools";
+	import ChooseBuilding from "./ChooseBuilding.svelte";
  
 	
 	const game = new Game();
 
 	function buyBuilding(payload) {
 		const { planetId } = payload.detail;
-		console.log(planetId);
+		
+		chooseBuilding.set({
+			planetId,
+			visible: true
+		})
 	}
 
 	onMount(() => game.init());
@@ -41,18 +46,29 @@
 	}
 	.right-panel {
 		z-index: 10;
-		background-color: #1f2424;
-		/*-webkit-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
+		/*background-color: #1f2424;
+		-webkit-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
 		-moz-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
 		box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);*/
 		position: fixed;
 		right: 10px;
 		top: 10px;
-		border: 1px solid #8c9b9d;
+		/*border: 1px solid #8c9b9d;*/
 		width: 40%;
     	padding: 1em;
 		overflow: auto;
 		max-height: 60%
+	}
+	::-webkit-scrollbar{
+		width:10px
+	}
+	::-webkit-scrollbar-track{
+		background:#1f2424;
+		border-radius:0px
+	}
+	::-webkit-scrollbar-thumb{
+		background:#8c9b9d;
+		border-radius:0px
 	}
 </style>
 
@@ -72,3 +88,7 @@
 	{/if}
 
 </div>
+
+
+
+<ChooseBuilding></ChooseBuilding>

@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import { planet, displayPlanet } from "./stores";
+    import { planet } from "./stores";
 
     const dispatch = createEventDispatcher();
 

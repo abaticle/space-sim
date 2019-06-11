@@ -42,10 +42,10 @@ export default class Game extends Observable {
      */
     init() {
         this.registerComponents();
-        this.createPlanets();
-        this.createSpaceships();
+        this.createPlanets(solarSystem);
         this.createSystems();
         this.initSystems();
+        this.createSpaceships();
         requestAnimationFrame(this.update.bind(this));
 
         //this.tests();
@@ -139,7 +139,7 @@ export default class Game extends Observable {
         this.ecs.set(earthPos.x, spaceship, "position", "x")
         this.ecs.set(earthPos.y, spaceship, "position", "y")
 
-        this.ecs.set(0.6, spaceship, "spaceship", "speed")
+        this.ecs.set(5, spaceship, "spaceship", "speed")
         this.ecs.set("space-1", spaceship, "spaceship", "desc")
 
         const orders = [{
@@ -178,10 +178,11 @@ export default class Game extends Observable {
 
     }
 
-    createPlanets() {
-        let planetList = solarSystem;
 
-
+    /**
+     * Create planet entities from a solar system
+     */
+    createPlanets(solarSystem) {
         const modifiers = {
             size: 20,
             distance: 16000,
@@ -201,7 +202,7 @@ export default class Game extends Observable {
         })
 
 
-        planetList.forEach(params => {            
+        solarSystem.forEach(params => {
 
             //Create each planets 
             const planet = entityManager.createPlanet({
@@ -247,7 +248,7 @@ export default class Game extends Observable {
                         y: 0,
                         parentId: planet,
                         speed: modifiers.speed * params.speed
-                    })                    
+                    })
                 })
             }
         })
