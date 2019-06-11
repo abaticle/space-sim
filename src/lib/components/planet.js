@@ -3,6 +3,7 @@ const planet = {
     desc: "",
     type: "", //Star/Planet/Satellite
     items: {},
+    resources: {},
     size: 0,
     speed: 0,
     parentId: undefined,

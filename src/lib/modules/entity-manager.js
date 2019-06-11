@@ -77,7 +77,7 @@ class EntityManager {
 
     /**
      * Create a new planet
-     * @param {{desc: string, size: number, x: number, y: number, speed: number, owned: boolean}} options Planet options
+     * @param {{desc: string, size: number, x: number, y: number, speed: number, owned: boolean, resources: object}} options Planet options
      * @returns {number} Planet id
      */
     createPlanet({
@@ -88,7 +88,8 @@ class EntityManager {
         y = 0,
         speed = 1,
         owned = false,
-        parentId = undefined
+        parentId = undefined,
+        resources = {}
     }) {
         let planetId = this.ecs.createFromAssemblage({
             components: ["planet", "position"],
@@ -99,7 +100,8 @@ class EntityManager {
                     size,
                     speed,
                     owned,
-                    parentId
+                    parentId,
+                    resources
                 },
                 position: {
                     x,

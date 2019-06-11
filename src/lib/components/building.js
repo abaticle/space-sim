@@ -1,3 +1,15 @@
+
+/**
+ * Possible states : 
+ * - WORK
+ * - TRANSFER
+ * - ACTIVE
+ * - INACTIVE
+ */
+const buildingState = {
+    state: ""
+}
+
 const building = {
     name: "building",
     type: "",

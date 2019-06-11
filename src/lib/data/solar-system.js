@@ -17,6 +17,10 @@ export default [
         distance: 1,
         speed: 30,
         size: 6.3,
+        resources: {
+            ironOre: 30000,
+            copperOre: 20000
+        },
         satellites: [{
             name: "Moon",
             distance: 1.10,
@@ -34,7 +38,13 @@ export default [
         name: "Jupiter",
         distance: 5.2,
         speed: 13,
-        size: 70
+        size: 70,
+        satellites: [{
+            name: "Ganymede",
+            distance: 5.5,
+            speed: 30,
+            size: 5
+        }]
     },
     {
         name: "Saturn",

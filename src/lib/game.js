@@ -21,7 +21,6 @@ import DrawSystem from "./systems/draw";
 import UISystem from "./systems/ui";
 import items from "./data/items";
 import solarSystem from "./data/solar-system";
-import assemblages from "./assemblages/buildings";
 import Observable from "./modules/observable";
 import ActionsManager from "./modules/actions";
 import EntityManager from "./modules/entity-manager";
@@ -212,7 +211,8 @@ export default class Game extends Observable {
                 x: 700 + (modifiers.distance * params.distance),
                 y: 0,
                 parentId: sun,
-                speed: modifiers.speed * params.speed
+                speed: modifiers.speed * params.speed,
+                resources: params["resources"] ? params.resources : {}
             })
 
 
