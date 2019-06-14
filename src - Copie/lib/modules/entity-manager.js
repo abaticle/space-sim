@@ -6,36 +6,6 @@ class EntityManager {
         this.ecs = ecs;
     }
 
-
-    createProducer({
-        type = "",
-        desc = "",
-        speed = 1,
-        planetId = 0,
-        price = {
-            ironBar: 5
-        },
-        produce = "",
-        state = ""
-    }) {
-        return this.ecs.createFromAssemblage({
-            components: ["building", "producer"],
-            data: {
-                building: {
-                    type,
-                    desc,
-                    planetId,
-                    price
-                },
-                producer: {
-                    speed,
-                    produce,
-                    state
-                }
-            }
-        })
-    }
-
     /**
      * Create a factory
      * @param {string} option.type Building type

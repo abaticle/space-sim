@@ -73,129 +73,74 @@ export default class BuildingSystem {
     }
 
 
-    takeRecipe(planetId, buildingId, item) {
-        let planet = this.ecs.get(planetId, "planet")
-        let producer = this.ecs.get(buildingId, "producer")
-
-        const itemToProduce = items[producer.produce]
-
-
-        //Check if can produce 
-        let check = true
-
-        Object.keys(itemToProduce).forEach(key => {
-            if (!planet.items[key]) {
-                check = false;
-            }
-
-            else {
-                if (planet.items[key] < itemToProduce[key]) {
-                    check = false;
-                }
-            }
-        })
-
-        if (check) {
-            Object.keys(itemToProduce).forEach(key => {
-                this.removeItem(planet.items, key, itemToProduce[key])
-                this.addItem(producer.items, key, itemToProduce[key])
-            })
-        }
-
-        return check;
-
-    }
-
-
-    producerInactive() {
-
-    }
-
-    producerActive(building, producer) {
-
-        let { planetItems } = this.ecs.get(building.planetId, "planet", "items");
-        const { recipe } = items[producer.produce];
-
-        //Check if can produce 
-        let check = true
-
-        for (const key in recipe) {
-            if (!planetItems[key]) {
-                check = false;
-            }
-            else {
-                if (planetItems[key] < recipe[key]) {
-                    check = false;
-                }
-            }
-        }
-
-        //And take from planet items
-        if (check) {
-            for (const key in recipe) {
-                this.removeItem(planetItems, key, recipe[key])
-                this.addItem(producer.items, key, recipe[key])
-            }
-
-            producer.state = "filled";
-        }
-    }
-
-    producerFilled(building, producer) {
-        let planet = this.ecs.get(building.planetId, "planet");
-        let itemToProduce = items[producer.produce];
-                
-        producer.workstep += (producer.speed * dt);
-
-        //Work done
-        if (producer.workstep > itemToProduce.time) {
-
-            this.addItem(planet.items, producer.produce, itemToProduce[key])
-
-
-            producer.state = "active";
-        }
-    }
-
-
-
-
-    updateProducers(dt) {
-        let producers = this.ecs.searchEntities(["producer"]);
-
-
-        producers.forEach(producerId => {
-            let {building, producer } = this.ecs.get(producerId);
-
-
-            switch(producer.state) {
-
-                //Inactive: do nothing
-                case "inactive":
-                this.producerInactive();
-
-
-                //Active: get items from planet
-                case "active":
-                this.producerActive(building, producer);
-                break;
-
-
-                //Filled: can work. If work done go back to active and transfer to planet items
-                case "filled":
-                this.producerFilled(building, producer);
-                break;
-            }
-        })
-    }
-
-
     update(dt, actions) {
-        
-        this.updateProducers(dt);
-
-        /*
         this.buildings = this.ecs.searchEntities(["building"]);
+
+
+        /*this.buildings.forEach(id => {
+            const {
+                building, 
+                factory,
+                extractor
+            } = this.ecs.get(id);
+
+            if (factory) {
+
+                //Get items from planet 
+                if (!factory.canWork && factory.produce) {
+                    let {recipe} = items[factory.produce];
+
+                    //Check if planet has enough material
+                    factory.canWork = this.canProduce(recipe, planet.items); 
+                    
+                    if (factory.canWork) {
+
+                        //And if ok transfer from planet to factory
+                        _.forOwn(recipe, (value, key) => {
+                            this.removeItem(planet.items, key, value);
+                            this.addItem(factory.items, key, value);
+                        });
+                    }
+                }
+
+                //Work
+                if (factory.canWork) {
+                    factory.workstep += dt;
+                }
+
+                //Produce
+                if (factory.workstep > items[factory.produce].time) {
+                    factory.workstep = 0;
+                    factory.canWork = false;
+
+                    let {recipe} = items[factory.produce];
+
+                    _.forOwn(recipe, (value, key) => {
+                        this.removeItem(factory.items, key, value);
+                    });                    
+
+                    this.addItem(planet.items, factory.produce, 1);
+                }
+            }
+
+
+            if (extractor) {
+
+                if (extractor.resource) {
+                    let produce = items[extractor.resource];
+
+                    extractor.workstep += dt;
+
+                    if (extractor.workstep >= produce.time) {
+                        extractor.workstep = 0;
+
+                        this.addItem(planet.items, produce.produce, 1);
+
+                        //console.log("planet extracted", planet.items)
+                    }
+                }
+            }
+        })*/
 
         _.each(this.buildings, (buildingId) => {
 
@@ -260,6 +205,6 @@ export default class BuildingSystem {
                     }
                 }
             }
-        });*/
+        });
     }
 }

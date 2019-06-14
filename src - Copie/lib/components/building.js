@@ -1,23 +1,22 @@
 
+/**
+ * Possible states : 
+ * - WORK
+ * - TRANSFER
+ * - ACTIVE
+ * - INACTIVE
+ */
+const buildingState = {
+    state: ""
+}
+
 const building = {
     name: "building",
     type: "",
     desc: "",
     planetId: 0,
-    energyUsed: 0,
-    populationUsed: 0,
-    price: undefined
-}
-
-const producer = {
-    name: "producer",
-    workstep: 0,
-    items: {},
-    produce: "",
-    speed: 1,
-    state: ""   //inactive/active/filled
-}
-
+    price: {}
+};
 
 const extractor = {
     name: "extractor",
@@ -37,5 +36,5 @@ const factory = {
     speed: 1
 }
 
-export { building, extractor, factory, producer };
+export { building, extractor, factory };
 

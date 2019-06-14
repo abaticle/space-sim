@@ -1,18 +1,49 @@
 export default {
+
+    //Population
+    population: {
+        id: "population",
+        type: "population",
+        desc: "Population"
+    },
+
+    //Money 
+    money: {
+        id: "money",
+        type: "money",
+        desc: "Money"
+    },
+
     //Resources 
+    iron: {
+        id: "iron",
+        type: "resource",
+        desc: "Iron"
+    },
+    copper: {
+        id: "copper",
+        type: "resouce",
+        desc: "Copper"
+    },
+
+    //Ores
     ironOre: {
         id: "ironOre",
-        type: "resource",
+        type: "ore",
         desc: "Iron ore",
-        produce: "ironOre",
-        time: 2
+        recipe: {
+            iron: 1
+        },
+        time: 1
     },
     copperOre: {
         id: "copperOre",
-        type: "resource",
+        type: "ore",
         desc: "Copper ore",
-        produce: "copperOre",
-        time: 4
+        recipe: {
+            copper: 1
+        },
+        time: 1
     },
 
     //Items
@@ -20,27 +51,27 @@ export default {
         id: "ironBar",
         type: "item",
         desc: "Iron bar",
-        time: 6,
         recipe: {
-            ironOre: 5
-        }
+            ironOre: 2
+        },
+        time: 2
     },
     copperBar: {
         id: "copperBar",
         type: "item",
         desc: "Copper bar",
-        time: 8,
         recipe: {
-            copperOre: 5
-        }
+            copperOre: 4
+        },
+        time: 4
     },
     electricComponent: {
         id: "electricComponent",
         type: "item",
         desc: "Electric component",
         recipe: {
-            copperBar: 5,
-            ironBar: 2
+            copperBar: 2,
+            ironBar: 1
         },
         time: 12
     }

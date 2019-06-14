@@ -3,8 +3,7 @@ import _ from "lodash";
 import {
     building,
     extractor,
-    factory,
-    producer
+    factory
 } from "./components/building";
 import {
     planet
@@ -112,7 +111,6 @@ export default class Game extends Observable {
         this.ecs.registerComponent(building);
         this.ecs.registerComponent(extractor);
         this.ecs.registerComponent(factory);
-        this.ecs.registerComponent(producer);
         this.ecs.registerComponent(planet);
         this.ecs.registerComponent(position);
         this.ecs.registerComponent(spaceship);
@@ -224,15 +222,18 @@ export default class Game extends Observable {
                 window.earth = this.ecs.get(planet);
 
                 for (let i = 0; i < 4; i++) {
-                    entityManager.createProducer({
-                        type: "extractor",
-                        desc: "Extractor MKI",
-                        produce: "ironOre",
-                        speed: 1,
+                    entityManager.createExtractor({
                         planetId: planet,
-                        state: "active"
+                        resource: "ironOre",
+                        time: items.ironOre.time
                     })
                 }
+
+                entityManager.createFactory({
+                    planetId: planet,
+                    produce: "ironBar",
+                    time: items.ironBar.time
+                })
             }
 
 
