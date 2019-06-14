@@ -119,7 +119,7 @@ class EntityManager {
         speed = 1,
         owned = false,
         parentId = undefined,
-        resources = {}
+        items = {}
     }) {
         let planetId = this.ecs.createFromAssemblage({
             components: ["planet", "position"],
@@ -131,7 +131,7 @@ class EntityManager {
                     speed,
                     owned,
                     parentId,
-                    resources
+                    items
                 },
                 position: {
                     x,

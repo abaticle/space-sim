@@ -4,22 +4,24 @@ export default [
         name: "Mercury",
         distance: 0.4,
         speed: 47,
-        size: 2.4
+        size: 2.4,
+        items: {}
     },
     {
         name: "Venus",
         distance: 0.7,
         speed: 35,
-        size: 6
+        size: 6,
+        items: {}
     },
     {
         name: "Earth",
         distance: 1,
         speed: 30,
         size: 6.3,
-        resources: {
-            ironOre: 30000,
-            copperOre: 20000
+        items: {
+            iron: 30000,
+            copper: 20000
         },
         satellites: [{
             name: "Moon",
@@ -32,7 +34,8 @@ export default [
         name: "Mars",
         distance: 1.5,
         speed: 24,
-        size: 3.3
+        size: 3.3,
+        items: {}
     },
     {
         name: "Jupiter",
@@ -44,24 +47,28 @@ export default [
             distance: 5.5, 
             speed: 30,
             size: 5
-        }]
+        }],
+        items: {}
     },
     {
         name: "Saturn",
         distance: 9.5,
         speed: 9.7,
-        size: 58
+        size: 58,
+        items: {}
     },
     {
         name: "Uranus",
         distance: 19.2,
         speed: 6.8,
-        size: 25
+        size: 25,
+        items: {}
     },
     {
         name: "Neptune",
         distance: 30.1,
         speed: 5.4,
-        size: 24.6
+        size: 24.6,
+        items: {}
     },
 ]

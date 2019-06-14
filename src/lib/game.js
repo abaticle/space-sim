@@ -214,7 +214,7 @@ export default class Game extends Observable {
                 y: 0,
                 parentId: sun,
                 speed: modifiers.speed * params.speed,
-                resources: params["resources"] ? params.resources : {},
+                items: params["items"] ? params.items : {},
                 owned: params.name === "Earth"
             })
 
