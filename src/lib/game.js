@@ -2,9 +2,8 @@ import ECS from "./modules/ecs";
 import _ from "lodash";
 import {
     building,
-    extractor,
-    factory,
-    producer
+    producer,
+    construction
 } from "./components/building";
 import {
     planet
@@ -34,6 +33,7 @@ export default class Game extends Observable {
         this.actions = new ActionsManager();
         this.systems = [];
         this.timeOld = 0;
+        this.entityManager = new EntityManager(this.ecs);
     }
 
     /**
@@ -42,6 +42,7 @@ export default class Game extends Observable {
     init() {
         this.registerComponents();
         this.createSolarSystem(solarSystem);
+        this.createBuildings();
         this.createSystems();
         this.createSpaceships();
         this.initSystems();
@@ -54,9 +55,9 @@ export default class Game extends Observable {
     tests() {
         const ecs = this.ecs;
 
-        let factory = new EntityManager(ecs);
+        let manager = new EntityManager(ecs);
 
-        let p = factory.createPlanet({
+        let p = manager.createPlanet({
             desc: "test",
             size: 400,
             owned: true,
@@ -109,23 +110,12 @@ export default class Game extends Observable {
 
     registerComponents() {
         this.ecs.registerComponent(building);
-        this.ecs.registerComponent(extractor);
-        this.ecs.registerComponent(factory);
         this.ecs.registerComponent(producer);
         this.ecs.registerComponent(planet);
         this.ecs.registerComponent(position);
         this.ecs.registerComponent(spaceship);
         this.ecs.registerComponent(spaceshipState);
-    }
-
-    /**
-     * find a planet from it's desc
-     * @param {string} desc 
-     */
-    getPlanet(desc) {
-        return this.ecs
-            .searchEntities("planet")
-            .find(id => this.ecs.get(id, "planet", "desc") === desc);
+        this.ecs.registerComponent(construction);        
     }
 
     createSpaceships() {
@@ -133,7 +123,10 @@ export default class Game extends Observable {
         
         console.log("Spaceship id: ", spaceship);
 
-        let earthId = this.getPlanet("Earth");
+        let earthId = this.entityManager.getPlanet("Earth");
+        let moonId = this.entityManager.getPlanet("Moon");
+
+
         let earthPos = this.ecs.get(earthId, "position");
 
         this.ecs.set(earthPos.x, spaceship, "position", "x")
@@ -143,13 +136,13 @@ export default class Game extends Observable {
         this.ecs.set("space-1", spaceship, "spaceship", "desc")
 
         const orders = [{
-            goTo: this.getPlanet("Moon")
+            goTo: moonId
         }, {
             take: {
                 ironBar: 10
             }
         }, {
-            goTo: this.getPlanet("Earth")
+            goTo: earthId
         }, {
             deposit: {
                 ironBar: "all"
@@ -157,6 +150,8 @@ export default class Game extends Observable {
         }];
 
         this.ecs.set(orders, spaceship, "spaceship", "orders");
+        this.ecs.set("move", spaceship, "spaceshipState", "state");
+        this.ecs.set(earthId, spaceship, "spaceshipState", "moveTo");
 
         /**
          * Possible spaceship states are :
@@ -173,21 +168,31 @@ export default class Game extends Observable {
 
 
 
-        this.ecs.set("move", spaceship, "spaceshipState", "state");
-        this.ecs.set(earthId, spaceship, "spaceshipState", "moveTo");
 
     }
 
+
+
+    createBuildings() {
+        let earth = this.entityManager.getPlanet("Earth");
+
+        this.entityManager.createProducer({
+            type: "extractor",
+            desc: "Extractor MKI",
+            produce: "ironOre",
+            speed: 1,
+            planetId: earth,
+            state: "active"
+        })
+    }
 
     /**
      * Create planet entities from a solar system
      */
     createSolarSystem(solarSystem) {        
 
-        const entityManager = new EntityManager(this.ecs);
-
         //Create the sun 
-        const sun = entityManager.createPlanet({
+        const sun = this.entityManager.createPlanet({
             type: "star",
             desc: "Sun",
             size: 700,
@@ -195,14 +200,14 @@ export default class Game extends Observable {
             y: 0
         })
 
-        function createPlanetFromParams(params, parentId) {
+        const createPlanetFromParams = (params, parentId) => {
             const modifiers = {
                 size: 20,
                 distance: 16000,
                 speed: 0.001
             }
 
-            return entityManager.createPlanet({
+            return this.entityManager.createPlanet({
                 type: "planet",
                 desc: params.name,
                 size: modifiers.size * params.size,
@@ -215,33 +220,14 @@ export default class Game extends Observable {
             })
         }
 
-
         solarSystem.forEach(params => {
-
             //Create each planets 
             const planet = createPlanetFromParams(params)
-
-            //For earth, create factories/extractors
-            if (params.name === "Earth") {
-                window.earth = this.ecs.get(planet);
-
-                for (let i = 0; i < 1; i++) {
-                    entityManager.createProducer({
-                        type: "extractor",
-                        desc: "Extractor MKI",
-                        produce: "ironOre",
-                        speed: 1,
-                        planetId: planet,
-                        state: "active"
-                    })
-                }
-            }
-
 
             //And planet satellites 
             params.satellites.forEach(params => createPlanetFromParams(params, planet))
         })
 
-        entityManager.updatePlanetsChildrens();
+        this.entityManager.updatePlanetsChildrens();
     }
 }

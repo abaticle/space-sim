@@ -27,6 +27,7 @@
 	onMount(() => game.init());
 
 	window.game = game;
+	window.ecs = game.ecs;
 	window._ = _;
 	window.planet = planet;
 	window.get = get;

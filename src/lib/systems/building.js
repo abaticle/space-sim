@@ -72,41 +72,6 @@ export default class BuildingSystem {
         return check;
     }
 
-
-    takeRecipe(planetId, buildingId, item) {
-
-        const planet = this.ecs.get(planetId, "planet")
-        const producer = this.ecs.get(buildingId, "producer")
-
-        const itemToProduce = items[producer.produce]
-
-
-        //Check if can produce 
-        let check = true
-
-        Object.keys(itemToProduce).forEach(key => {
-            if (!planet.items[key]) {
-                check = false;
-            }
-            else {
-                if (planet.items[key] < itemToProduce[key]) {
-                    check = false;
-                }
-            }
-        })
-
-        if (check) {
-            Object.keys(itemToProduce).forEach(key => {
-                this.removeItem(planet.items, key, itemToProduce[key])
-                this.addItem(producer.items, key, itemToProduce[key])
-            })
-        }
-
-        return check;
-
-    }
-
-
     producerInactive() {
 
     }

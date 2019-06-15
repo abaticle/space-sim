@@ -9,9 +9,10 @@ export default {
         price: {
             ironBar: 5
         },
-        type: "extractor"
+        type: "extractor",
+        time: 10
     },
-    extractorMk1: {
+    extractorMk2: {
         id: "extractorMk2",
         desc: "Extractor MKII",
         speed: 2,
@@ -19,7 +20,8 @@ export default {
         price: {
             ironBar: 50
         },
-        type: "extractor"
+        type: "extractor",
+        time: 100
     },
 
     //Furnaces
@@ -31,7 +33,8 @@ export default {
         price: {
             ironBar: 15
         },
-        type: "factory"
+        type: "factory",
+        time: 50
     },
     furnaceMk2: {
         id: "furnaceMk2",
@@ -41,7 +44,8 @@ export default {
         price: {
             ironBar: 150
         },
-        type: "factory"
+        type: "factory",
+        time: 500
     },
 
     //Factories
@@ -54,7 +58,8 @@ export default {
             ironBar: 30,
             copperBar: 15
         },
-        type: "factory"
+        type: "factory",
+        time: 100
     }
 
 }

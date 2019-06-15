@@ -21,6 +21,9 @@
 </script>
 
 <style>
+.alignRight{
+    text-align: right
+}
 </style>
 
 
@@ -35,7 +38,7 @@
         {#if $planet.items.length === 0} 
             No item
         {:else}
-        <table class="table is-fullwidth">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Type</th>
@@ -48,7 +51,7 @@
                     <tr>
                         <td>{item.type}</td>
                         <td>{item.desc}</td>
-                        <td>{numberFormatter(item.count)}</td>
+                        <td class="alignRight">{numberFormatter(item.count)}</td>
                     </tr>
                 {/each}
             </tbody>

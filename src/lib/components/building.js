@@ -6,7 +6,8 @@ const building = {
     planetId: 0,
     energyUsed: 0,
     populationUsed: 0,
-    price: undefined
+    price: {},
+    time: 0
 }
 
 const producer = {
@@ -18,24 +19,13 @@ const producer = {
     state: ""   //inactive/active/filled
 }
 
-
-const extractor = {
-    name: "extractor",
-    workstep: 0,
-    resource: "", //string: item id
-    time: 0,
-    speed: 1
-};
-
-const factory = {
-    name: "factory",
-    canWork: false,
-    produce: "", //string: item id
-    workstep: 0,
-    time: 0,
-    items: {}, //object {ironBar:2}
-    speed: 1
+const construction = {
+    name: "construction",
+    building: "",
+    workstep: 0
 }
 
-export { building, extractor, factory, producer };
+
+
+export { building, producer, construction };
 

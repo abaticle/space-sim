@@ -35,6 +35,8 @@ export default class UISystem {
                     
                     break;
                 
+                case "displayBuyBuilding":
+                    break;
 
                 //Remove planet
                 case "removePanel": 

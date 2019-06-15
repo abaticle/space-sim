@@ -26,6 +26,7 @@ export default class MoveSystem {
      * @param {*} dt Time difference
      */
     movePlanet(id, dt) {
+        
         const {
             position,
             planet
@@ -59,7 +60,12 @@ export default class MoveSystem {
     }
 
 
+    /**
+     * Move all planets
+     * @param {number} dt Time difference
+     */
     movePlanets(dt) {
+
         let planets = this.ecs.searchEntities(["planet", "position"])
 
         planets.forEach(id => {
@@ -67,7 +73,13 @@ export default class MoveSystem {
         })
     }
 
+    /**
+     * Move a spaceship
+     * @param {number} id Spaceship id
+     * @param {number} dt Time difference
+     */
     moveSpaceship(id, dt) {
+
         const {
             spaceship,
             position,
@@ -101,8 +113,12 @@ export default class MoveSystem {
         }
     }
 
+    /**
+     * Move all spaceships
+     * @param {number} dt Time difference
+     */
     moveSpaceships(dt) {
-        
+
         let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
 
         spaceships.forEach(id => {
@@ -114,7 +130,6 @@ export default class MoveSystem {
     update(dt, actions) {
         this.movePlanets(dt);
         this.moveSpaceships(dt);
-
     }
 
 }

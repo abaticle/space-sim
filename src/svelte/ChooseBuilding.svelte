@@ -1,8 +1,6 @@
 <script>
     import buildings from "../lib/data/buildings";
     import { chooseBuilding } from "./stores"
-
-    export let isActive = false;
 </script>
 
 {#if $chooseBuilding.visible}

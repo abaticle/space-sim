@@ -36,74 +36,6 @@ class EntityManager {
         })
     }
 
-    /**
-     * Create a factory
-     * @param {string} option.type Building type
-     * @param {{type:{string}, desc: {string}, speed: {number}, planetId:{number}, price: {object}}} param0 
-     */
-    createFactory({
-        type = "factory",
-        desc = "Factory",
-        speed = 1,
-        planetId = 0,
-        price = {
-            ironBar: 5
-        },
-        produce,
-        time = 0
-    }) {
-        this.ecs.createFromAssemblage({
-            components: ["factory", "building"],
-            data: {
-                building: {
-                    type,
-                    desc,
-                    price,
-                    planetId
-                },
-                factory: {
-                    speed,
-                    produce,
-                    time
-                }
-            }
-        })
-    }
-
-
-    /**
-     * Create an extractor
-     * @param {{type:{string}, desc: {string}, speed: {number}, planetId:{number}, price: {object}}} param0 
-     */
-    createExtractor({
-        type = "extractor",
-        desc = "Extractor",
-        speed = 1,
-        planetId = 0,
-        price = {
-            ironBar: 5
-        },
-        resource,
-        time = 0
-    }) {
-        this.ecs.createFromAssemblage({
-            components: ["extractor", "building"],
-            data: {
-                building: {
-                    type,
-                    desc,
-                    price,
-                    planetId
-                },
-                extractor: {
-                    speed,
-                    resource,
-                    time
-                }
-            }
-        })
-    }
-
 
     /**
      * Create a new planet
@@ -172,6 +104,16 @@ class EntityManager {
             getChildren(planet._id);
         })
     }
+
+    /**
+     * find a planet from it's desc
+     * @param {string} desc 
+     */
+    getPlanet(desc) {
+        return this.ecs
+            .searchEntities("planet")
+            .find(id => this.ecs.get(id, "planet", "desc") === desc);
+    }    
 }
 
 
