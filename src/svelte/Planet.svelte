@@ -1,6 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { planet } from "./stores";
+    import items from "./../lib/data/items";
 
     const dispatch = createEventDispatcher();
 
@@ -8,6 +9,15 @@
         let percent = ((step * 100) / time) / 100;
         return percent.toFixed(2); 
     }    
+
+    const numberFormatter = (number) => {
+        if (number >= 1000) {
+            return (number / 1000).toFixed(1) + " K"
+        }
+        else {
+            return number
+        }
+    }
 </script>
 
 <style>
@@ -16,12 +26,11 @@
 
 <h1 class="title">{$planet.desc}</h1>
 
-
 {#if $planet.owned}
-<div class="columns">     
+<div class="columns">    
+    <div class="column">
 
-    <!-- Planet items :-->
-    <div class="column is-one-quarter">
+        <!-- Planet items/resources :-->
         <h2 class="subtitle">Items</h2>
         {#if $planet.items.length === 0} 
             No item
@@ -29,6 +38,7 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
+                    <th>Type</th>
                     <th>Item</th>
                     <th>Count</th>
                 </tr>
@@ -36,17 +46,20 @@
             <tbody>
                 {#each $planet.items as item}
                     <tr>
+                        <td>{item.type}</td>
                         <td>{item.desc}</td>
-                        <td>{item.count}</td>
+                        <td>{numberFormatter(item.count)}</td>
                     </tr>
                 {/each}
             </tbody>
         </table>		
         {/if}
     </div>
+</div>
 
-    <!-- Planet buildings -->
+<div class="columns">    
     <div class="column">
+        <!-- Planet buildings -->
         <h2 class="subtitle">Buildings</h2>
 
         <!-- Buttons -->

@@ -54,12 +54,14 @@ export default class UISystem {
      */
     getPlanet(planetId) {
 
+        const { planet, position } = this.ecs.get(planetId);
+
         let result = {
             id: planetId,
-            x: this.ecs.get(planetId, "position", "x"),
-            y: this.ecs.get(planetId, "position", "y"),
-            desc: this.ecs.get(planetId, "planet", "desc"),
-            owned: this.ecs.get(planetId, "planet", "owned"),
+            x: position.x,
+            y: planet.y,
+            desc: planet.desc,
+            owned: planet.owned,
             buildings: [],
             items: []
         };
@@ -71,8 +73,7 @@ export default class UISystem {
             .forEach(buildingId => {
                 const {
                     building,
-                    extractor,
-                    factory
+                    producer
                 } = this.ecs.get(buildingId);
 
 
@@ -81,21 +82,14 @@ export default class UISystem {
                     desc: building.desc
                 }
 
-                if (extractor) {
-                    map = {
-                        ...map,
-                        workstep: extractor.workstep,
-                        produce: extractor.resource === "" ? "": items[extractor.resource].desc,
-                        time: extractor.time
-                    }
-                }
+                if (producer) {
+                    const item = items[producer.produce];
 
-                if (factory) {
                     map = {
                         ...map,
-                        workstep: factory.workstep,
-                        produce: items[factory.produce].desc,
-                        time: factory.time
+                        workstep: producer.workstep,
+                        produce: producer.produce === "" ? "": item.desc,
+                        time: item.time
                     }
                 }
 
@@ -107,9 +101,12 @@ export default class UISystem {
         Object
             .entries(this.ecs.get(planetId, "planet", "items"))
             .forEach(pair => {
+                const item = items[pair[0]];
+                
                 result.items.push({
                     id: pair[0],
-                    desc: items[pair[0]].desc,
+                    desc: item.desc,
+                    type: item.type,
                     count: pair[1]
                 })
             });

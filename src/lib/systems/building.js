@@ -153,7 +153,7 @@ export default class BuildingSystem {
 
             this.addItem(planet.items, producer.produce, 1)
 
-
+            producer.workstep = 0;
             producer.state = "active";
         }
     }

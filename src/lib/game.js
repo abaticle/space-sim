@@ -20,7 +20,6 @@ import BuildingSystem from "./systems/building";
 import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
 import UISystem from "./systems/ui";
-import items from "./data/items";
 import solarSystem from "./data/solar-system";
 import Observable from "./modules/observable";
 import ActionsManager from "./modules/actions";
@@ -42,7 +41,7 @@ export default class Game extends Observable {
      */
     init() {
         this.registerComponents();
-        this.createPlanets(solarSystem);
+        this.createSolarSystem(solarSystem);
         this.createSystems();
         this.createSpaceships();
         this.initSystems();
@@ -183,15 +182,9 @@ export default class Game extends Observable {
     /**
      * Create planet entities from a solar system
      */
-    createPlanets(solarSystem) {
-        const modifiers = {
-            size: 20,
-            distance: 16000,
-            speed: 0.001
-        }
+    createSolarSystem(solarSystem) {        
 
         const entityManager = new EntityManager(this.ecs);
-
 
         //Create the sun 
         const sun = entityManager.createPlanet({
@@ -202,28 +195,37 @@ export default class Game extends Observable {
             y: 0
         })
 
+        function createPlanetFromParams(params, parentId) {
+            const modifiers = {
+                size: 20,
+                distance: 16000,
+                speed: 0.001
+            }
 
-        solarSystem.forEach(params => {
-
-            //Create each planets 
-            const planet = entityManager.createPlanet({
+            return entityManager.createPlanet({
                 type: "planet",
                 desc: params.name,
                 size: modifiers.size * params.size,
                 x: 700 + (modifiers.distance * params.distance),
                 y: 0,
-                parentId: sun,
+                parentId: parentId || sun,
                 speed: modifiers.speed * params.speed,
                 items: params["items"] ? params.items : {},
-                owned: params.name === "Earth"
+                owned: params.owned
             })
+        }
 
+
+        solarSystem.forEach(params => {
+
+            //Create each planets 
+            const planet = createPlanetFromParams(params)
 
             //For earth, create factories/extractors
             if (params.name === "Earth") {
                 window.earth = this.ecs.get(planet);
 
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 1; i++) {
                     entityManager.createProducer({
                         type: "extractor",
                         desc: "Extractor MKI",
@@ -237,20 +239,7 @@ export default class Game extends Observable {
 
 
             //And planet satellites 
-            if (params["satellites"] !== undefined) {
-
-                params["satellites"].forEach(params => {
-                    const satellite = entityManager.createPlanet({
-                        type: "satellite",
-                        desc: params.name,
-                        size: modifiers.size * params.size,
-                        x: 700 + (modifiers.distance * params.distance),
-                        y: 0,
-                        parentId: planet,
-                        speed: modifiers.speed * params.speed
-                    })
-                })
-            }
+            params.satellites.forEach(params => createPlanetFromParams(params, planet))
         })
 
         entityManager.updatePlanetsChildrens();

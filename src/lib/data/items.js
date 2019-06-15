@@ -34,7 +34,7 @@ export default {
         recipe: {
             iron: 1
         },
-        time: 1
+        time: 5
     },
     copperOre: {
         id: "copperOre",
@@ -43,7 +43,7 @@ export default {
         recipe: {
             copper: 1
         },
-        time: 1
+        time: 10
     },
 
     //Items
@@ -54,7 +54,7 @@ export default {
         recipe: {
             ironOre: 2
         },
-        time: 2
+        time: 10
     },
     copperBar: {
         id: "copperBar",
@@ -63,7 +63,7 @@ export default {
         recipe: {
             copperOre: 4
         },
-        time: 4
+        time: 20
     },
     electricComponent: {
         id: "electricComponent",

@@ -3,7 +3,7 @@
 	import Game from "./../lib/game";	
 	import Planet from "./Planet.svelte";
 	import { onMount } from 'svelte';
-	import { chooseBuilding, planet } from "./stores"
+	import { chooseBuilding, planet, speed } from "./stores"
 	import { get } from 'svelte/store';
 	import Tools from "./../lib/modules/tools";
 	import ChooseBuilding from "./ChooseBuilding.svelte";
@@ -19,6 +19,10 @@
 			visible: true
 		})
 	}
+
+	speed.subscribe(value => {
+		game.speed = value;
+	})
 
 	onMount(() => game.init());
 
@@ -41,26 +45,18 @@
 	.hidden {
 		display: none;
 	}
-	.over-canvas {
-
-	}
 	.right-panel {
 		z-index: 10;
-		/*background-color: #1f2424;
-		-webkit-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
-		-moz-box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);
-		box-shadow: 10px 11px 25px 0px rgba(0,0,0,0.75);*/
 		position: fixed;
 		right: 10px;
 		top: 10px;
-		/*border: 1px solid #8c9b9d;*/
-		width: 40%;
+		width: 30%;
     	padding: 1em;
 		overflow: auto;
 		max-height: 60%
 	}
 	::-webkit-scrollbar{
-		width:10px
+		width:6px
 	}
 	::-webkit-scrollbar-track{
 		background:#1f2424;
@@ -69,6 +65,10 @@
 	::-webkit-scrollbar-thumb{
 		background:#8c9b9d;
 		border-radius:0px
+	}
+	.speed{
+		padding-left: 1em;
+		padding-right: 1em;
 	}
 </style>
 
@@ -81,11 +81,30 @@
 	<div id="map"/>	
 
 	<!-- Display planet -->
-	{#if $planet}
+	
 	<div class="right-panel"> 
-		<Planet on:buyBuilding={buyBuilding}></Planet>
+		<div class="level">
+            <div class="level-left">				
+                <button class="button" on:click={() => $speed -= 5}>
+					<span class="icon is-small">
+						<i class="fas fa-backward"></i>
+					</span>
+				</button>			
+
+				<h1 class="speed">{$speed}</h1>
+
+                <button class="button" on:click={() => $speed += 5}>
+					<span class="icon is-small">
+						<i class="fas fa-forward"></i>
+					</span>
+				</button>
+            </div>
+        </div>
+		{#if $planet}
+			<Planet on:buyBuilding={buyBuilding}></Planet>
+		{/if}
 	</div>
-	{/if}
+	
 
 </div>
 
