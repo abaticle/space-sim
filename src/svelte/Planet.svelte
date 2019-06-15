@@ -11,6 +11,9 @@
     }    
 
     const numberFormatter = (number) => {
+        //todo:à retirer / TEST
+        return number
+
         if (number >= 1000) {
             return (number / 1000).toFixed(1) + " K"
         }

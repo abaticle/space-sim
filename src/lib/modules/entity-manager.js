@@ -1,9 +1,59 @@
 import { extractor, building } from "../components/building";
+import buildings from "../data/buildings";
 
 class EntityManager {
 
     constructor(ecs) {
         this.ecs = ecs;
+    }
+
+
+
+
+
+    /**
+     * Transfer item between components
+     * @param {object} compFrom Component from 
+     * @param {object} compTo Component to
+     * @param {string} item Item to transfer
+     * @param {number} count Number of items to transfer
+     */
+    static transferItem(compFrom, compTo, item, count) {
+        if (!compFrom["items"]) {
+            throw new Error(`No "items" property on ${compFrom}`)
+        }
+        if (!compFrom.items[item]) {
+            throw new Error(`${compFrom.name} has no ${item}`)
+        }
+        if (!compTo["items"]) {
+            throw new Error(`No "items" property on ${compTo}`)
+        }
+        if (count > compFrom.items[item]) {
+            throw new Error(`Not enough ${item} in ${compFrom}`)
+        }
+
+        //Add item count to target
+        if (!compTo.items[item]) {
+            compTo.items[item] = 0
+        }
+
+        compTo.items[item] += count;
+
+        //Remove item from origin
+        compFrom.items[item] -= count;
+    }
+
+
+
+    buyBuilding(planetId, buildingId) {
+
+        const building = buildings[buildingId]
+
+        this.ecs.createFromAssemblage({
+            components: building.components,
+            data: building.data
+        })
+
     }
 
 

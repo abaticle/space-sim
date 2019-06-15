@@ -1,5 +1,6 @@
 import items from "../data/items";
 import _ from "lodash";
+import EntityManager from "../modules/entity-manager";
 
 export default class BuildingSystem {
 
@@ -17,61 +18,6 @@ export default class BuildingSystem {
     }
 
 
-    /**
-     * Add an item to a component
-     * @param {object} comp Where to add items
-     * @param {string} item Item to add
-     * @param {number} count Number of items
-     */
-    addItem(comp, item, count) {
-        if (comp[item]) {
-            comp[item] += count;
-        }
-        else {
-            comp[item] = count;
-        }
-    }
-
-    /**
-     * Remove an item to a component
-     * @param {object} comp Where to remove items
-     * @param {string} item Item to remove
-     * @param {number} count Number of items
-     */
-    removeItem(comp, item, count) {
-        if (comp[item]) {
-            comp[item] -= count;
-
-            if (comp[item] <= 0) {
-                delete comp[item];
-            }
-        }
-    }
-
-    /**
-     * Check if item has enough material to produce a recipe
-     * @param {object} recipe 
-     * @param {object} items 
-     */
-    canProduce(recipe, items) {
-
-        let check = true;
-
-        _.forOwn(recipe, (value, key) => {
-            if (!items[key]) {
-                check = false;
-            }
-
-            else {
-                if (items[key] < value) {
-                    check = false;
-                }
-            }
-        })        
-
-        return check;
-    }
-
     producerInactive() {
 
     }
@@ -79,6 +25,7 @@ export default class BuildingSystem {
     producerActive(building, producer) {
 
         const planetItems = this.ecs.get(building.planetId, "planet", "items");
+        const planet = this.ecs.get(building.planetId, "planet")
         const {recipe} = items[producer.produce];
 
         //Check if planet has enough material
@@ -98,8 +45,7 @@ export default class BuildingSystem {
         //And take from planet items
         if (check) {
             for (const key in recipe) {
-                this.removeItem(planetItems, key, recipe[key])
-                this.addItem(producer.items, key, recipe[key])
+                EntityManager.transferItem(planet, producer, key, recipe[key])
             }
 
             producer.state = "filled";
@@ -115,8 +61,9 @@ export default class BuildingSystem {
 
         //Work done
         if (producer.workstep > itemToProduce.time) {
+            producer.items[producer.produce] = 1;
 
-            this.addItem(planet.items, producer.produce, 1)
+            EntityManager.transferItem(producer, planet, producer.produce, 1)
 
             producer.workstep = 0;
             producer.state = "active";
@@ -150,7 +97,7 @@ export default class BuildingSystem {
     }
 
 
-    update(dt, actions) {
+    update(dt) {
         this.updateProducers(dt);
     }
 }

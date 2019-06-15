@@ -25,7 +25,9 @@ export default [
         size: 6.3,
         items: {
             iron: 30000,
-            copper: 20000
+            copper: 20000,
+            ironOre: 1000,
+            copperOre: 400
         },
         owned: true,
         satellites: [{

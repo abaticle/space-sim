@@ -15,6 +15,7 @@ const producer = {
     workstep: 0,
     items: {},
     produce: "",
+    canProduce: [], //Array of items 
     speed: 1,
     state: ""   //inactive/active/filled
 }

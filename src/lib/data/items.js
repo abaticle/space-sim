@@ -14,6 +14,13 @@ export default {
         desc: "Money"
     },
 
+    //Research
+    research: {
+        id: "research",
+        type: "research",
+        desc: "Research"
+    },
+
     //Resources 
     iron: {
         id: "iron",

@@ -54,7 +54,7 @@
 		width: 30%;
     	padding: 1em;
 		overflow: auto;
-		max-height: 60%
+		max-height: 90%
 	}
 	::-webkit-scrollbar{
 		width:6px
