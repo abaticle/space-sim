@@ -1,6 +1,10 @@
 import Tools from "./../modules/tools";
-import { planet } from "./../../svelte/stores";
-import { get } from 'svelte/store';
+import {
+    planet
+} from "./../ui/stores";
+import {
+    get
+} from 'svelte/store';
 
 export default class DrawSystem {
 
@@ -13,40 +17,122 @@ export default class DrawSystem {
         this.layer;
         this.stage;
         this.scaleBy = 1.3;
+
+        this.drawSelection = false;
+        this.selectionFromX = 0;
+        this.selectionFromY = 0;
+        this.selectionToX = 0;
+        this.selectionToY = 0;
     }
 
+    /**
+     * Click on planet : dispatch action to display it
+     * @param {string} konvaId Konva object id
+     */
+    onDisplayPlanet(konvaId) {
+        let planetId = parseInt(konvaId.split("-")[1]);
 
-    hidePannel() {
-        //planet.set(undefined);
+        if (typeof planetId !== "number") {
+            throw new Error(`No entity found from id ${target.id()}`);
+        }
+
+        this.actions.addAction("displayPlanet", {
+            planetId
+        })
     }
 
+    /**
+     * Click on nothin : remove right panel
+     */
+    onRemovePanel() {
+        this.actions.addAction("removePanel")
+    }
 
+    /**
+     * Click on a planet/ship
+     * @param {object} event Konva event
+     */
     onClick(event) {
         let id = event.target.id();
 
         switch (true) {
+
             case id.startsWith("planet"):
-                let planetId = parseInt(id.split("-")[1]);
-
-                if (typeof planetId !== "number") {
-                    throw new Error(`No entity found from id ${target.id()}`);
-                }
-
-                this.actions.addAction("displayPlanet", planetId)
+                this.onDisplayPlanet(id);
                 break;
 
             default:
-                this.actions.addAction("removePanel")
+                this.onRemovePanel();
+                break;
         }
     }
 
 
-    //TODO: utiliser une fonction de leasing pour l'animation
-    onScroll(e) {
+    debug() {
+
+        let text = new Konva.Text({
+            x: 10,
+            y: 40,
+            fontSize: 12,
+            text: "Scale: " + this.stage.getScale().x,
+            fill: "white",
+            listening: false
+        });
+
+        this.layer.add(text);
+    }
+
+    onMouseDown(event) {
+
+        const isLeft = event.evt.button === 0;
+        this.stage.draggable(!isLeft);        
+
+        if (event.evt.button === 0) {
+
+            const selection = this.layer.findOne("#selection");
+
+            let scale = this.stage.getScale().x;
+
+            //Start to draw selection
+            if (!selection.getVisible()) {
+
+                selection.setVisible(true)
+
+                selection.x(event.evt.offsetX / scale - this.stage.x() / scale)
+                selection.x(event.evt.offsetY / scale - this.stage.y() / scale)
+
+                this.drawSelection = true;
+            }
+
+            else {
+
+                selection.width(100)
+                selection.height(100)
+
+                //selection.setWidth(event.evt.offsetX / scale - this.stage.x() / scale - selection.getX())
+                //selection.setHeight(event.evt.offsetY / scale - this.stage.y() / scale - selection.getY())
+            }
+        }
+
+    }
+
+    onMouseUp(event) {
+        const selection = this.layer.findOne("#selection");
+
+        selection.setVisible(false)
+    }
+
+
+    /**
+     * Scroll 
+     * TODO:Lease animation when zooming
+     * @param {object} event Konva event
+     */
+    onScroll(event) {
 
         const stage = this.stage;
 
-        e.evt.preventDefault();
+        event.evt.preventDefault();
 
         const oldScale = stage.scaleX();
 
@@ -55,8 +141,8 @@ export default class DrawSystem {
             y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
         };
 
-        const newScale = e.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
-       
+        const newScale = event.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
+
         stage.scale({
             x: newScale,
             y: newScale
@@ -80,21 +166,28 @@ export default class DrawSystem {
         stage.batchDraw();
     }
 
+    /**
+     * Init Konva canva
+     * TODO:Update with and heigth when moving window
+     */
     initKonva() {
-
-        //this.width = document.getElementById("map").offsetWidth;
 
         this.stage = new Konva.Stage({
             container: 'map',
             width: this.width,
-            height: this.height,
-            draggable: true
+            height: this.height
         });
+
+        this.stage.on('contextmenu', event => {
+            event.evt.preventDefault();
+        })
 
         this.layer = new Konva.Layer({
             id: "planet-layer"
         });
 
+        this.stage.on("mousedown", this.onMouseDown.bind(this))        
+        this.stage.on("mouseup", this.onMouseUp.bind(this))
         this.stage.on('wheel', this.onScroll.bind(this));
         this.stage.on("click", this.onClick.bind(this))
 
@@ -105,6 +198,9 @@ export default class DrawSystem {
         window.layer = this.layer;
     }
 
+    /**
+     * Draw planets
+     */
     initPlanets() {
         let planets = this.ecs.searchEntities(["planet", "position"])
 
@@ -129,10 +225,12 @@ export default class DrawSystem {
 
             if (planet.desc === "Sun") {
                 circle.fill("#fff5b1")
+                circle.shadowColor("#fff5b1")
+                circle.shadowBlur(500)
             } else {
                 circle.fill("#f1f8ff")
-                circle.stroke("white")
-                circle.strokeWidth(2)
+                //circle.stroke("white")
+                //circle.strokeWidth(2)
             }
 
             layer.add(circle);
@@ -159,7 +257,7 @@ export default class DrawSystem {
             //Drawn planet name :
             let text = new Konva.Text({
                 x: position.x,
-                y: position.y + planet.size + 15,
+                y: position.y + planet.size + 30,
                 fontSize: 12,
                 text: planet.desc,
                 fill: "white",
@@ -174,7 +272,10 @@ export default class DrawSystem {
         });
     }
 
-    initSpaceships() {
+    /**
+     * Draw ships
+     */
+    initShips() {
 
         let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
 
@@ -229,14 +330,35 @@ export default class DrawSystem {
 
     }
 
+    initSelection() {
+        let selection = new Konva.Rect({
+            id: "selection",
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+            stroke: "white",
+            strokeWidth: 1,
+            visible: false
+        })
+
+        this.layer.add(selection)
+    }
+
+    /**
+     * Init: draw everything
+     */
     init() {
         this.initKonva()
         this.initPlanets()
-        this.initSpaceships()
+        this.initShips()
+        this.initSelection()
     }
 
-
-
+    /**
+     * Update planet/text/orbits positions
+     * @param {number} dt 
+     */
     updatePlanets(dt) {
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
@@ -273,12 +395,16 @@ export default class DrawSystem {
             let textDraw = this.layer.findOne("#planet-text-" + planetId);
 
             textDraw.setX(position.x)
-            textDraw.setY(position.y + planet.size + 10)
+            textDraw.setY(position.y + (planet.size * 1.1))
             textDraw.offsetX(textDraw.width() / 2)
         });
 
     }
 
+    /**
+     * Update ships positions
+     * @param {number} dt 
+     */
     updateSpaceships(dt) {
         let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
 
@@ -307,29 +433,11 @@ export default class DrawSystem {
         });
     }
 
-
-
-    updatePosition(dt) {
-        let uiPlanet = get(planet);
-
-        if (get(planet) !== undefined) {
-       /*     this.stage.position({
-                x: (uiPlanet.x ) * -1,
-                y: (uiPlanet.y ) * -1
-            })*/
-        }
-
-
-    }
-
-
     update(dt) {
-        this.updatePlanets(dt);
-        this.updateSpaceships(dt);
-        this.updatePosition(dt);
+        this.updatePlanets(dt)
+        this.updateSpaceships(dt)
 
         this.layer.batchDraw()
-
     }
 
 

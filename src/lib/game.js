@@ -178,14 +178,10 @@ export default class Game extends Observable {
     createBuildings() {
         let earth = this.entityManager.getPlanet("Earth");
 
-        this.entityManager.createProducer({
-            type: "extractor",
-            desc: "Extractor MKI",
-            produce: "ironOre",
-            speed: 1,
-            planetId: earth,
-            state: "active"
-        })
+        this.entityManager.createBuildingFromData("extractorMk1", false, earth)
+        this.entityManager.createBuildingFromData("extractorMk1", false, earth)
+        this.entityManager.createBuildingFromData("furnaceMk1", false, earth)
+        this.entityManager.createBuildingFromData("factoryMk1", false, earth)
     }
 
     /**

@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { planet } from "./stores";
-    import items from "./../lib/data/items";
+    import items from "./../data/items";
 
     const dispatch = createEventDispatcher();
 
@@ -21,6 +21,7 @@
             return number
         }
     }
+
 </script>
 
 <style>
@@ -30,7 +31,7 @@
 </style>
 
 
-<h1 class="title">{$planet.desc}</h1>
+<h1 class="title alignRight">{$planet.desc}</h1>
 
 {#if $planet.owned}
 <div class="columns">    
@@ -75,6 +76,26 @@
             </div>
         </div>
 
+        {#if $planet.constructions.length > 0}
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Building</th>
+                    <th>Construction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each $planet.constructions as construction}
+                <tr>
+                    <td>{construction.desc}</td>
+                    <td><progress class="progress is-primary" value={workstepFormatter(construction.workstep, construction.time)}></progress></td>
+                </tr>
+
+                {/each}
+            </tbody>
+        </table>
+        {/if}
+
         <!-- Building list-->
         {#if $planet.buildings.length === 0} 
             No buiding 
@@ -89,18 +110,56 @@
                 </tr>
             </thead>
             <tbody>
+
+
+
+            <!--
+                TODO:Better choose production !
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link" href="javascript:;">
+                {building.produce}
+                </a>
+
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="javascript:;">
+                        Iron ore
+                    </a>
+                    <a class="navbar-item" href="javascript:;">
+                        Copper ore
+                    </a>
+                </div>
+            </div>
+
+            <button class="button is-text" on:click={() => dispatch('chooseBuildingProduction')}>
+                {building.produce}
+            </button>
+            
+            </td>
+            -->
+            
+
             {#each $planet.buildings as building}
                 <tr>
                     <td>{building.desc}</td>
-
-                    {#if building.produce === ""} 
-                    <td></td>
-                    <td></td>
-                    {:else}
-                    <td>{building.produce}</td>
-                    <td><progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}></progress></td>
-                    {/if}
-                    <td><button class="button is-primary is-small">Sell</button></td>
+                    
+                    <td>                    
+                        <button class="button is-text" on:click={() => dispatch('displayChooseProduction', {buildingId: building.id})}>
+                            {#if building.produce === ""} 
+                            Nothing
+                            {:else}
+                            {building.produce}
+                            {/if}                                
+                        </button>
+                    </td>
+                        
+                    <td>
+                        {#if building.produce !== ""} 
+                        <progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}>
+                        </progress>
+                        {/if}
+                    </td>
+                    
+                    <td><button class="button  is-text">Sell</button></td>
                 </tr>
             {/each}
             </tbody>

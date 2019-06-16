@@ -1,22 +1,37 @@
-import { planet as planetStore } from "../../svelte/stores.js";
-import { get } from 'svelte/store';
+import {
+    planet as planetStore,
+    chooseBuilding as chooseBuildingStore,
+    chooseProduction as chooseProductionStore
+} from "../ui/stores";
 import items from "../data/items";
+import buildings from "../data/buildings"
+import EntityManager from "../modules/entity-manager";
 
 export default class UISystem {
 
     constructor(ecs, actions) {
-        this.ecs = ecs;
-        this.actions = actions;
+        this.ecs = ecs
+        this.actions = actions
+        this.entityManager = new EntityManager(ecs)
     }
 
     init() {
 
     }
 
+    /**
+     * Display a planet in the right panel
+     * @param {object} payload Action payload
+     * @param {number} payload.planetId Planet to display
+     */
+    displayPlanet(payload) {
 
-    displayPlanet(planetId) {
-        
-        const { planet, position } = this.ecs.get(planetId);
+        const planetId = payload.planetId;
+
+        const {
+            planet,
+            position
+        } = this.ecs.get(planetId);
 
         let result = {
             id: planetId,
@@ -24,6 +39,7 @@ export default class UISystem {
             y: position.y,
             desc: planet.desc,
             owned: planet.owned,
+            constructions: [],
             buildings: [],
             items: []
         };
@@ -35,27 +51,39 @@ export default class UISystem {
             .forEach(buildingId => {
                 const {
                     building,
-                    producer
+                    producer,
+                    construction
                 } = this.ecs.get(buildingId);
-
 
                 let map = {
                     id: buildingId,
                     desc: building.desc
                 }
 
-                if (producer) {
+                if (construction) {
+                    map = {
+                        ...map,
+                        workstep: construction.workstep,
+                        time: construction.time
+                    }
+
+                    result.constructions.push(map)
+                } 
+
+                else {
                     const item = items[producer.produce];
 
                     map = {
                         ...map,
+                        canProduce: producer.canProduce,
                         workstep: producer.workstep,
-                        produce: producer.produce === "" ? "": item.desc,
-                        time: item.time
+                        produce: producer.produce === "" ? "" : item.desc,
+                        time: producer.produce === "" ? "" : item.time
                     }
-                }
 
-                result.buildings.push(map);
+                    result.buildings.push(map);
+                }
+                
             })
 
 
@@ -74,49 +102,209 @@ export default class UISystem {
         planetStore.set(result);
     }
 
+    /**
+     * Remove right panel
+     */
+    removePanel() {
+        planetStore.set(undefined)
 
-    removePlanet() {        
-        planet.set(undefined);
-        this.actions.removeAction("removePlanet");
+        this.actions.removeAction("displayPlanet")
+        this.actions.removeAction("removePanel")
     }
 
 
-    displayBuyBuilding() {
+    removeChooseProduction() {
+        chooseProductionStore.set({
+            visible: false
+        })
 
+        this.actions.removeAction("displayChooseProduction")
+        this.actions.removeAction("removeChooseProduction")
+    }
+
+    /**
+     * Remove buy building popup
+     */
+    removeBuyBuilding() {
+        chooseBuildingStore.set({
+            visible: false
+        })
+
+        this.actions.removeAction("displayBuyBuilding")
+        this.actions.removeAction("removeBuyBuilding")
+    }
+
+    /**
+     * Display production list to choose
+     * @param {object} payload Action payload
+     * @param {number} payload.buildingId Current building entity Id
+     */
+    displayChooseProduction(payload) {
+
+        const producer = this.ecs.get(payload.buildingId, "producer")
+
+        chooseProductionStore.set({
+            visible: true,
+            buildingId: payload.buildingId,
+            items: Object.values(producer.canProduce).map(id => {
+                return {
+                    ...items[id]
+                }
+            })
+        })
+
+    }
+
+    /**
+     * Display building list to buy
+     * @param {object} payload Action payload
+     * @param {number} payload.planetId Current planet entity Id
+     */
+    displayBuyBuilding(payload) {
+
+        const planetItems = this.ecs.get(payload.planetId, "planet", "items");
+
+        /**
+         * Check if planet has enough materials to construc a building
+         * @param {object} building Building from data file
+         */
+        const canConstruct = (building) => {
+            const buildingPrice = building.data.construction.price;
+
+            for (let item in buildingPrice) {
+                if (!planetItems[item]) {
+                    return false;
+                } else {
+                    if (planetItems[item] < buildingPrice[item]) {
+                        return false
+                    }
+                }
+            }
+            return true;
+        }
+
+        //Update store 
+        chooseBuildingStore.set({
+            visible: true,
+            planetId: payload.planetId,
+            buildings: Object.keys(buildings).map(id => {
+                return {
+                    ...buildings[id],
+                    canConstruct: canConstruct(buildings[id])
+                }
+            })
+        });
+    }
+
+
+    /**
+     * Buy a new building
+     * @param {object} payload Action payload
+     * @param {number} payload.planetId Current planet entity Id 
+     * @param {string} payload.buildingId Building id from data file
+     */
+    buyBuilding(payload) {
+
+        const { planetId, buildingId } = payload;
+
+        const planet = this.ecs.get(planetId, "planet")
+
+        //Create building
+        const newBuilding = this.entityManager.createBuildingFromData(buildingId, true, planetId);
+
+        //Move items to construction
+        const construction = this.ecs.get(newBuilding, "construction")
+
+        for (let item in construction.price) {
+            EntityManager.transferItem(planet, construction, item, construction.price[item])
+        }
+       
+        //Remove action & popup
+        this.actions.removeAction("buyBuilding")        
+
+        //TODO:Remove popup ?
+        //this.removeBuyBuilding();
+    }
+
+    /**
+     * Choose new building production :
+     * - Move current items to planet
+     * - Change production
+     * @param {object} payload Action payload
+     * @param {number} payload.buildingId Building entity id
+     * @param {string} payload.produce Item to produce
+     */
+    chooseProduction(payload) {
+
+        const { buildingId, produce } = payload
+        
+        const { building, producer } = this.ecs.get(buildingId)
+        
+        //Nothing to do if same production
+        if (producer.produce !== produce) {
+
+            //Move all items to planet 
+            const planet = this.ecs.get(building.planetId, "planet")
+
+            EntityManager.transferAllItems(producer, planet)
+
+            //Update production
+            producer.produce = produce
+            producer.workstep = 0
+            producer.state = produce === "" ? "inactive" : "active"
+            
+        }
+
+        this.actions.removeAction("chooseProduction")
+
+        this.removeChooseProduction()
     }
 
     update(dt) {
-        
-        const actions = this.actions.getActions();
 
-        actions.map(({ action, payload }, i) => {
-            //eval("this." + action + "(" + JSON.stringify(payload) + ")")
-            
+        const actions = this.actions.getActions()
+
+        actions.map(({
+            action,
+            payload
+        }) => {
             switch (action) {
 
-                //Display right panel 
+                case "chooseProduction":
+                    this.chooseProduction(payload)
+                    break;
+
+                case "buyBuilding":
+                    this.buyBuilding(payload)
+                    break
+
                 case "displayPlanet":
-                    this.displayPlanet(payload)                    
+                    this.displayPlanet(payload)
                     break;
 
                 case "removePlanet":
-                    this.removePlanet();
-                    break;
-                
+                    this.removePlanet()
+                    break
+
+                case "displayChooseProduction":
+                    this.displayChooseProduction(payload)
+                    break
+
                 case "displayBuyBuilding":
                     this.displayBuyBuilding(payload)
-                    break;
+                    break
 
                 case "removeBuyBuilding":
-                    break;
+                    this.removeBuyBuilding()
+                    break
 
-                //Remove planet
-                case "removePanel": 
-                    planet.set(undefined);
+                case "removePanel":
+                    this.removePanel()
+                    break
 
-                    this.actions.removeAction(i);
-                    this.actions.removeAction("displayPlanet")
-                    break;
+                case "removeChooseProduction":
+                    this.removeChooseProduction()
+                    break
             }
         })
 

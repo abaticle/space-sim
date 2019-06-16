@@ -11,19 +11,25 @@ export default class ConstructionSystem {
         
     }
 
-    update(dt){
-        const entities = this.ecs.searchEntities("construction");
+    /**
+     * Construct buildings
+     * @param {number} dt 
+     */
+    constructBuildings(dt) {
+        const buildings = this.ecs.searchEntities(["building", "construction"])
 
-        entities.forEach(entity => {
-            const construction = this.ecs.get(entity, "construction");
-
-            const building = buildings[construction.building];
+        buildings.forEach(buildingId => {
+            const construction = this.ecs.get(buildingId, "construction")
 
             construction.workstep += dt
 
-            if (construction.workstep >= building.time) {
-                this.ecs.remove(entity, "construct");
+            if (construction.workstep > construction.time) {
+                this.ecs.remove(buildingId, "construction");
             }
-        });
+        })
+    }
+
+    update(dt){
+        this.constructBuildings(dt);
     }
 }

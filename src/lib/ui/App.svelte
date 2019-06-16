@@ -1,24 +1,39 @@
 <script>
-	import _ from "lodash";
-	import Game from "./../lib/game";	
-	import Planet from "./Planet.svelte";
-	import { onMount } from 'svelte';
+	import _ from "lodash"
+	import Game from "./../game"
+	import Planet from "./Planet.svelte"
+	import { onMount } from 'svelte'
 	import { chooseBuilding, planet, speed } from "./stores"
-	import { get } from 'svelte/store';
-	import Tools from "./../lib/modules/tools";
-	import ChooseBuilding from "./ChooseBuilding.svelte";
+	import { get } from 'svelte/store'
+	import Tools from "./../modules/tools"
+	import ChooseBuilding from "./ChooseBuilding.svelte"
+	import ChooseProduction from "./ChooseProduction.svelte"
  
 	
 	const game = new Game();
+ 
+	function displayBuyBuilding(event) {
+		game.actions.addAction("displayBuyBuilding", event.detail)
+	}
 
-	function displayBuyBuilding(payload) {
-		game.actions.addAction("displayBuyBuilding", {
-			payload
-		})
+	function displayChooseProduction(event) {
+		game.actions.addAction("displayChooseProduction", event.detail)
 	}
 
 	function removeBuyBuilding() {
 		game.actions.addAction("removeBuyBuilding")
+	}
+
+	function removeChooseProduction() {
+		game.actions.addAction("removeChooseProduction")
+	}
+
+	function buyBuilding(event) {
+		game.actions.addAction("buyBuilding", event.detail);
+	}
+
+	function chooseProduction(event) {
+		game.actions.addAction("chooseProduction", event.detail);
 	}
 
 	speed.subscribe(value => {
@@ -44,15 +59,12 @@
 		left: 10px;
 		color: white
 	}
-	.hidden {
-		display: none;
-	}
 	.right-panel {
 		z-index: 10;
 		position: fixed;
 		right: 10px;
 		top: 10px;
-		width: 30%;
+		width: 35%;
     	padding: 1em;
 		overflow: auto;
 		max-height: 90%
@@ -86,7 +98,9 @@
 	
 	<div class="right-panel"> 
 		<div class="level">
-            <div class="level-left">				
+            <div class="level-left">
+            </div>
+            <div class="level-right">				
                 <button class="button" on:click={() => $speed -= 5}>
 					<span class="icon is-small">
 						<i class="fas fa-backward"></i>
@@ -104,8 +118,8 @@
         </div>
 		{#if $planet}
 			<Planet 
-				on:displayBuyBuilding={displayBuyBuilding} 
-				on:removeBuyBuilding={removeBuyBuilding}>
+				on:displayBuyBuilding={displayBuyBuilding}
+				on:displayChooseProduction={displayChooseProduction}>
 			</Planet>
 		{/if}
 	</div>
@@ -115,4 +129,12 @@
 
 
 
-<ChooseBuilding></ChooseBuilding>
+<ChooseBuilding 
+	on:removeBuyBuilding={removeBuyBuilding}
+	on:buyBuilding={buyBuilding}>
+</ChooseBuilding>
+
+<ChooseProduction
+	on:removeChooseProduction={removeChooseProduction}
+	on:chooseProduction={chooseProduction}>
+</ChooseProduction>

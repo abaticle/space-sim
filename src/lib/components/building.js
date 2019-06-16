@@ -1,13 +1,13 @@
 
 const building = {
     name: "building",
+    buildingId: "",
     type: "",
     desc: "",
+    longDesc: "",
     planetId: 0,
     energyUsed: 0,
-    populationUsed: 0,
-    price: {},
-    time: 0
+    populationUsed: 0
 }
 
 const producer = {
@@ -23,7 +23,10 @@ const producer = {
 const construction = {
     name: "construction",
     building: "",
-    workstep: 0
+    workstep: 0,
+    price: {},
+    time: 0,
+    items: {}
 }
 
 

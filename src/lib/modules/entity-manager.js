@@ -7,10 +7,6 @@ class EntityManager {
         this.ecs = ecs;
     }
 
-
-
-
-
     /**
      * Transfer item between components
      * @param {object} compFrom Component from 
@@ -41,30 +37,70 @@ class EntityManager {
 
         //Remove item from origin
         compFrom.items[item] -= count;
+
+        if (compFrom.items[item] === 0) {
+            delete compFrom.items[item]
+        }
     }
 
 
+    /**
+     * Transfer all items between components
+     * @param {object} compFrom Component from 
+     * @param {object} compTo Component to
+     */
+    static transferAllItems(compFrom, compTo) {
+        if (!compFrom["items"]) {
+            throw new Error(`No "items" property on ${compFrom}`)
+        }
+        if (!compTo["items"]) {
+            throw new Error(`No "items" property on ${compTo}`)
+        }
 
-    buyBuilding(planetId, buildingId) {
+        for (let item in compFrom.items) {
+            this.transferItem(compFrom, compTo, item, compFrom.items[item])
+        }
+    }
 
-        const building = buildings[buildingId]
+    /**
+     * Create a new building
+     * @param {string} buildingId Building id from data file
+     * @param {boolean} withConstruction Use construction or not. Default yes
+     * @param {number} planet Planet entity id
+     * @returns {number} New building id
+     */
+    createBuildingFromData(buildingId, withConstruction = true, planet) {
+        let buildingData = buildings[buildingId];
 
-        this.ecs.createFromAssemblage({
-            components: building.components,
-            data: building.data
+        const building = this.ecs.createFromAssemblage({
+            components: buildingData.components,
+            data: buildingData.data
         })
 
-    }
+        if (!withConstruction) {
+            this.ecs.remove(building, "construction")
+        }
 
+        if (planet !== undefined) {
+            this.ecs.set(planet, building, "building", "planetId")
+        }
+
+        //TODO:Better handling state !! 
+        //TODO:Remove check..
+        if (!this.ecs.has(building, "producer")) {
+            throw new Error('TODO/Remove:No producer ')
+        }
+
+        this.ecs.set("inactive", building, "producer", "state");
+
+        return building
+    }
 
     createProducer({
         type = "",
         desc = "",
         speed = 1,
         planetId = 0,
-        price = {
-            ironBar: 5
-        },
         produce = "",
         state = ""
     }) {
@@ -74,8 +110,7 @@ class EntityManager {
                 building: {
                     type,
                     desc,
-                    planetId,
-                    price
+                    planetId
                 },
                 producer: {
                     speed,

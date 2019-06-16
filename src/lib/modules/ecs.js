@@ -173,7 +173,6 @@ export default class ECS {
             this._cache = this._cache.filter()
 
         })
-
     }
 
     /**
@@ -189,20 +188,20 @@ export default class ECS {
         }
 
         componentNames.forEach(name => {
-            if (!this.existComponent(name)) {
+            if (!this.existComponent(name)) { 
                 throw new Error(`Component "${name}" doesn't exists`);
             }
             if (this.entitiesComponents[name][entityId]) {
                 throw new Error(`Entity ${entityId} already has component "${name}"`);
             }
 
+            this._cleanCache(name);
             this.entitiesComponents[name][entityId] = _.cloneDeep(this.components[name]);
             this.entitiesComponents[name][entityId]["_id"] = entityId;
         })
 
         return this;
     }
-
 
     /**
      * Clean cache for a given component. Automaticaly called when adding or removing component to an entity
@@ -217,7 +216,6 @@ export default class ECS {
             }
         }
     }
-
 
     /**
      * Remove component(s) from an entity
@@ -236,21 +234,14 @@ export default class ECS {
             if (!this.existComponent(componentName)) {
                 throw new Error(`Component "${componentName}" doesn't exists`);
             }
+
+            delete this.entitiesComponents[componentName][entityId];
+
+            this._cleanCache(componentName);
         })
-
-
-        //Remove component and clean cache
-        componantNames.forEach(componantName => {
-            delete this.components[componantName][entityId];
-
-            this._cleanCache(componantName);
-        });
-
-
 
         return this;
     }
-
 
     /**
      * 
@@ -340,9 +331,6 @@ export default class ECS {
 
         return this;
     }
-
-
-
 
     /**
      * Get an entity, component or value from component

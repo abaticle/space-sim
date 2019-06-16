@@ -32,13 +32,19 @@ export default class BuildingSystem {
                 switch (producer.state) {
 
                     case "inactive":
-                        this.producerInactive();
+                        this.producerInactive()
+                        break
 
                     case "active":
-                        this.producerActive(building, producer);
+                        this.producerActive(building, producer)
+                        break
 
                     case "filled":
-                        this.producerFilled(building, producer, dt);
+                        this.producerFilled(building, producer, dt)
+                        break
+
+                    default:
+                        throw new Error(`Producer ${producerId} has state ${producer.state}`)
 
                 }
             }

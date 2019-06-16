@@ -10,3 +10,9 @@ export const chooseBuilding = writable({
     planetId: undefined,
     buildings: []
 })
+
+export const chooseProduction = writable({
+    visible: false,
+    buildingId: undefined,
+    items: []
+})

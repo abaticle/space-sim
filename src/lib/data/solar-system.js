@@ -26,8 +26,9 @@ export default [
         items: {
             iron: 30000,
             copper: 20000,
-            ironOre: 1000,
-            copperOre: 400
+            ironOre: 100,
+            copperOre: 50,
+            ironBar: 10
         },
         owned: true,
         satellites: [{
@@ -57,7 +58,7 @@ export default [
         size: 70, 
         satellites: [{
             name: "Ganymede",
-            distance: 5.5, 
+            distance: 5.9, 
             speed: 30,
             size: 5
         }],

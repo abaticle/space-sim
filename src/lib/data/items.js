@@ -4,33 +4,42 @@ export default {
     population: {
         id: "population",
         type: "population",
-        desc: "Population"
+        desc: "Population",
+        recipe: {}
     },
 
     //Money 
     money: {
         id: "money",
         type: "money",
-        desc: "Money"
+        desc: "Money",
+        recipe: {},
+        time: 1
     },
 
     //Research
     research: {
         id: "research",
         type: "research",
-        desc: "Research"
+        desc: "Research",
+        recipe: {},
+        time: 1
     },
 
     //Resources 
     iron: {
         id: "iron",
         type: "resource",
-        desc: "Iron"
+        desc: "Iron",
+        recipe: {},
+        time: 1
     },
     copper: {
         id: "copper",
         type: "resouce",
-        desc: "Copper"
+        desc: "Copper",
+        recipe: {},
+        time: 1
     },
 
     //Ores
