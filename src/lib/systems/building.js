@@ -4,19 +4,46 @@ import EntityManager from "../modules/entity-manager";
 
 export default class BuildingSystem {
 
-    /**
-     * 
-     * @param {ECS} ecs 
-     */
     constructor(ecs, actions) {
         this.ecs = ecs;
         this.actions = actions;
     }
 
     init() {
-        
+
     }
 
+    update(dt) {
+        this.updateProducers(dt);
+    }
+
+    updateProducers(dt) {
+        let producers = this.ecs.searchEntities(["producer"]);
+
+        producers.forEach(producerId => {
+            let {
+                building,
+                producer,
+                construction
+            } = this.ecs.get(producerId);
+
+            if (!construction) {
+
+                switch (producer.state) {
+
+                    case "inactive":
+                        this.producerInactive();
+
+                    case "active":
+                        this.producerActive(building, producer);
+
+                    case "filled":
+                        this.producerFilled(building, producer, dt);
+
+                }
+            }
+        })
+    }
 
     producerInactive() {
 
@@ -26,7 +53,9 @@ export default class BuildingSystem {
 
         const planetItems = this.ecs.get(building.planetId, "planet", "items");
         const planet = this.ecs.get(building.planetId, "planet")
-        const {recipe} = items[producer.produce];
+        const {
+            recipe
+        } = items[producer.produce];
 
         //Check if planet has enough material
         let check = true
@@ -34,8 +63,7 @@ export default class BuildingSystem {
         for (const key in recipe) {
             if (!planetItems[key]) {
                 check = false;
-            }
-            else {
+            } else {
                 if (planetItems[key] < recipe[key]) {
                     check = false;
                 }
@@ -56,7 +84,7 @@ export default class BuildingSystem {
 
         const planet = this.ecs.get(building.planetId, "planet");
         const itemToProduce = items[producer.produce];
-                
+
         producer.workstep += (producer.speed * dt);
 
         //Work done
@@ -71,33 +99,4 @@ export default class BuildingSystem {
     }
 
 
-
-
-    updateProducers(dt) {
-        let producers = this.ecs.searchEntities(["producer"]);
-
-
-        producers.forEach(producerId => {
-            let {building, producer } = this.ecs.get(producerId);
-
-
-            switch(producer.state) {
-
-                case "inactive":
-                    this.producerInactive();
-
-                case "active":
-                    this.producerActive(building, producer);
-
-                case "filled":
-                    this.producerFilled(building, producer, dt);
-
-            }   
-        })
-    }
-
-
-    update(dt) {
-        this.updateProducers(dt);
-    }
 }

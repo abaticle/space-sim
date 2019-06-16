@@ -71,7 +71,7 @@
         <!-- Buttons -->
         <div class="level">
             <div class="level-left">
-                <button class="button is-primary" on:click={() => dispatch('buyBuilding', {planetId:$planet.id})}>Buy new</button>
+                <button class="button is-primary" on:click={() => dispatch('displayBuyBuilding', {planetId:$planet.id})}>Buy new</button>
             </div>
         </div>
 

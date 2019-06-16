@@ -353,6 +353,9 @@ export default class ECS {
     get(entityId, componentName, path) {
 
         if (entityId) {
+            if (typeof entityId !== "number") {
+                throw new Error(`Entity ${entityId} is not a number`);
+            }
             if (!this.existEntity(entityId)) {
                 throw new Error(`Entity ${entityId} doesn't exists`);
             }

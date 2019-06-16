@@ -5,14 +5,16 @@ export default class ActionsManager {
     }
 
     addAction(action, payload = {}) {
-        this.validateAction(action);
-
         this.actions.push({
             action,
             payload
         })
     }
 
+    /**
+     * 
+     * @param {number|string} index 
+     */
     removeAction(index) {
         if (typeof index === "number") {
             this.actions.splice(index, 1);
@@ -23,19 +25,6 @@ export default class ActionsManager {
         }
         
     }
-
-
-    validateAction(action) {
-        switch (action) {
-            case "displayPanel":
-            case "removePanel":
-                return true;
-
-            default:
-                throw new Error(`Action ${action} unknown`);
-        }
-    }
-
 
     getActions() {
         return this.actions;

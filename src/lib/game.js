@@ -16,6 +16,7 @@ import {
     spaceshipState
 } from "./components/spaceship";
 import BuildingSystem from "./systems/building";
+import ConstructionSystem from "./systems/construction";
 import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
 import UISystem from "./systems/ui";
@@ -73,6 +74,7 @@ export default class Game extends Observable {
     }
 
     createSystems() {
+        this.systems.push(new ConstructionSystem(this.ecs, this.actions))
         this.systems.push(new BuildingSystem(this.ecs, this.actions))
         this.systems.push(new MoveSystem(this.ecs, this.actions))
         this.systems.push(new DrawSystem(this.ecs, this.actions))

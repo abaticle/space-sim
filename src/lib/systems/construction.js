@@ -1,13 +1,18 @@
 import buildings from "../data/buildings";
 
-export default class ConstructSystem {
+export default class ConstructionSystem {
+    
     constructor(ecs, actions) {
         this.ecs = ecs
         this.actions = actions
     }
 
+    init() {
+        
+    }
+
     update(dt){
-        const entities = this.ecs.searchEntities("construct");
+        const entities = this.ecs.searchEntities("construction");
 
         entities.forEach(entity => {
             const construction = this.ecs.get(entity, "construction");

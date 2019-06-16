@@ -32,10 +32,7 @@ export default class DrawSystem {
                     throw new Error(`No entity found from id ${target.id()}`);
                 }
 
-                this.actions.addAction("displayPanel", {
-                    type: "planet",
-                    planetId
-                })
+                this.actions.addAction("displayPlanet", planetId)
                 break;
 
             default:

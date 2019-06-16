@@ -11,13 +11,14 @@
 	
 	const game = new Game();
 
-	function buyBuilding(payload) {
-		const { planetId } = payload.detail;
-		
-		chooseBuilding.set({
-			planetId,
-			visible: true
+	function displayBuyBuilding(payload) {
+		game.actions.addAction("displayBuyBuilding", {
+			payload
 		})
+	}
+
+	function removeBuyBuilding() {
+		game.actions.addAction("removeBuyBuilding")
 	}
 
 	speed.subscribe(value => {
@@ -102,7 +103,10 @@
             </div>
         </div>
 		{#if $planet}
-			<Planet on:buyBuilding={buyBuilding}></Planet>
+			<Planet 
+				on:displayBuyBuilding={displayBuyBuilding} 
+				on:removeBuyBuilding={removeBuyBuilding}>
+			</Planet>
 		{/if}
 	</div>
 	

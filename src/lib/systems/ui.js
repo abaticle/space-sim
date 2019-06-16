@@ -1,4 +1,4 @@
-import { planet } from "../../svelte/stores.js";
+import { planet as planetStore } from "../../svelte/stores.js";
 import { get } from 'svelte/store';
 import items from "../data/items";
 
@@ -13,55 +13,15 @@ export default class UISystem {
 
     }
 
-    update(dt) {
+
+    displayPlanet(planetId) {
         
-        const actions = this.actions.getActions();
-
-        actions.map(({ action, payload }, i) => {
-            switch (action) {
-
-                //Display right panel 
-                case "displayPanel":
-
-                    switch(payload.type) {
-                        case "planet":
-                            planet.set(this.getPlanet(payload.planetId));
-                            break;
-
-                        default:
-                            throw new Error(`Unexepected envent ${action} / ${JSON.stringify(payload)}`);
-                    }
-
-                    
-                    break;
-                
-                case "displayBuyBuilding":
-                    break;
-
-                //Remove planet
-                case "removePanel": 
-                    planet.set(undefined);
-
-                    this.actions.removeAction(i);
-                    this.actions.removeAction("displayPanel")
-                    break;
-            }
-        })
-
-    }
-
-    /**
-     * Get planet informations
-     * @param {number} planetId 
-     */
-    getPlanet(planetId) {
-
         const { planet, position } = this.ecs.get(planetId);
 
         let result = {
             id: planetId,
             x: position.x,
-            y: planet.y,
+            y: position.y,
             desc: planet.desc,
             owned: planet.owned,
             buildings: [],
@@ -100,20 +60,67 @@ export default class UISystem {
 
 
         //Planet items
-        Object
-            .entries(this.ecs.get(planetId, "planet", "items"))
-            .forEach(pair => {
-                const item = items[pair[0]];
-                
-                result.items.push({
-                    id: pair[0],
-                    desc: item.desc,
-                    type: item.type,
-                    count: pair[1]
-                })
-            });
+        const planetItems = this.ecs.get(planetId, "planet", "items");
 
-        return result;
+        for (let itemId in planetItems) {
+            result.items.push({
+                id: itemId,
+                desc: items[itemId].desc,
+                type: items[itemId].type,
+                count: planetItems[itemId]
+            })
+        }
+
+        planetStore.set(result);
     }
+
+
+    removePlanet() {        
+        planet.set(undefined);
+        this.actions.removeAction("removePlanet");
+    }
+
+
+    displayBuyBuilding() {
+
+    }
+
+    update(dt) {
+        
+        const actions = this.actions.getActions();
+
+        actions.map(({ action, payload }, i) => {
+            //eval("this." + action + "(" + JSON.stringify(payload) + ")")
+            
+            switch (action) {
+
+                //Display right panel 
+                case "displayPlanet":
+                    this.displayPlanet(payload)                    
+                    break;
+
+                case "removePlanet":
+                    this.removePlanet();
+                    break;
+                
+                case "displayBuyBuilding":
+                    this.displayBuyBuilding(payload)
+                    break;
+
+                case "removeBuyBuilding":
+                    break;
+
+                //Remove planet
+                case "removePanel": 
+                    planet.set(undefined);
+
+                    this.actions.removeAction(i);
+                    this.actions.removeAction("displayPlanet")
+                    break;
+            }
+        })
+
+    }
+
 
 }
