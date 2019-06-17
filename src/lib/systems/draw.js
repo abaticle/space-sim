@@ -98,16 +98,16 @@ export default class DrawSystem {
 
                 selection.setVisible(true)
 
-                selection.x(event.evt.offsetX / scale - this.stage.x() / scale)
-                selection.x(event.evt.offsetY / scale - this.stage.y() / scale)
+                selection.setX(event.evt.offsetX / scale - this.stage.x() / scale)
+                selection.setY(event.evt.offsetY / scale - this.stage.y() / scale)
 
                 this.drawSelection = true;
             }
 
             else {
 
-                selection.width(100)
-                selection.height(100)
+                selection.setWidth(100)
+                selection.setHeight(100)
 
                 //selection.setWidth(event.evt.offsetX / scale - this.stage.x() / scale - selection.getX())
                 //selection.setHeight(event.evt.offsetY / scale - this.stage.y() / scale - selection.getY())
