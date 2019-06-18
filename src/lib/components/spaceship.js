@@ -16,7 +16,8 @@ const spaceship = {
     orderIndex: 0,
     orderRepeat: true,
     orders: [],
-    items: {}
+    items: {},
+    owned: false
 }
 
 /**

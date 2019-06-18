@@ -23,3 +23,5 @@ export const chooseProduction = writable({
     buildingId: undefined,
     items: []
 })
+
+export const spaceship = writable(undefined)

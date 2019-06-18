@@ -127,7 +127,7 @@ export default class MoveSystem {
     }
 
 
-    update(dt, actions) {
+    update(dt) {
         this.movePlanets(dt);
         this.moveSpaceships(dt);
     }

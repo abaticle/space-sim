@@ -289,11 +289,13 @@ export default class UISystem {
             if (planet) {
                 newMap.type = "planet"
                 newMap.desc = planet.desc
+                newMap.owned = planet.owned
             }
 
             else if (spaceship) {
                 newMap.type = "spaceship"
                 newMap.desc = spaceship.desc
+                newMap.owned = spaceship.owned
             }
 
             return newMap
