@@ -1,11 +1,12 @@
 import {
     planet as planetStore,
     chooseBuilding as chooseBuildingStore,
-    chooseProduction as chooseProductionStore
-} from "../ui/stores";
-import items from "../data/items";
+    chooseProduction as chooseProductionStore,
+    entityList as entityListStore
+} from "../ui/stores"
+import items from "../data/items"
 import buildings from "../data/buildings"
-import EntityManager from "../modules/entity-manager";
+import EntityManager from "../modules/entity-manager"
 
 export default class UISystem {
 
@@ -26,15 +27,15 @@ export default class UISystem {
      */
     displayPlanet(payload) {
 
-        const planetId = payload.planetId;
+        const planetId = payload.planetId
 
         const {
             planet,
             position
-        } = this.ecs.get(planetId);
+        } = this.ecs.get(planetId)
 
         let result = {
-            id: planetId,
+            id: planetId, 
             x: position.x,
             y: position.y,
             desc: planet.desc,
@@ -42,7 +43,7 @@ export default class UISystem {
             constructions: [],
             buildings: [],
             items: []
-        };
+        }
 
         //Planet buildings :
         this.ecs
@@ -53,7 +54,7 @@ export default class UISystem {
                     building,
                     producer,
                     construction
-                } = this.ecs.get(buildingId);
+                } = this.ecs.get(buildingId)
 
                 let map = {
                     id: buildingId,
@@ -71,7 +72,7 @@ export default class UISystem {
                 } 
 
                 else {
-                    const item = items[producer.produce];
+                    const item = items[producer.produce]
 
                     map = {
                         ...map,
@@ -81,14 +82,14 @@ export default class UISystem {
                         time: producer.produce === "" ? "" : item.time
                     }
 
-                    result.buildings.push(map);
+                    result.buildings.push(map)
                 }
                 
             })
 
 
         //Planet items
-        const planetItems = this.ecs.get(planetId, "planet", "items");
+        const planetItems = this.ecs.get(planetId, "planet", "items")
 
         for (let itemId in planetItems) {
             result.items.push({
@@ -99,20 +100,27 @@ export default class UISystem {
             })
         }
 
-        planetStore.set(result);
+        planetStore.set(result)
     }
 
     /**
      * Remove right panel
      */
     removePanel() {
+        
         planetStore.set(undefined)
+
+        entityListStore.set({
+            visible: false
+        })
 
         this.actions.removeAction("displayPlanet")
         this.actions.removeAction("removePanel")
     }
 
-
+    /**
+     * Remove choose production popup
+     */
     removeChooseProduction() {
         chooseProductionStore.set({
             visible: false
@@ -162,25 +170,25 @@ export default class UISystem {
      */
     displayBuyBuilding(payload) {
 
-        const planetItems = this.ecs.get(payload.planetId, "planet", "items");
+        const planetItems = this.ecs.get(payload.planetId, "planet", "items")
 
         /**
          * Check if planet has enough materials to construc a building
          * @param {object} building Building from data file
          */
         const canConstruct = (building) => {
-            const buildingPrice = building.data.construction.price;
+            const buildingPrice = building.data.construction.price
 
             for (let item in buildingPrice) {
                 if (!planetItems[item]) {
-                    return false;
+                    return false
                 } else {
                     if (planetItems[item] < buildingPrice[item]) {
                         return false
                     }
                 }
             }
-            return true;
+            return true
         }
 
         //Update store 
@@ -193,9 +201,8 @@ export default class UISystem {
                     canConstruct: canConstruct(buildings[id])
                 }
             })
-        });
+        })
     }
-
 
     /**
      * Buy a new building
@@ -205,12 +212,12 @@ export default class UISystem {
      */
     buyBuilding(payload) {
 
-        const { planetId, buildingId } = payload;
+        const { planetId, buildingId } = payload
 
         const planet = this.ecs.get(planetId, "planet")
 
         //Create building
-        const newBuilding = this.entityManager.createBuildingFromData(buildingId, true, planetId);
+        const newBuilding = this.entityManager.createBuildingFromData(buildingId, true, planetId)
 
         //Move items to construction
         const construction = this.ecs.get(newBuilding, "construction")
@@ -223,7 +230,92 @@ export default class UISystem {
         this.actions.removeAction("buyBuilding")        
 
         //TODO:Remove popup ?
-        //this.removeBuyBuilding();
+        this.removeBuyBuilding()
+    }
+
+    /**
+     * Selected planets/ships
+     * @param {object} payload Action payload
+     * @param {number[]} payload.entities Array of selected entities
+     */
+    selectedEntities(payload) {
+        
+        const { entities } = payload
+
+        if (entities.length === 1) {
+
+            switch(true) {
+                case this.ecs.has(entities[0], "planet"):
+                    this.actions.addAction("displayPlanet", {
+                        planetId: entities[0]
+                    })   
+
+                    
+                case this.ecs.has(entities[0], "spaceship"):
+                    this.actions.addAction("displaySpaceship", {
+                        spaceshipId: entities[0]
+                    })   
+    
+            }
+        }
+
+        else {
+            this.actions.addAction("displayEntities", {
+                entities: entities
+            })   
+        }
+
+        this.actions.removeAction("selectedEntities")
+    }
+
+
+    /**
+     * Display entities
+     * @param {object} payload Action payload
+     * @param {number[]} payload.entities Entities to display
+     */
+    displayEntities(payload) {
+
+        let {entities} = payload;
+
+        entities = entities.map(entityId => {
+
+            const {planet, spaceship} = this.ecs.get(entityId)
+
+            const newMap = {
+                entityId
+            }
+
+            if (planet) {
+                newMap.type = "planet"
+                newMap.desc = planet.desc
+            }
+
+            else if (spaceship) {
+                newMap.type = "spaceship"
+                newMap.desc = spaceship.desc
+            }
+
+            return newMap
+        })
+        
+        entityListStore.set({
+            visible: true,
+            entities
+        })
+
+        this.actions.removeAction("displayEntities")
+    }
+
+
+    /**
+     * Display Spaceship
+     * @param {object} payload Action payload
+     * @param {number} payload.spaceshipId Spaceship to display
+     */
+    displaySpaceship(payload) {
+
+        this.actions.removeAction("displaySpaceship")
     }
 
     /**
@@ -259,7 +351,7 @@ export default class UISystem {
 
         this.removeChooseProduction()
     }
-
+    
     update(dt) {
 
         const actions = this.actions.getActions()
@@ -270,9 +362,17 @@ export default class UISystem {
         }) => {
             switch (action) {
 
+                case "displayEntities":
+                    this.displayEntities(payload)
+                    break
+
+                case "selectedEntities":
+                    this.selectedEntities(payload)
+                    break
+
                 case "chooseProduction":
                     this.chooseProduction(payload)
-                    break;
+                    break
 
                 case "buyBuilding":
                     this.buyBuilding(payload)
@@ -280,7 +380,7 @@ export default class UISystem {
 
                 case "displayPlanet":
                     this.displayPlanet(payload)
-                    break;
+                    break
 
                 case "removePlanet":
                     this.removePlanet()

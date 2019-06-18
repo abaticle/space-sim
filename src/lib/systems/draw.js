@@ -17,12 +17,6 @@ export default class DrawSystem {
         this.layer;
         this.stage;
         this.scaleBy = 1.3;
-
-        this.drawSelection = false;
-        this.selectionFromX = 0;
-        this.selectionFromY = 0;
-        this.selectionToX = 0;
-        this.selectionToY = 0;
     }
 
     /**
@@ -53,6 +47,17 @@ export default class DrawSystem {
      * @param {object} event Konva event
      */
     onClick(event) {
+
+        //If selection, we can exit
+        const selection = this.layer.findOne("#selection")
+
+        if (!selection.getVisible()) {
+            if (selection.getWidth() > 10) {
+                return
+            }
+        }
+
+        //Else 
         let id = event.target.id();
 
         switch (true) {
@@ -67,33 +72,42 @@ export default class DrawSystem {
         }
     }
 
+    /**
+     * Mouse move: update selection width and height
+     * @param {object} event Konva event
+     */
+    onMouseMove(event) {
+        const selection = this.layer.findOne("#selection");
 
-    debug() {
+        if (selection.getVisible()) {
+            const scale = this.stage.getScale().x;
 
-        let text = new Konva.Text({
-            x: 10,
-            y: 40,
-            fontSize: 12,
-            text: "Scale: " + this.stage.getScale().x,
-            fill: "white",
-            listening: false
-        });
+            selection.setWidth((event.evt.offsetX / scale - this.stage.x() / scale) - selection.getX())
+            selection.setHeight((event.evt.offsetY / scale - this.stage.y() / scale) - selection.getY())
 
-        this.layer.add(text);
+            this.layer.batchDraw()
+        }
     }
-
+    
+    /**
+     * Mouse down: 
+     * - Start to draw selection
+     * - Prevent from dragging
+     * @param {object} event Konva event
+     */
     onMouseDown(event) {
 
         const isLeft = event.evt.button === 0;
-        this.stage.draggable(!isLeft);        
 
+        this.stage.draggable(!isLeft);
+
+
+        //Start to draw selection
         if (event.evt.button === 0) {
 
+            const scale = this.stage.getScale().x;
             const selection = this.layer.findOne("#selection");
-
-            let scale = this.stage.getScale().x;
-
-            //Start to draw selection
+            
             if (!selection.getVisible()) {
 
                 selection.setVisible(true)
@@ -101,23 +115,61 @@ export default class DrawSystem {
                 selection.setX(event.evt.offsetX / scale - this.stage.x() / scale)
                 selection.setY(event.evt.offsetY / scale - this.stage.y() / scale)
 
-                this.drawSelection = true;
+                selection.setWidth(0)
+                selection.setHeight(0)
+
             }
 
-            else {
-
-                selection.setWidth(100)
-                selection.setHeight(100)
-
-                //selection.setWidth(event.evt.offsetX / scale - this.stage.x() / scale - selection.getX())
-                //selection.setHeight(event.evt.offsetY / scale - this.stage.y() / scale - selection.getY())
-            }
+            this.layer.batchDraw()
         }
 
     }
 
+    /**
+     * Get selected entities 
+     * @param {object} selection Selection rectangle
+     */
+    _getSelectedEntities(selection) {
+
+        let shapes = [
+            ...this.layer.find(".planet"),
+            ...this.layer.find(".spaceship")
+        ]
+
+        return shapes
+            .filter(shape => {
+                const xInSelection = () => shape.getX() >= selection.getX() && shape.getX() <= (selection.getX() + selection.getWidth())
+                const yInSelection = () => shape.getY() >= selection.getY() && shape.getY() <= (selection.getY() + selection.getWidth())
+
+                return xInSelection() && yInSelection()
+            })
+            .map(shape => {
+                const arr = shape.id().split("-");
+
+                if (!arr[1]) {
+                    throw new Error(`Error : shape ${shape.id()} should not be selected`)
+                }
+                return parseInt(arr[1], 0)
+            })
+    }
+
+    /**
+     * Mouse up: select entities within rectangle
+     * @param {object} event Konva event
+     */
     onMouseUp(event) {
         const selection = this.layer.findOne("#selection");
+
+        if (selection.getVisible()) {
+            const entities = this._getSelectedEntities(selection)
+
+            if (entities.length > 0) {
+
+                this.actions.addAction("selectedEntities", {
+                    entities
+                })
+            }
+        }
 
         selection.setVisible(false)
     }
@@ -186,7 +238,8 @@ export default class DrawSystem {
             id: "planet-layer"
         });
 
-        this.stage.on("mousedown", this.onMouseDown.bind(this))        
+        this.stage.on("mousedown", this.onMouseDown.bind(this))
+        this.stage.on("mousemove", this.onMouseMove.bind(this))
         this.stage.on("mouseup", this.onMouseUp.bind(this))
         this.stage.on('wheel', this.onScroll.bind(this));
         this.stage.on("click", this.onClick.bind(this))
@@ -199,7 +252,10 @@ export default class DrawSystem {
     }
 
     /**
-     * Draw planets
+     * Draw planets:
+     * - Each planet is a circle
+     * - Each planet has an orbit
+     * - Each planet has a text
      */
     initPlanets() {
         let planets = this.ecs.searchEntities(["planet", "position"])
@@ -274,6 +330,7 @@ export default class DrawSystem {
 
     /**
      * Draw ships
+     * - A ship is a triangle
      */
     initShips() {
 
@@ -330,16 +387,15 @@ export default class DrawSystem {
 
     }
 
+    /**
+     * Init selection rectangle (not visible)
+     */
     initSelection() {
         let selection = new Konva.Rect({
             id: "selection",
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
             stroke: "white",
-            strokeWidth: 1,
-            visible: false
+            visible: false,
+            listening: false
         })
 
         this.layer.add(selection)
@@ -364,28 +420,31 @@ export default class DrawSystem {
 
         planets.forEach(planetId => {
 
-            let {
+            const {
                 position,
                 planet
             } = this.ecs.get(planetId);
 
-
             //Move planet :
-            let planetDraw = this.layer.findOne("#planet-" + planetId);
+            const planetDraw = this.layer.findOne("#planet-" + planetId);
 
-            planetDraw.setX(position.x)
-            planetDraw.setY(position.y)
+            planetDraw.position({
+                x: position.x,
+                y: position.y
+            })
 
 
             //Move planet orbit :
             if (planet.parentId !== undefined) {
-                let orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
-                let parentPosition = this.ecs.get(planet.parentId, "position");
+                const orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
+                const parentPosition = this.ecs.get(planet.parentId, "position");
 
-                orbiteDraw.setX(parentPosition.x)
-                orbiteDraw.setY(parentPosition.y)
+                orbiteDraw.position({
+                    x: parentPosition.x,
+                    y: parentPosition.y
+                })
 
-                let scale = this.stage.getScale();
+                const scale = this.stage.getScale();
 
                 orbiteDraw.setStrokeWidth(0.2 / scale.x);
             }
@@ -394,11 +453,29 @@ export default class DrawSystem {
             //Move planet text: 
             let textDraw = this.layer.findOne("#planet-text-" + planetId);
 
-            textDraw.setX(position.x)
-            textDraw.setY(position.y + (planet.size * 1.1))
+            textDraw.position({
+                x: position.x,
+                y: position.y + (planet.size * 1.1)
+            })
+
             textDraw.offsetX(textDraw.width() / 2)
         });
 
+    }
+
+    /**
+     * Update selection box
+     * @param {number} dt 
+     */
+    updateSelection(dt) {
+        
+        const selection = this.layer.findOne("#selection")
+
+        if (selection.getVisible()) {
+            const scale = this.stage.getScale()
+
+            selection.setStrokeWidth(0.5 / scale.x)
+        }
     }
 
     /**
@@ -410,24 +487,30 @@ export default class DrawSystem {
 
         spaceships.forEach(id => {
 
-            let {
+            const {
                 spaceship,
                 position
             } = this.ecs.get(id)
 
             //Ship position
-            let spaceshipDraw = this.layer.findOne("#spaceship-" + id);
+            const spaceshipDraw = this.layer.findOne("#spaceship-" + id);
 
-            spaceshipDraw.setX(position.x)
-            spaceshipDraw.setY(position.y)
+            spaceshipDraw.position({
+                x: position.x,
+                y: position.y
+            })
+
             spaceshipDraw.rotation(position.angle + 90);
 
 
             //Ship text
-            let textDraw = this.layer.findOne("#spaceship-text-" + id);
+            const textDraw = this.layer.findOne("#spaceship-text-" + id);
 
-            textDraw.setX(position.x)
-            textDraw.setY(position.y + 10)
+            textDraw.position({
+                x: position.x,
+                y: position.y + 10
+            })
+
             textDraw.offsetX(textDraw.width() / 2)
 
         });
@@ -436,6 +519,7 @@ export default class DrawSystem {
     update(dt) {
         this.updatePlanets(dt)
         this.updateSpaceships(dt)
+        this.updateSelection(dt)
 
         this.layer.batchDraw()
     }

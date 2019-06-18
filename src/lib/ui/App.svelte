@@ -3,14 +3,19 @@
 	import Game from "./../game"
 	import Planet from "./Planet.svelte"
 	import { onMount } from 'svelte'
-	import { chooseBuilding, planet, speed } from "./stores"
+	import { chooseBuilding, planet, speed, entityList } from "./stores"
 	import { get } from 'svelte/store'
 	import Tools from "./../modules/tools"
 	import ChooseBuilding from "./ChooseBuilding.svelte"
 	import ChooseProduction from "./ChooseProduction.svelte"
+	import EntityList from "./EntityList.svelte"
  
 	
 	const game = new Game();
+
+	function entitySelected(event) {
+		//TODO
+	}
  
 	function displayBuyBuilding(event) {
 		game.actions.addAction("displayBuyBuilding", event.detail)
@@ -64,7 +69,6 @@
 		position: fixed;
 		right: 10px;
 		top: 10px;
-		width: 35%;
     	padding: 1em;
 		overflow: auto;
 		max-height: 90%
@@ -94,7 +98,7 @@
 	<!-- Map -->
 	<div id="map"/>	
 
-	<!-- Display planet -->
+	<!-- right panel -->
 	
 	<div class="right-panel"> 
 		<div class="level">
@@ -122,6 +126,13 @@
 				on:displayChooseProduction={displayChooseProduction}>
 			</Planet>
 		{/if}
+
+		{#if $entityList.visible}
+			<EntityList
+				on:entitySelected={entitySelected}
+			></EntityList>
+		{/if}
+		
 	</div>
 	
 
