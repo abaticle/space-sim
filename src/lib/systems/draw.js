@@ -165,6 +165,8 @@ export default class DrawSystem {
 
             if (entities.length > 0) {
 
+                this.onRemovePanel()
+
                 this.actions.addAction("selectedEntities", {
                     entities
                 })

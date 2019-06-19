@@ -1,4 +1,3 @@
-import { extractor, building } from "../components/building";
 import buildings from "../data/buildings";
 
 class EntityManager {

@@ -1,46 +1,4 @@
-import _ from "lodash";
-
-
-const CheckProxy = {
-
-    get(target, propKey, receiver) {
-        
-        const targetValue = Reflect.get(ecs, propKey, receiver);
-
-        if (typeof targetValue === 'function') {
-            return function (...args) {
-    
-                switch (propKey) {
-
-                    case "registerComponent":
-                        const component = args[0];
-                    
-                        if (!component["name"]) {
-                            throw new Error(`Component "${component}" doesn't have a name`);
-                        }
-                        if (ecs.existComponent(component.name)) {
-                            throw new Error(`Component "${component}" already exists`);
-                        }                       
-                        break;
-
-
-                    case "createFromAssemblage":
-                        const assemblage = args[0];
-
-                        if (!assemblage["components"]) {
-                            throw new Error(`Argument for method "createFromAssemblage" need a "components" property`);
-                        }
-                        break;
-
-                }
-
-                return targetValue.apply(this, args)
-            }
-        } else {
-            return targetValue;
-        }
-    }
-}
+import _ from "lodash"
 
 
 export default class ECS {
@@ -48,18 +6,16 @@ export default class ECS {
     constructor() {
         this.entities = [];
         this.entitiesComponents = {}
-        this.components = {};
-        this._cache = {};
-        this._cacheFunctions = {};
-
-        //return new Proxy(this, CheckProxy)
+        this.components = {}
+        this._cache = {}
+        this._cacheFunctions = {}
     }
 
     clearAll() {
-        this.entities = [];
+        this.entities = []
         this.entitiesComponents = {}
-        this.components = {};
-        this._cache = {};
+        this.components = {}
+        this._cache = {}
     }
 
 
@@ -69,19 +25,19 @@ export default class ECS {
      * @returns {number} New entity id
      */
     createFromAssemblage(assemblage) {
-        let entity = this.createEntity();
+        let entity = this.createEntity()
 
         //Add components 
         assemblage.components.forEach(component => {
-            this.add(entity, component);
+            this.add(entity, component)
         });
 
         //Update data
         for (let [component, value] of Object.entries(assemblage.data)) {
-            this.set(value, entity, component);
+            this.set(value, entity, component)
         }
 
-        return entity;
+        return entity
     }
 
 
@@ -92,9 +48,9 @@ export default class ECS {
         let i = 0;
         while (true) {
             if (this.entities[i] === undefined) {
-                return i;
+                return i
             }
-            i++;
+            i++
         }
     }
 
@@ -104,7 +60,7 @@ export default class ECS {
      * @param {number} id 
      */
     existEntity(id) {
-        return this.entities.includes(id);
+        return this.entities.includes(id)
     }
 
     /**
@@ -131,15 +87,15 @@ export default class ECS {
      * @returns {number} Newly generated entity id
      */
     createEntity(components) {
-        let entityId = this._getNextEntityId();
+        let entityId = this._getNextEntityId()
 
-        this.entities[entityId] = entityId;
+        this.entities[entityId] = entityId
 
         if (components) {
-            this.add(entityId, components);
+            this.add(entityId, components)
         }
 
-        return entityId;
+        return entityId
     }
 
 
@@ -149,25 +105,25 @@ export default class ECS {
      */
     registerComponent(component) {
         this.components[component.name] = component;
-        this.entitiesComponents[component.name] = [];
+        this.entitiesComponents[component.name] = []
 
-        return this;
+        return this
     }
 
     remove(entityId, componantNames) {
         componentNames = [].concat(componentNames)
 
         if (!this.existEntity(entityId)) {
-            throw new Error(`Entity ${entityId} doesn't exists`);
+            throw new Error(`Entity ${entityId} doesn't exists`)
         }
 
         componantNames.forEach(name => {
             if (!this.existComponent(name)) {
-                throw new Error(`Component "${name}" doesn't exists`);
+                throw new Error(`Component "${name}" doesn't exists`)
             }
 
             //Remove component
-            this.entitiesComponents[name][entityId] = undefined;
+            this.entitiesComponents[name][entityId] = undefined
 
             //And update cache
             this._cache = this._cache.filter()
@@ -184,20 +140,20 @@ export default class ECS {
         componentNames = [].concat(componentNames)
 
         if (!this.existEntity(entityId)) {
-            throw new Error(`Entity ${entityId} doesn't exists`);
+            throw new Error(`Entity ${entityId} doesn't exists`)
         }
 
         componentNames.forEach(name => {
             if (!this.existComponent(name)) { 
-                throw new Error(`Component "${name}" doesn't exists`);
+                throw new Error(`Component "${name}" doesn't exists`)
             }
             if (this.entitiesComponents[name][entityId]) {
-                throw new Error(`Entity ${entityId} already has component "${name}"`);
+                throw new Error(`Entity ${entityId} already has component "${name}"`)
             }
 
             this._cleanCache(name);
-            this.entitiesComponents[name][entityId] = _.cloneDeep(this.components[name]);
-            this.entitiesComponents[name][entityId]["_id"] = entityId;
+            this.entitiesComponents[name][entityId] = _.cloneDeep(this.components[name])
+            this.entitiesComponents[name][entityId]["_id"] = entityId
         })
 
         return this;
@@ -227,20 +183,20 @@ export default class ECS {
 
         //Check parameters
         if (!this.entities.includes(entityId)) {
-            throw new Error(`Entity ${entityId} doesn't exists`);
+            throw new Error(`Entity ${entityId} doesn't exists`)
         }
 
         componentNames.forEach(componentName => {
             if (!this.existComponent(componentName)) {
-                throw new Error(`Component "${componentName}" doesn't exists`);
+                throw new Error(`Component "${componentName}" doesn't exists`)
             }
 
-            delete this.entitiesComponents[componentName][entityId];
+            delete this.entitiesComponents[componentName][entityId]
 
-            this._cleanCache(componentName);
+            this._cleanCache(componentName)
         })
 
-        return this;
+        return this
     }
 
     /**
@@ -252,84 +208,80 @@ export default class ECS {
      */
     set(value, entityId, componentName, property) {
 
-        let setValue = "";
+        let setValue = ""
 
         if (value === undefined) {
-            throw new Error(`Value parameter is mandatory`);
+            throw new Error(`Value parameter is mandatory`)
         }
 
         if (entityId !== undefined) {
             if (!this.existEntity(entityId)) {
-                throw new Error(`Entity ${entityId} doesn't exists`);
+                throw new Error(`Entity ${entityId} doesn't exists`)
             }
-            setValue = "entity";
+            setValue = "entity"
         } else {
-            throw new Error(`Entity parameter is mandatory`);
+            throw new Error(`Entity parameter is mandatory`)
         }
 
         if (componentName) {
             if (!this.existComponent(componentName)) {
-                throw new Error(`Component "${componentName}" doesn't exists`);
+                throw new Error(`Component "${componentName}" doesn't exists`)
             }
-            setValue = "component";
+            setValue = "component"
         }
 
         if (property) {
             if (!this.components[componentName].hasOwnProperty(property)) {
-                throw new Error(`Component "${componentName}" doesn't have property "${property}"`);
+                throw new Error(`Component "${componentName}" doesn't have property "${property}"`)
             }
-            setValue = "property";
+            setValue = "property"
         }
 
         switch (setValue) {
             case "":
-                throw new Error("No enough arguments, minimum 2");
+                throw new Error("No enough arguments, minimum 2")
 
             case "entity":
                 //Check component names:
                 _.forOwn(value, (compValue, compName) => {
                     if (!this.existComponent(compName)) {
-                        throw new Error(`Component "${compName}" doesn't exists`);
+                        throw new Error(`Component "${compName}" doesn't exists`)
                     }
 
-                    let component = this.components[compName];
+                    let component = this.components[compName]
 
                     //Check component properties
                     _.forOwn(compValue, (propValue, propName) => {
                         if (this.components[compName][propName] === undefined) {
-                            throw new Error(`Property "${propName}" in component "${componentName}" doesn't exists`);
+                            throw new Error(`Property "${propName}" in component "${componentName}" doesn't exists`)
                         }
                     })
                 })
-
-                _.forOwn(value, (compValue, compName) => {
-
-                })
-                break;
+                break
 
             case "component":
                 _.forOwn(value, (propValue, propName) => {
                     if (!_.has(this.components[componentName], propName)) {
-                        throw new Error(`Property "${propName}" in component "${componentName}" doesn't exists`);
+                        throw new Error(`Property "${propName}" in component "${componentName}" doesn't exists`)
                     }
-                });
+                })
 
                 this.entitiesComponents[componentName][entityId] = {
                     ...this.entitiesComponents[componentName][entityId],
                     ...value
-                };
-                break;
+                }
+                break
 
             case "property":
                 if (!_.has(this.components[componentName], property)) {
-                    throw new Error(`Property "${property}" in component "${componentName}" doesn't exists`);
+                    throw new Error(`Property "${property}" in component "${componentName}" doesn't exists`)
                 }
 
-                _.set(this.entitiesComponents[componentName][entityId], property, value);
-                break;
+                _.set(this.entitiesComponents[componentName][entityId], property, value)
+                break
         }
 
-        return this;
+        return this
     }
 
     /**
@@ -342,39 +294,39 @@ export default class ECS {
 
         if (entityId) {
             if (typeof entityId !== "number") {
-                throw new Error(`Entity ${entityId} is not a number`);
+                throw new Error(`Entity ${entityId} is not a number`)
             }
             if (!this.existEntity(entityId)) {
-                throw new Error(`Entity ${entityId} doesn't exists`);
+                throw new Error(`Entity ${entityId} doesn't exists`)
             }
         }
 
         if (componentName) {
             if (!this.existComponent(componentName)) {
-                throw new Error(`Component "${componentName}" doesn't exists`);
+                throw new Error(`Component "${componentName}" doesn't exists`)
             }
         }
 
         if (path) {
             if (!_.has(this.components[componentName], path)) {
-                throw new Error(`Component "${componentName}" doesn't have path "${path}"`);
+                throw new Error(`Component "${componentName}" doesn't have path "${path}"`)
             }
         }
 
 
         switch (arguments.length) {
             case 0:
-                throw new Error("No arguments");
+                throw new Error("No arguments")
 
             case 1:
-                return _.pickBy(_.mapValues(this.entitiesComponents, c => c[entityId]), _.identity);
+                return _.pickBy(_.mapValues(this.entitiesComponents, c => c[entityId]), _.identity)
 
 
             case 2:
-                return this.entitiesComponents[componentName][entityId];
+                return this.entitiesComponents[componentName][entityId]
 
             case 3:
-                return _.get(this.entitiesComponents[componentName][entityId], path);
+                return _.get(this.entitiesComponents[componentName][entityId], path)
         }
     }
 
@@ -395,7 +347,7 @@ export default class ECS {
             }
         })
 
-        let cacheId = componentNames.sort().join('|');
+        let cacheId = componentNames.sort().join('|')
 
         if (!this._cache[cacheId]) {
 
@@ -403,18 +355,18 @@ export default class ECS {
                 _.every(componentNames, componantName =>
                     this.entitiesComponents[componantName][entityId] !== undefined
                 )
-            );
+            )
 
         }
 
-        return this._cache[cacheId];
+        return this._cache[cacheId]
     }
 
     has(entityId, componantName) {
         if (this.entitiesComponents[componantName][entityId]) {
-            return true;
+            return true
         }
-        return false;
+        return false
     }
 
 

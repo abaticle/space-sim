@@ -3,18 +3,37 @@
 	import Game from "./../game"
 	import Planet from "./Planet.svelte"
 	import { onMount } from 'svelte'
-	import { chooseBuilding, planet, speed, entityList } from "./stores"
+	import { chooseBuilding, planet, speed, entityList, spaceship } from "./stores"
 	import { get } from 'svelte/store'
 	import Tools from "./../modules/tools"
 	import ChooseBuilding from "./ChooseBuilding.svelte"
 	import ChooseProduction from "./ChooseProduction.svelte"
 	import EntityList from "./EntityList.svelte"
+	import Spaceship from "./Spaceship.svelte"
  
 	
-	const game = new Game();
+	const game = new Game()
+
+	onMount(() => game.init());
+
 
 	function entitySelected(event) {
-		//TODO
+		const { entity } = event.detail
+
+		switch(entity.type) {
+			case "planet":				
+				game.actions.addAction("displayPlanet", {
+					planetId: entity.entityId
+				})
+				break
+
+			case "spaceship":			
+				game.actions.addAction("displaySpaceship", {
+					spaceshipId: entity.entityId
+				})
+				break
+		}
+
 	}
  
 	function displayBuyBuilding(event) {
@@ -45,7 +64,7 @@
 		game.speed = value;
 	})
 
-	onMount(() => game.init());
+	
 
 	window.game = game;
 	window.ecs = game.ecs;
@@ -125,6 +144,10 @@
 				on:displayBuyBuilding={displayBuyBuilding}
 				on:displayChooseProduction={displayChooseProduction}>
 			</Planet>
+		{/if}
+
+		{#if $spaceship}
+			<Spaceship></Spaceship>
 		{/if}
 
 		{#if $entityList.visible}

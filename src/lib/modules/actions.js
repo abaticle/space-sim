@@ -4,6 +4,11 @@ export default class ActionsManager {
         this.actions = [];
     }
 
+    /** 
+     * Add an action
+     * @param {string} action Action name
+     * @param {object} payload Action payload
+     */
     addAction(action, payload = {}) {
         this.actions.push({
             action,
@@ -12,7 +17,7 @@ export default class ActionsManager {
     }
 
     /**
-     * 
+     * Remove actions
      * @param {number|string} index 
      */
     removeAction(index) {

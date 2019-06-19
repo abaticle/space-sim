@@ -2,9 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import { spaceship } from "./stores";
 
-    const dispatch = createEventDispatcher();
-
-
+    const dispatch = createEventDispatcher();    
 </script>
 
 

@@ -4,6 +4,7 @@
 
     const dispatch = createEventDispatcher();
 
+
 </script>
 
 
@@ -23,7 +24,11 @@
                 {#each $entityList.entities as entity}
                     <tr>
                         <td>{entity.type}</td>
-                        <td>{entity.desc}</td>
+                        <td>
+                            <a href="#" on:click={() => dispatch("entitySelected", {entity})}>
+                                {entity.desc}
+                            </a>
+                        </td>
                     </tr>
                 {/each}
             </tbody>

@@ -2,7 +2,8 @@ import {
     planet as planetStore,
     chooseBuilding as chooseBuildingStore,
     chooseProduction as chooseProductionStore,
-    entityList as entityListStore
+    entityList as entityListStore,
+    spaceship as spaceshipStore
 } from "../ui/stores"
 import items from "../data/items"
 import buildings from "../data/buildings"
@@ -110,10 +111,13 @@ export default class UISystem {
         
         planetStore.set(undefined)
 
+        spaceshipStore.set(undefined)
+
         entityListStore.set({
             visible: false
         })
 
+        this.actions.removeAction("displaySpaceship")
         this.actions.removeAction("displayPlanet")
         this.actions.removeAction("removePanel")
     }
@@ -249,12 +253,14 @@ export default class UISystem {
                     this.actions.addAction("displayPlanet", {
                         planetId: entities[0]
                     })   
+                    break
 
                     
                 case this.ecs.has(entities[0], "spaceship"):
                     this.actions.addAction("displaySpaceship", {
                         spaceshipId: entities[0]
                     })   
+                    break
     
             }
         }
@@ -317,6 +323,14 @@ export default class UISystem {
      */
     displaySpaceship(payload) {
 
+        const { spaceship } = this.ecs.get(payload.spaceshipId)
+
+        spaceshipStore.set({
+            ...spaceship,
+            id: payload.spaceshipId
+        })
+
+        //TODO:UI Display spaceship 
         this.actions.removeAction("displaySpaceship")
     }
 
@@ -362,7 +376,15 @@ export default class UISystem {
             action,
             payload
         }) => {
+
+            //this[action](payload);
+
+            
             switch (action) {
+
+                case "displaySpaceship":
+                    this.displaySpaceship(payload)
+                    break
 
                 case "displayEntities":
                     this.displayEntities(payload)
