@@ -19,6 +19,7 @@ import BuildingSystem from "./systems/building";
 import ConstructionSystem from "./systems/construction";
 import MoveSystem from "./systems/move";
 import DrawSystem from "./systems/draw";
+import DebugSystem from "./systems/debug";
 import UISystem from "./systems/ui";
 import solarSystem from "./data/solar-system";
 import Observable from "./modules/observable";
@@ -79,6 +80,7 @@ export default class Game extends Observable {
         this.systems.push(new MoveSystem(this.ecs, this.actions))
         this.systems.push(new DrawSystem(this.ecs, this.actions))
         this.systems.push(new UISystem(this.ecs, this.actions))
+        this.systems.push(new DebugSystem(this.ecs, this.actions))
     }
 
     /**

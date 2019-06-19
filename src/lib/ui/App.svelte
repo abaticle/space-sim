@@ -10,6 +10,7 @@
 	import ChooseProduction from "./ChooseProduction.svelte"
 	import EntityList from "./EntityList.svelte"
 	import Spaceship from "./Spaceship.svelte"
+	import Debug from "./Debug.svelte"
  
 	
 	const game = new Game()
@@ -83,6 +84,16 @@
 		left: 10px;
 		color: white
 	}
+	
+	.debug-panel {
+		z-index: 10;
+		position: fixed;
+		left: 10px;
+		bottom: 10px;		
+    	padding: 1em;
+		overflow: auto;
+		max-height: 90%
+	}
 	.right-panel {
 		z-index: 10;
 		position: fixed;
@@ -116,6 +127,11 @@
 
 	<!-- Map -->
 	<div id="map"/>	
+
+
+	<div class="debug-panel">
+		<Debug></Debug>
+	</div>
 
 	<!-- right panel -->
 	
