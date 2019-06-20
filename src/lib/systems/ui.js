@@ -377,9 +377,9 @@ export default class UISystem {
             payload
         }) => {
 
-            //this[action](payload);
+            this[action](payload);
 
-            
+            /*
             switch (action) {
 
                 case "displaySpaceship":
@@ -429,7 +429,7 @@ export default class UISystem {
                 case "removeChooseProduction":
                     this.removeChooseProduction()
                     break
-            }
+            }*/
         })
 
     }

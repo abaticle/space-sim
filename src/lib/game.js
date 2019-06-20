@@ -1,30 +1,31 @@
-import ECS from "./modules/ecs";
-import _ from "lodash";
+import ECS from "./modules/ecs"
+import _ from "lodash"
 import {
     building,
     producer,
     construction
-} from "./components/building";
+} from "./components/building"
 import {
     planet
-} from "./components/planet";
+} from "./components/planet"
 import {
     position
-} from "./components/position";
+} from "./components/position"
 import {
     spaceship,
     spaceshipState
-} from "./components/spaceship";
-import BuildingSystem from "./systems/building";
-import ConstructionSystem from "./systems/construction";
-import MoveSystem from "./systems/move";
-import DrawSystem from "./systems/draw";
-import DebugSystem from "./systems/debug";
-import UISystem from "./systems/ui";
-import solarSystem from "./data/solar-system";
-import Observable from "./modules/observable";
-import ActionsManager from "./modules/actions";
-import EntityManager from "./modules/entity-manager";
+} from "./components/spaceship"
+import BuildingSystem from "./systems/building"
+import ConstructionSystem from "./systems/construction"
+import MovePlanetSystem from "./systems/move-planet"
+import MoveSpaceshipSystem from "./systems/move-spaceship"
+import DrawSystem from "./systems/draw"
+import DebugSystem from "./systems/debug"
+import UISystem from "./systems/ui"
+import solarSystem from "./data/solar-system"
+import Observable from "./modules/observable"
+import ActionsManager from "./modules/actions"
+import EntityManager from "./modules/entity-manager"
 
 export default class Game extends Observable {
 
@@ -77,7 +78,8 @@ export default class Game extends Observable {
     createSystems() {
         this.systems.push(new ConstructionSystem(this.ecs, this.actions))
         this.systems.push(new BuildingSystem(this.ecs, this.actions))
-        this.systems.push(new MoveSystem(this.ecs, this.actions))
+        this.systems.push(new MovePlanetSystem(this.ecs, this.actions))        
+        this.systems.push(new MoveSpaceshipSystem(this.ecs, this.actions))
         this.systems.push(new DrawSystem(this.ecs, this.actions))
         this.systems.push(new UISystem(this.ecs, this.actions))
         this.systems.push(new DebugSystem(this.ecs, this.actions))
@@ -136,7 +138,7 @@ export default class Game extends Observable {
         this.ecs.set(earthPos.x, spaceship, "position", "x")
         this.ecs.set(earthPos.y, spaceship, "position", "y")
 
-        this.ecs.set(5, spaceship, "spaceship", "speed")
+        this.ecs.set(150, spaceship, "spaceship", "speed")
         this.ecs.set("space-1", spaceship, "spaceship", "desc")
 
         const orders = [{
@@ -202,8 +204,8 @@ export default class Game extends Observable {
 
         const createPlanetFromParams = (params, parentId) => {
             const modifiers = {
-                size: 20,
-                distance: 16000,
+                size: 100,
+                distance: 60000,
                 speed: 0.001
             }
 
