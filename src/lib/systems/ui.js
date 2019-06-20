@@ -92,16 +92,59 @@ export default class UISystem {
         //Planet items
         const planetItems = this.ecs.get(planetId, "planet", "items")
 
+        //Get stats
+        const planetItemsStats = this._getPlanetItemsStat(planetId, planetItems)
+
         for (let itemId in planetItems) {
             result.items.push({
                 id: itemId,
                 desc: items[itemId].desc,
                 type: items[itemId].type,
-                count: planetItems[itemId]
+                count: planetItems[itemId],
+                stat: planetItemsStats[itemId] || 0
             })
         }
 
         planetStore.set(result)
+    }
+
+    /**
+     * Get a planet items stats
+     */
+    _getPlanetItemsStat(planetId, planetItems) {
+
+        const buildings = this.ecs
+            .searchEntities(["building", "producer"])
+            .map(entityId => this.ecs.get(entityId))
+            .filter(({building}) => building.planetId === planetId)
+            .filter(({producer}) => producer.state === "filled")
+
+        const stats = {}
+        
+        console.log(buildings)
+
+        buildings.forEach(({producer}) => {
+            const item = items[producer.produce]
+
+            //Production 
+            if (stats[producer.produce] === undefined) {
+                stats[producer.produce] = 0
+            }
+
+            stats[producer.produce] += 1 / item.time
+            
+            
+            //Consumption
+            for (let itemId in item.recipe) {
+                if (stats[itemId] === undefined) {
+                    stats[itemId] = 0;
+                }
+
+                stats[itemId] -= item.recipe[itemId] / item.time
+            }
+        })
+
+        return stats;
     }
 
     /**

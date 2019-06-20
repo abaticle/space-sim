@@ -11,7 +11,7 @@
     }    
 
     const numberFormatter = (number) => {
-        //todo:à retirer / TEST
+        //TODO:To remove, for tests purpose
         return number
 
         if (number >= 1000) {
@@ -20,6 +20,10 @@
         else {
             return number
         }
+    }
+
+    const statFormatter = (stat) => {
+        return stat.toFixed(2) + " /s"
     }
 
 </script>
@@ -48,6 +52,7 @@
                     <th>Type</th>
                     <th>Item</th>
                     <th>Count</th>
+                    <th>Stats</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,6 +61,7 @@
                         <td>{item.type}</td>
                         <td>{item.desc}</td>
                         <td class="alignRight">{numberFormatter(item.count)}</td>
+                        <td class="alignRight">{statFormatter(item.stat)}</td>
                     </tr>
                 {/each}
             </tbody>
