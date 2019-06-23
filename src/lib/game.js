@@ -1,6 +1,9 @@
 import ECS from "./modules/ecs"
 import _ from "lodash"
 import {
+    game
+} from "./components/game"
+import {
     building,
     producer,
     construction
@@ -26,17 +29,19 @@ import solarSystem from "./data/solar-system"
 import Observable from "./modules/observable"
 import ActionsManager from "./modules/actions"
 import EntityManager from "./modules/entity-manager"
+import constants from "./data/constants";
+import Tools from "./modules/tools";
 
 export default class Game extends Observable {
 
     constructor() {
         super();
-        this.speed = 1;
         this.ecs = new ECS();
         this.actions = new ActionsManager();
         this.systems = [];
         this.timeOld = 0;
         this.entityManager = new EntityManager(this.ecs);
+        this._gameEntity = undefined;
     }
 
     /**
@@ -44,6 +49,7 @@ export default class Game extends Observable {
      */
     init() {
         this.registerComponents();
+        this._gameEntity = this.createGame();
         this.createSolarSystem(solarSystem);
         this.createBuildings();
         this.createSystems();
@@ -53,7 +59,6 @@ export default class Game extends Observable {
 
         //this.tests();
     }
-
 
     tests() {
         const ecs = this.ecs;
@@ -78,7 +83,7 @@ export default class Game extends Observable {
     createSystems() {
         this.systems.push(new ConstructionSystem(this.ecs, this.actions))
         this.systems.push(new BuildingSystem(this.ecs, this.actions))
-        this.systems.push(new MovePlanetSystem(this.ecs, this.actions))        
+        this.systems.push(new MovePlanetSystem(this.ecs, this.actions))
         this.systems.push(new MoveSpaceshipSystem(this.ecs, this.actions))
         this.systems.push(new DrawSystem(this.ecs, this.actions))
         this.systems.push(new UISystem(this.ecs, this.actions))
@@ -93,13 +98,12 @@ export default class Game extends Observable {
         let dt = (time - this.timeOld) / 1000;
         this.timeOld = time;
 
-
         //Display FPS
         this.updateFPS(dt);
 
-
         //Update speed
-        dt *= this.speed;
+        //dt *= this.speed;
+        dt *= this._gameEntity.speed
 
         _.each(this.systems, system => {
             system.update(dt);
@@ -115,68 +119,48 @@ export default class Game extends Observable {
     }
 
     registerComponents() {
-        this.ecs.registerComponent(building);
-        this.ecs.registerComponent(producer);
-        this.ecs.registerComponent(planet);
-        this.ecs.registerComponent(position);
-        this.ecs.registerComponent(spaceship);
-        this.ecs.registerComponent(spaceshipState);
-        this.ecs.registerComponent(construction);        
+
+        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game];
+
+        components.forEach(c => this.ecs.registerComponent(c))
+
     }
 
     createSpaceships() {
-        let spaceship = this.ecs.createEntity(["spaceship", "spaceshipState", "position"]);
-        
-        console.log("Spaceship id: ", spaceship);
 
-        let earthId = this.entityManager.getPlanet("Earth");
-        let moonId = this.entityManager.getPlanet("Moon");
+        const earthId = this.entityManager.getPlanet("Earth");
 
 
-        let earthPos = this.ecs.get(earthId, "position");
-
-        this.ecs.set(earthPos.x, spaceship, "position", "x")
-        this.ecs.set(earthPos.y, spaceship, "position", "y")
-
-        this.ecs.set(150, spaceship, "spaceship", "speed")
-        this.ecs.set("space-1", spaceship, "spaceship", "desc")
-
-        const orders = [{
-            goTo: moonId
-        }, {
-            take: {
-                ironBar: 10
-            }
-        }, {
-            goTo: earthId
-        }, {
-            deposit: {
-                ironBar: "all"
-            }
-        }];
-
-        this.ecs.set(orders, spaceship, "spaceship", "orders");
-        this.ecs.set("move", spaceship, "spaceshipState", "state");
-        this.ecs.set(earthId, spaceship, "spaceshipState", "moveTo");
-
-        /**
-         * Possible spaceship states are :
-         * - orbit
-         * - move
-         * - stop
-         * - transfer
-         */
-
-        /**
-         * Commands: 
-         *
-         * */
+        this.entityManager.createSpaceship({
+            desc: "space-1",
+            x: Tools.random(-40000, 40000),
+            y: Tools.random(-40000, 40000),
+            moveTo: earthId,
+            stateIndex: 0,
+            stateRepeat: true,
+            states: [{
+                state: "move",
+                moveTo: this.entityManager.getPlanet("Earth")
+            }, {
+                state: "move",
+                moveTo: this.entityManager.getPlanet("Moon")
+            }]
+        })
 
 
 
+        /*for (let i = 1; i < 5; i++) {
 
+            this.entityManager.createSpaceship({
+                desc: "space-" + i,
+                x: Tools.random(-40000, 40000),
+                y: Tools.random(-40000, 40000),
+                state: "move",
+                moveTo: earthId
+            })
+
+        }*/
     }
-
 
 
     createBuildings() {
@@ -188,10 +172,20 @@ export default class Game extends Observable {
         this.entityManager.createBuildingFromData("factoryMk1", false, earth)
     }
 
+
+    /**
+     * Create game entity with speed
+     */
+    createGame() {
+        let game = this.ecs.createEntity("game");
+
+        return this.ecs.get(game, "game")
+    }
+
     /**
      * Create planet entities from a solar system
      */
-    createSolarSystem(solarSystem) {        
+    createSolarSystem(solarSystem) {
 
         //Create the sun 
         const sun = this.entityManager.createPlanet({
@@ -202,12 +196,15 @@ export default class Game extends Observable {
             y: 0
         })
 
+
+
         const createPlanetFromParams = (params, parentId) => {
             const modifiers = {
-                size: 100,
-                distance: 60000,
-                speed: 0.001
+                size: constants.planetSizeModifier,
+                distance: constants.planetDistanceModifier,
+                speed: constants.planetSpeedModifier
             }
+
 
             return this.entityManager.createPlanet({
                 type: "planet",
@@ -220,15 +217,18 @@ export default class Game extends Observable {
                 items: params["items"] ? params.items : {},
                 owned: params.owned
             })
-        }
+        } 
 
-        solarSystem.forEach(params => {
-            //Create each planets 
-            const planet = createPlanetFromParams(params)
+        //TODO:Only for test purpose : set earth, moon and venus
+        solarSystem 
+            //.filter(params => params.name === "Earth" || params.name === "Venus")
+            .forEach(params => {
+                //Create each planets 
+                const planet = createPlanetFromParams(params)
 
-            //And planet satellites 
-            params.satellites.forEach(params => createPlanetFromParams(params, planet))
-        })
+                //And planet satellites 
+                params.satellites.forEach(params => createPlanetFromParams(params, planet))
+            })
 
         this.entityManager.updatePlanetsChildrens();
     }

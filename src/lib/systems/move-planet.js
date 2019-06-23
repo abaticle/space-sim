@@ -36,13 +36,14 @@ export default class MovePlanetSystem {
 
         if (planet.parentId !== undefined) {
 
-            //Rotate planet :
-            let parentPos = this.ecs.get(planet.parentId, "position");
+            //Get parent posititon
+            const parentPos = this.ecs.get(planet.parentId, "position");
 
-            let r = Tools.rotate(parentPos.x, parentPos.y, position.x, position.y, planet.speed * dt);
-
-            position.x = r.x
-            position.y = r.y
+            //Rotation target
+            const rotation = Tools.rotate(parentPos, position, planet.speed * dt)
+            
+            position.x = rotation.x
+            position.y = rotation.y
 
             //And move all childrens :            
             t.x = position.x - t.x

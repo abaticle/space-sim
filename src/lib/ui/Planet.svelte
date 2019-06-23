@@ -11,14 +11,14 @@
     }    
 
     const numberFormatter = (number) => {
-        //TODO:To remove, for tests purpose
-        return number
-
-        if (number >= 1000) {
-            return (number / 1000).toFixed(1) + " K"
-        }
-        else {
-            return number
+        switch (true) {
+            case number >= 1000000:
+                return (number / 1000000).toFixed(2) + "K"
+            case number >= 1000:
+                return (number / 1000).toFixed(2) + " K"
+        
+            default:
+                return number
         }
     }
 
@@ -46,13 +46,13 @@
         {#if $planet.items.length === 0} 
             No item
         {:else}
-        <table class="table">
+        <table class="table" width="100%">
             <thead>
                 <tr>
                     <th>Type</th>
                     <th>Item</th>
-                    <th>Count</th>
-                    <th>Stats</th>
+                    <th class="alignRight">Count</th>
+                    <th class="alignRight">Stats</th>
                 </tr>
             </thead>
             <tbody>
@@ -72,7 +72,7 @@
 
 <div class="columns">    
     <div class="column">
-        <!-- Planet buildings -->
+    
         <h2 class="subtitle">Buildings</h2>
 
         <!-- Buttons -->
@@ -82,6 +82,7 @@
             </div>
         </div>
 
+        <!-- Constructions -->
         {#if $planet.constructions.length > 0}
         <table class="table is-fullwidth">
             <thead>
@@ -102,7 +103,7 @@
         </table>
         {/if}
 
-        <!-- Building list-->
+        <!-- Buildings-->
         {#if $planet.buildings.length === 0} 
             No buiding 
         {:else}
@@ -115,57 +116,34 @@
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
-
-
-
-            <!--
-                TODO:Better choose production !
-            <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link" href="javascript:;">
-                {building.produce}
-                </a>
-
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" href="javascript:;">
-                        Iron ore
-                    </a>
-                    <a class="navbar-item" href="javascript:;">
-                        Copper ore
-                    </a>
-                </div>
-            </div>
-
-            <button class="button is-text" on:click={() => dispatch('chooseBuildingProduction')}>
-                {building.produce}
-            </button>
-            
-            </td>
-            -->
-            
+            <tbody>            
 
             {#each $planet.buildings as building}
                 <tr>
                     <td>{building.desc}</td>
                     
                     <td>                    
-                        <button class="button is-text" on:click={() => dispatch('displayChooseProduction', {buildingId: building.id})}>
-                            {#if building.produce === ""} 
+                        <a href="javascript:void(0)" on:click={() => dispatch('displayChooseProduction', {buildingId: building.id})}>
+                        {#if building.produce === ""} 
                             Nothing
-                            {:else}
+                        {:else}
                             {building.produce}
-                            {/if}                                
-                        </button>
+                        {/if}                                
+                        </a>
                     </td>
                         
                     <td>
-                        {#if building.produce !== ""} 
+                    {#if building.produce !== ""} 
                         <progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}>
                         </progress>
-                        {/if}
+                    {/if}
                     </td>
                     
-                    <td><button class="button  is-text">Sell</button></td>
+                    <td>
+                        <a href="javascript:void(0)">    
+                            Sell
+                        </a>
+                    </td>
                 </tr>
             {/each}
             </tbody>

@@ -12,10 +12,15 @@
 	import Spaceship from "./Spaceship.svelte"
 	import Debug from "./Debug.svelte"
  
-	
 	const game = new Game()
 
-	onMount(() => game.init());
+	onMount(() => {
+		game.init()
+
+		/*speed.subscribe(value => {
+			game.setSpeed(value);
+		})*/
+	});
 
 
 	function entitySelected(event) {
@@ -35,6 +40,15 @@
 				break
 		}
 
+	}
+
+
+
+	function increaseSpeed() {
+		game.actions.addAction("increaseSpeed")
+	}
+	function decreaseSpeed() {
+		game.actions.addAction("decreaseSpeed")
 	}
  
 	function displayBuyBuilding(event) {
@@ -60,11 +74,6 @@
 	function chooseProduction(event) {
 		game.actions.addAction("chooseProduction", event.detail);
 	}
-
-	speed.subscribe(value => {
-		game.speed = value;
-	})
-
 	
 
 	window.game = game;
@@ -101,7 +110,9 @@
 		top: 10px;
     	padding: 1em;
 		overflow: auto;
-		max-height: 90%
+		max-height: 95%;
+		min-width: 30%;
+		max-width: 60%;
 	}
 	::-webkit-scrollbar{
 		width:6px
@@ -140,7 +151,7 @@
             <div class="level-left">
             </div>
             <div class="level-right">				
-                <button class="button" on:click={() => $speed -= 5}>
+                <button class="button" on:click={() => decreaseSpeed()}>
 					<span class="icon is-small">
 						<i class="fas fa-backward"></i>
 					</span>
@@ -148,13 +159,20 @@
 
 				<h1 class="speed">{$speed}</h1>
 
-                <button class="button" on:click={() => $speed += 5}>
+                <button class="button" on:click={() => increaseSpeed()}>
 					<span class="icon is-small">
 						<i class="fas fa-forward"></i>
 					</span>
 				</button>
             </div>
         </div>
+
+		{#if $entityList.visible}
+			<EntityList
+				on:entitySelected={entitySelected}
+			></EntityList>
+		{/if}
+		
 		{#if $planet}
 			<Planet 
 				on:displayBuyBuilding={displayBuyBuilding}
@@ -164,12 +182,6 @@
 
 		{#if $spaceship}
 			<Spaceship></Spaceship>
-		{/if}
-
-		{#if $entityList.visible}
-			<EntityList
-				on:entitySelected={entitySelected}
-			></EntityList>
 		{/if}
 		
 	</div>

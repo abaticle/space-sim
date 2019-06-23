@@ -6,8 +6,12 @@
 </script>
 
 
-<h1 class="title alignRight">{$spaceship.desc}</h1>
+<h1 class="title alignRight">{$spaceship.spaceship.desc}</h1>
 
-<h2 class="subtitle">Speed: {$spaceship.speed}</h2>
+<h2 class="subtitle">Speed: {$spaceship.spaceship.speed}</h2>
+
+{#if $spaceship.spaceshipState.length}
+    <h2 class="subtitle">State: {$spaceship.spaceshipState.states[0].state}</h2>
+{/if}
 
 

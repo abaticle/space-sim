@@ -22,16 +22,16 @@ export default class DebugSystem {
             data: [{
                 name: "action",
                 value: JSON.stringify(this.actions.getActions())
-            }, {
+            }/*, {
                 name: "Earth speed",
                 value: this.ecs.get(3, "planet", "speed")
             },{
                 name: "Spaceship pos",
-                value: JSON.stringify(this.ecs.get(15).position)
+                value: JSON.stringify(this.ecs.get(9).position)
             }, {
                 name: "Spaceship state",
-                value: JSON.stringify(this.ecs.get(15).spaceshipState)
-            }]
+                value: JSON.stringify(this.ecs.get(9).spaceshipState)
+            }*/]
         })
 
     }

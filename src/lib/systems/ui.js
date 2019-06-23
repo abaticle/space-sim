@@ -3,7 +3,8 @@ import {
     chooseBuilding as chooseBuildingStore,
     chooseProduction as chooseProductionStore,
     entityList as entityListStore,
-    spaceship as spaceshipStore
+    spaceship as spaceshipStore,
+    speed as speeedStore
 } from "../ui/stores"
 import items from "../data/items"
 import buildings from "../data/buildings"
@@ -19,6 +20,27 @@ export default class UISystem {
 
     init() {
 
+    }
+
+
+    increaseSpeed(payload) {
+        const game = this.entityManager.getGame();
+
+        game.speed += 1
+
+        speeedStore.set(game.speed)
+
+        this.actions.removeAction("increaseSpeed")
+    }
+
+    decreaseSpeed(payload) {
+        const game = this.entityManager.getGame();
+
+        game.speed -= 1
+
+        speeedStore.set(game.speed)
+        
+        this.actions.removeAction("decreaseSpeed")
     }
 
     /**
@@ -95,6 +117,8 @@ export default class UISystem {
         //Get stats
         const planetItemsStats = this._getPlanetItemsStat(planetId, planetItems)
 
+        
+
         for (let itemId in planetItems) {
             result.items.push({
                 id: itemId,
@@ -113,34 +137,40 @@ export default class UISystem {
      */
     _getPlanetItemsStat(planetId, planetItems) {
 
-        const buildings = this.ecs
-            .searchEntities(["building", "producer"])
+        const buildings = this.ecs.searchEntities(["building", "producer"])
             .map(entityId => this.ecs.get(entityId))
             .filter(({building}) => building.planetId === planetId)
             .filter(({producer}) => producer.state === "filled")
 
         const stats = {}
+        const speed = this.entityManager.getGameSpeed()
         
-        console.log(buildings)
+        //FIXME:Fix bug for planet items stats on consumption
+        //TODO:Glitch with ui when consumption/production is = 0
+
 
         buildings.forEach(({producer}) => {
             const item = items[producer.produce]
 
-            //Production 
-            if (stats[producer.produce] === undefined) {
-                stats[producer.produce] = 0
-            }
+            let stat;
 
-            stats[producer.produce] += 1 / item.time
+
+            //Production 
+            stat = speed / item.time
+
+            stats[producer.produce] = stats[producer.produce] === undefined ? 
+                stat : 
+                stats[producer.produce] += stat
             
             
             //Consumption
             for (let itemId in item.recipe) {
-                if (stats[itemId] === undefined) {
-                    stats[itemId] = 0;
-                }
 
-                stats[itemId] -= item.recipe[itemId] / item.time
+                stat = item.recipe[itemId] / (item.time / speed)
+
+                stats[itemId] = stats[itemId] === undefined ?
+                    stat :
+                    stats[itemId] -= stat
             }
         })
 
@@ -366,15 +396,16 @@ export default class UISystem {
      */
     displaySpaceship(payload) {
 
-        const { spaceship } = this.ecs.get(payload.spaceshipId)
+        const { spaceship, spaceshipState } = this.ecs.get(payload.spaceshipId)
 
         spaceshipStore.set({
-            ...spaceship,
+            spaceship: {...spaceship},
+            spaceshipState: {...spaceshipState},
             id: payload.spaceshipId
         })
 
-        //TODO:UI Display spaceship 
-        this.actions.removeAction("displaySpaceship")
+        
+        //this.actions.removeAction("displaySpaceship")
     }
 
     /**

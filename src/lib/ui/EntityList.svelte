@@ -4,7 +4,7 @@
 
     const dispatch = createEventDispatcher();
 
-
+    //TODO:When entities selected, remove the selection panel
 </script>
 
 
@@ -16,19 +16,19 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Type</th>
                     <th>Desc</th>
+                    <th>Type</th>
                 </tr>
             </thead>
             <tbody>
                 {#each $entityList.entities as entity}
                     <tr>
-                        <td>{entity.type}</td>
                         <td>
-                            <a href="#" on:click={() => dispatch("entitySelected", {entity})}>
+                            <a href="javascript:void(0)" on:click={() => dispatch("entitySelected", {entity})}>
                                 {entity.desc}
                             </a>
                         </td>
+                        <td>{entity.type}</td>
                     </tr>
                 {/each}
             </tbody>

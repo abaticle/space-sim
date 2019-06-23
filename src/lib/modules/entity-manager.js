@@ -1,9 +1,17 @@
-import buildings from "../data/buildings";
+import buildings from "../data/buildings"
+import constants from "../data/constants"
 
 class EntityManager {
 
     constructor(ecs) {
         this.ecs = ecs;
+    }
+
+    /**
+     * Get game entity
+     */
+    getGame() {
+        return this.ecs.get(this.ecs.searchEntities("game")[0], "game")
     }
 
     /**
@@ -121,6 +129,37 @@ class EntityManager {
     }
 
 
+    createSpaceship({
+        desc = "spaceship",
+        x = 0,
+        y = 0,
+        moveTo = 0,
+        speed = 150,
+        states = [],
+        stateRepeat = false
+    }) {
+        let spaceshipId = this.ecs.createFromAssemblage({
+            components: ["spaceship", "spaceshipState", "position"],
+            data: {
+                spaceship: {
+                    desc,
+                    speed,
+                    states,
+                    stateRepeat
+                },
+                spaceshipState: {
+                    moveTo
+                },
+                position: {
+                    x,
+                    y
+                }
+            }
+
+        })
+    }
+
+
     /**
      * Create a new planet
      * @param {{desc: string, size: number, x: number, y: number, speed: number, owned: boolean, resources: object}} options Planet options
@@ -163,6 +202,17 @@ class EntityManager {
 
     }
 
+    /**
+     * Get game speed
+     * @returns {number} Game speed
+     */
+    getGameSpeed() {
+
+        return this.ecs.searchEntities("game")
+            .map(id => this.ecs.get(id, "game", "speed"))
+            .find(() => true)        
+
+    }
 
     /**
      * Update all planets childrens array
@@ -192,6 +242,7 @@ class EntityManager {
     /**
      * find a planet from it's desc
      * @param {string} desc 
+     * @returns {number} Planet id
      */
     getPlanet(desc) {
         return this.ecs

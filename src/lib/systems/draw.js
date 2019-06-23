@@ -1,10 +1,5 @@
-import Tools from "./../modules/tools";
-import {
-    planet
-} from "./../ui/stores";
-import {
-    get
-} from 'svelte/store';
+import Tools from "../modules/tools";
+import constants from "../data/constants";
 
 export default class DrawSystem {
 
@@ -254,6 +249,80 @@ export default class DrawSystem {
     }
 
     /**
+     * Draw a planet
+     * - Each planet is a circle
+     * - Each planet has an orbit
+     * - Each planet has a text
+     * @param {number} id  Planet id
+     */
+    drawPlanet(id) {
+        let layer = this.layer;
+
+        let {
+            position,
+            planet
+        } = this.ecs.get(id);
+
+        //Draw planet :
+        let circle = new Konva.Circle({
+            x: position.x,
+            y: position.y,
+            radius: planet.size,
+            //stroke: "white",
+            //strokeWidth: 2,
+            id: "planet-" + id.toString(),
+            name: "planet"
+        });
+
+        if (planet.desc === "Sun") {
+            circle.fill("#fff5b1")
+            circle.shadowColor("#fff5b1")
+            circle.shadowBlur(500)
+        } else {
+            circle.fill("#f1f8ff")
+            //circle.stroke("white")
+            //circle.strokeWidth(2)
+        }
+
+        layer.add(circle);
+
+
+        //Draw planet orbit
+        if (planet.parentId !== undefined) {
+            let positionParent = this.ecs.get(planet.parentId, "position")
+
+            let radius = Tools.distance(position, positionParent)
+
+            layer.add(new Konva.Circle({
+                x: positionParent.x,
+                y: positionParent.y,
+                radius: radius,
+                stroke: "white",
+                strokeWidth: 0.3,
+                id: "planet-orbite-" + id.toString(),
+                name: "planet-orbite",
+                listening: false
+            }));
+        }
+
+        //Drawn planet name :
+        let text = new Konva.Text({
+            x: position.x,
+            y: position.y + planet.size + 30,
+            fontSize: 12,
+            text: planet.desc,
+            fill: "white",
+            id: "planet-text-" + id.toString(),
+            name: "planet-text",
+            listening: false
+        });
+
+        text.offsetX(text.width() / 2)
+
+        layer.add(text);
+    }
+
+    /**
      * Draw planets:
      * - Each planet is a circle
      * - Each planet has an orbit
@@ -263,71 +332,59 @@ export default class DrawSystem {
         let planets = this.ecs.searchEntities(["planet", "position"])
 
         planets.forEach(id => {
-            let layer = this.layer;
-
-            let {
-                position,
-                planet
-            } = this.ecs.get(id);
-
-            //Draw planet :
-            let circle = new Konva.Circle({
-                x: position.x,
-                y: position.y,
-                radius: planet.size,
-                //stroke: "white",
-                //strokeWidth: 2,
-                id: "planet-" + id.toString(),
-                name: "planet"
-            });
-
-            if (planet.desc === "Sun") {
-                circle.fill("#fff5b1")
-                circle.shadowColor("#fff5b1")
-                circle.shadowBlur(500)
-            } else {
-                circle.fill("#f1f8ff")
-                //circle.stroke("white")
-                //circle.strokeWidth(2)
-            }
-
-            layer.add(circle);
-
-
-            //Draw planet orbit
-            if (planet.parentId !== undefined) {
-                let positionParent = this.ecs.get(planet.parentId, "position")
-
-                let radius = Tools.distance(position, positionParent)
-
-                layer.add(new Konva.Circle({
-                    x: positionParent.x,
-                    y: positionParent.y,
-                    radius: radius,
-                    stroke: "white",
-                    strokeWidth: 0.3,
-                    id: "planet-orbite-" + id.toString(),
-                    name: "planet-orbite",
-                    listening: false
-                }));
-            }
-
-            //Drawn planet name :
-            let text = new Konva.Text({
-                x: position.x,
-                y: position.y + planet.size + 30,
-                fontSize: 12,
-                text: planet.desc,
-                fill: "white",
-                id: "planet-text-" + id.toString(),
-                name: "planet-text",
-                listening: false
-            });
-
-            text.offsetX(text.width() / 2)
-
-            layer.add(text);
+            this.drawPlanet(id)
         });
+    }
+
+
+    drawSpaceship(entityId) {
+
+        const size = constants.spaceshipSizeModifier
+
+        let layer = this.layer
+
+        let {
+            spaceship,
+            position
+        } = this.ecs.get(entityId)
+
+        let shape = new Konva.Shape({
+            x: position.x,
+            y: position.y,
+            id: "spaceship-" + entityId.toString(),
+            name: "spaceship",
+            fill: "#f1f8ff",
+            stroke: "white",
+            sceneFunc: (ctx, shape) => {                        
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(5 * size, 0);
+                ctx.lineTo(2.5 * size, -7 * size);
+
+                //ctx.quadraticCurveTo(150, 100, 260, 170);
+                ctx.closePath();
+                ctx.fillStrokeShape(shape);
+            }
+        })
+
+        layer.add(shape)
+
+
+        let text = new Konva.Text({
+            x: position.x,
+            y: position.y + 12,
+            fontSize: 12,
+            text: spaceship.desc,
+            fill: "white",
+            id: "spaceship-text-" + entityId.toString(),
+            name: "spaceship-text",
+            listening: false
+        })
+
+        text.offsetX(text.width() / 2)
+
+        layer.add(text)
     }
 
     /**
@@ -336,57 +393,9 @@ export default class DrawSystem {
      */
     initShips() {
 
-        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);        
 
-        spaceships.forEach(id => {
-            let layer = this.layer
-
-            let {
-                spaceship,
-                position
-            } = this.ecs.get(id)
-
-            let shape = new Konva.Shape({
-                x: position.x,
-                y: position.y,
-                id: "spaceship-" + id.toString(),
-                name: "spaceship",
-                fill: "#f1f8ff",
-                stroke: "white",
-                sceneFunc: (ctx, shape) => {
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(5, 0);
-                    ctx.lineTo(2.5, -7);
-
-                    //ctx.quadraticCurveTo(150, 100, 260, 170);
-                    ctx.closePath();
-                    ctx.fillStrokeShape(shape);
-                }
-            })
-
-            layer.add(shape)
-
-
-            let text = new Konva.Text({
-                x: position.x,
-                y: position.y + 12,
-                fontSize: 12,
-                text: spaceship.desc,
-                fill: "white",
-                id: "spaceship-text-" + id.toString(),
-                name: "spaceship-text",
-                listening: false
-            })
-
-            text.offsetX(text.width() / 2)
-
-            layer.add(text)
-
-
-
-        })
-
+        spaceships.forEach(id => this.drawSpaceship(id))
     }
 
     /**
@@ -495,7 +504,7 @@ export default class DrawSystem {
             } = this.ecs.get(id)
 
             //Ship position
-            const spaceshipDraw = this.layer.findOne("#spaceship-" + id);
+            const spaceshipDraw = this.layer.findOne("#spaceship-" + id)
 
             spaceshipDraw.position({
                 x: position.x,
@@ -506,7 +515,7 @@ export default class DrawSystem {
 
 
             //Ship text
-            const textDraw = this.layer.findOne("#spaceship-text-" + id);
+            const textDraw = this.layer.findOne("#spaceship-text-" + id)
 
             textDraw.position({
                 x: position.x,

@@ -5,4 +5,12 @@ const position = {
     angle: 0
 }
 
-export { position };
+const vector = {
+    name: "vector",
+    x: 0,
+    y: 0,
+    angle: 0,
+    speed: 0
+}
+
+export { position, vector };

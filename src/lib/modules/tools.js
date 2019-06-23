@@ -1,6 +1,19 @@
 export default class Tools {
 
 
+
+    /**
+     * Create a random number
+     * @param {number} min 
+     * @param {number} max 
+     */
+    static random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Tests easing function
+     */
     static easeOutQuint(from, to, number) { 
         const f = t => 1+(--t)*t*t*t*t
 
@@ -41,19 +54,21 @@ export default class Tools {
 
 
     /**
-     * Get new posititon for an item rotation
-     * @param {number} cx Rotation axle x pos
-     * @param {*} cy Rotation axle y pos
-     * @param {*} x Item x to rotate
-     * @param {*} y Item y to rotate
-     * @param {*} angle Angle in degree
+     * 
+     * @param {object} center 
+     * @param {number} center.x 
+     * @param {number} center.y 
+     * @param {object} pos 
+     * @param {number} pos.x 
+     * @param {number} pos.y 
+     * @param {number} angle 
      */
-    static rotate(cx, cy, x, y, angle) {
+    static rotate(center, pos, angle) {
         let radians = (Math.PI / 180) * angle;
         let cos = Math.cos(radians);
         let sin = Math.sin(radians);
-        let nx = (cos * (x - cx)) + (sin * (y - cy)) + cx;
-        let ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+        let nx = (cos * (pos.x - center.x)) + (sin * (pos.y - center.y)) + center.x;
+        let ny = (cos * (pos.y - center.y)) - (sin * (pos.x - center.x)) + center.y;
 
         return {
             x: nx,
