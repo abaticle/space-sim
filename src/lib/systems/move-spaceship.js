@@ -1,6 +1,7 @@
 
 import Tools from "./../modules/tools"
 import constants from "../data/constants";
+import EntityManager from "../modules/entity-manager";
 
 
 export default class MoveSpaceshipSystem {
@@ -47,7 +48,7 @@ export default class MoveSpaceshipSystem {
      * @param {object} spaceship Spaceship component
      * @returns {object|undefined} New state or undefined
      */
-    getNextState(spaceship) {
+    getNextStateOld(spaceship) {
 
         //Update index, and put first element at end
         if (spaceship.stateRepeat) {
@@ -74,6 +75,42 @@ export default class MoveSpaceshipSystem {
 
 
     /**
+     * Increment stateIndex, update states array if in repeat mode, and return new state
+     * @param {object} spaceship Spaceship component
+     * @param {object} spaceshipState Spaceship state component
+     * @returns {object|undefined} New state or undefined
+     */
+    updateNextState(spaceship, spaceshipState) {
+
+        //With repeat 
+        if (spaceship.stateRepeat) {
+
+            //Update index
+            spaceship.stateIndex++
+
+            if (spaceship.stateIndex >= spaceship.states.length) {
+                spaceship.stateIndex = 0
+            }
+        }
+
+        //Without repeat, no need to update the index
+        else {
+            spaceship.states.shift()
+        }
+
+        const newState = spaceship.states[spaceship.stateIndex];
+
+        if (newState) {
+            if (newState.payload) {
+                for (let key in newState.payload) {
+                    spaceshipState[key] = newState.payload[key]
+                }
+            }
+        }
+    }
+
+
+    /**
      * Move a spaceship toward an entity at ship speed
      * - spaceshipState.moveTo
      * @param {object} spaceshipState 
@@ -84,6 +121,7 @@ export default class MoveSpaceshipSystem {
      */
     spaceshipMove(spaceshipState, position, spaceship, dt) {
 
+
         const targetPosition = this.ecs.get(spaceshipState.moveTo, "position");
 
         const nextPosition = Tools.moveToward(position, targetPosition, spaceship.speed * dt * constants.spaceshipSpeedModifier);
@@ -92,8 +130,37 @@ export default class MoveSpaceshipSystem {
         position.y = nextPosition.y
         position.angle = nextPosition.angle
 
+        switch(true) {
 
-        //If target is a planet :
+            //Target is a planet 
+            case this.ecs.has(spaceshipState.moveTo, "planet"):
+
+                //Set a distance for orbit
+                const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size") * 3
+
+                //And planet is near 
+                if (Tools.distance(position, targetPosition) <= maxDistance) {
+                    this.updateNextState(spaceship, spaceshipState)
+                }
+            
+            
+            //Target is a ship
+            case this.ecs.has(spaceshipState.moveTo, "spaceship"):
+                //TODO:Ship target move spaceship
+                break;
+            
+
+            //Target is a position
+            case typeof spaceshipState.moveTo === "object":
+                //TODO:Ship target move position
+                break;
+
+            default:
+                throw new Error(`${spaceshipState.moveTo} is not a valid target`)
+
+        }
+
+        /*
         if (this.ecs.has(spaceshipState.moveTo, "planet")) {
 
             //Set a distance for orbit
@@ -101,28 +168,47 @@ export default class MoveSpaceshipSystem {
 
             //And planet is near 
             if (Tools.distance(position, targetPosition) <= maxDistance) {
-
-                //Next state
-                const newState = this.getNextState(spaceship);
-
-                
-                spaceshipState.moveTo = newState.moveTo
+                this.updateNextState(spaceship, spaceshipState)
             }
-
-
         } else {
 
+        }*/
+    }
+
+    spaceshipGive(spaceshipState, spaceship, dt) {
+        
+
+        
+    }
+
+    spaceshipTake(spaceshipState, spaceship, dt) {
+        
+        spaceshipState.takeCurrentTime += dt 
 
 
+        if (spaceshipState.takeCurrentTime >= spaceshipState.takeTime) {
+
+            spaceshipState.takeCurrentTime = 0;
+
+            //Target items
+            const planet = this.ecs.get(spaceshipState.takeFrom, "planet")
+
+            //Transfer items to ship
+            for (let item in spaceshipState.takeItems) {
+
+                if (planet.items[item]) {
+                    if (planet.items[item] >= spaceshipState.takeItems[item]) {
+                        EntityManager.transferItem(planet, spaceship, item, spaceshipState.takeItems[item])
+                    }
+                }                
+            }
+
+            this.updateNextState(spaceship, spaceshipState)
         }
-    }
 
-    spaceshipDeposit() {
-
-    }
-
-    spaceshipTake() {
-
+        else {
+            //Wait in orbit
+        }
     }
 
     spaceshipRefuel() {
@@ -154,15 +240,15 @@ export default class MoveSpaceshipSystem {
                     break
     
                 case "take":
-                    this.spaceshipTake()
+                    this.spaceshipTake(spaceshipState, spaceship, dt)
                     break
 
                 case "refuel":
                     this.spaceshipRefuel()
                     break
     
-                case "deposit":
-                    this.spaceshipTransfer()
+                case "give":
+                    this.spaceshipGive()
                     break
             }
 

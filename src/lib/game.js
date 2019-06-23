@@ -140,10 +140,22 @@ export default class Game extends Observable {
             stateRepeat: true,
             states: [{
                 state: "move",
-                moveTo: this.entityManager.getPlanet("Earth")
+                payload: {
+                    moveTo: this.entityManager.getPlanet("Earth")
+                }                
             }, {
+                state: "take",
+                payload: {
+                    takeFrom: this.entityManager.getPlanet("Earth"),
+                    takeItems: {
+                        ironBar: 2
+                    }
+                }
+            },{
                 state: "move",
-                moveTo: this.entityManager.getPlanet("Moon")
+                payload: {
+                    moveTo: this.entityManager.getPlanet("Moon")
+                }
             }]
         })
 
@@ -219,9 +231,7 @@ export default class Game extends Observable {
             })
         } 
 
-        //TODO:Only for test purpose : set earth, moon and venus
         solarSystem 
-            //.filter(params => params.name === "Earth" || params.name === "Venus")
             .forEach(params => {
                 //Create each planets 
                 const planet = createPlanetFromParams(params)

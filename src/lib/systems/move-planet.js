@@ -16,7 +16,19 @@ export default class MovePlanetSystem {
 
         planets.forEach(id => {
             this.movePlanet(id, Math.random() * 10000)
+
+            if (this.ecs.get(id, "planet", "desc") === "Earth") {
+                const ship = this.ecs.searchEntities("spaceshipState")[0];
+
+                const position = this.ecs.get(ship, "position")
+
+                position.x = this.ecs.get(id, "position", "x") + 1000
+            }
         })
+
+
+
+        
     }
 
     /**

@@ -8,6 +8,8 @@ export default class DebugSystem {
     constructor(ecs, actions) {
         this.ecs = ecs
         this.actions = actions
+
+        this.spaceship = undefined
     }
 
     init() {
@@ -18,19 +20,27 @@ export default class DebugSystem {
 
     update(dt) {
 
+        if (this.spaceship === undefined) {
+
+            const id = this.ecs.searchEntities("spaceshipState")[0];
+
+            this.spaceshipState = this.ecs.get(id, "spaceshipState")
+            this.spaceship = this.ecs.get(id, "spaceship")
+        }
+
         debugStore.set({
             data: [{
                 name: "action",
                 value: JSON.stringify(this.actions.getActions())
             }/*, {
-                name: "Earth speed",
-                value: this.ecs.get(3, "planet", "speed")
-            },{
-                name: "Spaceship pos",
-                value: JSON.stringify(this.ecs.get(9).position)
+                name: "spaceshipState",
+                value: JSON.stringify(this.spaceshipState)   
             }, {
-                name: "Spaceship state",
-                value: JSON.stringify(this.ecs.get(9).spaceshipState)
+                name: "spaceship.stateIndex",
+                value: this.spaceship.stateIndex
+            }, {
+                name: "orders",
+                value: JSON.stringify(this.spaceship.states)
             }*/]
         })
 

@@ -349,8 +349,6 @@ export default class DrawSystem {
         } = this.ecs.get(entityId)
 
         let shape = new Konva.Shape({
-            x: position.x,
-            y: position.y,
             id: "spaceship-" + entityId.toString(),
             name: "spaceship",
             fill: "#f1f8ff",
@@ -368,12 +366,14 @@ export default class DrawSystem {
             }
         })
 
+        //Shape center
+        shape.offsetX((5 * size) / 2)
+        shape.offsetY((-7 * size) / 2)
+
         layer.add(shape)
 
 
         let text = new Konva.Text({
-            x: position.x,
-            y: position.y + 12,
             fontSize: 12,
             text: spaceship.desc,
             fill: "white",
@@ -494,6 +494,9 @@ export default class DrawSystem {
      * @param {number} dt 
      */
     updateSpaceships(dt) {
+
+        const spaceshipSize = constants.spaceshipSizeModifier
+
         let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
 
         spaceships.forEach(id => {
@@ -519,7 +522,7 @@ export default class DrawSystem {
 
             textDraw.position({
                 x: position.x,
-                y: position.y + 10
+                y: position.y + 300 + spaceshipSize
             })
 
             textDraw.offsetX(textDraw.width() / 2)

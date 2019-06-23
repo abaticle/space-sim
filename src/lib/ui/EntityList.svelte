@@ -4,7 +4,6 @@
 
     const dispatch = createEventDispatcher();
 
-    //TODO:When entities selected, remove the selection panel
 </script>
 
 

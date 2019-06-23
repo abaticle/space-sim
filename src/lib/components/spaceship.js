@@ -37,12 +37,18 @@ const spaceshipState = {
     stopX: 0,
     stopY: 0,
 
-    //Transfer state
-    transferFrom: 0,
-    transferTo: 0,
-    transferTime: 5,
-    transferCurrent: 0,
-    transferItems: {}
+    //Take state
+    takeFrom: 0,
+    takeTime: 5,
+    takeCurrentTime: 0,
+    takeItems: {},
+
+    //Give state
+    giveTo: 0,
+    giveTime: 5,
+    giveCurrentTime: 0,
+    giveItems: {},
+
 }
 
 export { spaceship, spaceshipState };

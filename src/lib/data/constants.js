@@ -4,6 +4,6 @@ export default {
     planetDistanceModifier: 60000,
 
     spaceshipSizeModifier:50,
-    spaceshipSpeedModifier: 1,
+    spaceshipSpeedModifier: 10,
     spaceshipOrbitRotationSpeed: 1
 }
