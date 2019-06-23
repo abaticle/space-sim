@@ -156,6 +156,14 @@ export default class Game extends Observable {
                 payload: {
                     moveTo: this.entityManager.getPlanet("Moon")
                 }
+            }, {
+                state: "give",
+                payload: {
+                    giveTo: this.entityManager.getPlanet("Moon"),
+                    giveItems: {
+                        ironBar: 2
+                    }
+                }
             }]
         })
 
@@ -198,12 +206,19 @@ export default class Game extends Observable {
      * Create planet entities from a solar system
      */
     createSolarSystem(solarSystem) {
+        
+        const modifiers = {
+            size: constants.planetSizeModifier,
+            distance: constants.planetDistanceModifier,
+            speed: constants.planetSpeedModifier
+        }
+
 
         //Create the sun 
         const sun = this.entityManager.createPlanet({
             type: "star",
             desc: "Sun",
-            size: 700,
+            size: 10 * modifiers.size,
             x: 0,
             y: 0
         })
@@ -211,11 +226,7 @@ export default class Game extends Observable {
 
 
         const createPlanetFromParams = (params, parentId) => {
-            const modifiers = {
-                size: constants.planetSizeModifier,
-                distance: constants.planetDistanceModifier,
-                speed: constants.planetSpeedModifier
-            }
+
 
 
             return this.entityManager.createPlanet({

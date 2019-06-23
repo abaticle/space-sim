@@ -177,7 +177,30 @@ export default class MoveSpaceshipSystem {
 
     spaceshipGive(spaceshipState, spaceship, dt) {
         
+        spaceshipState.giveCurrentTime += dt 
 
+        if (spaceshipState.giveCurrentTime >= spaceshipState.giveTime) {
+
+            spaceshipState.giveCurrentTime = 0;
+            
+            //Target items
+            const planet = this.ecs.get(spaceshipState.giveTo, "planet")
+
+            for (let item in spaceshipState.giveItems) {
+
+                if (spaceship.items[item]) {
+                    const maxToGive = spaceship.items[item] <= spaceshipState.giveItems[item] ?
+                        spaceship.items[item] :
+                        spaceshipState.giveItems[item]
+
+                    EntityManager.transferItem(spaceship, planet, item, maxToGive)
+                    
+                }
+
+            }
+
+            this.updateNextState(spaceship, spaceshipState)
+        }
         
     }
 
@@ -197,9 +220,14 @@ export default class MoveSpaceshipSystem {
             for (let item in spaceshipState.takeItems) {
 
                 if (planet.items[item]) {
-                    if (planet.items[item] >= spaceshipState.takeItems[item]) {
-                        EntityManager.transferItem(planet, spaceship, item, spaceshipState.takeItems[item])
-                    }
+                    const maxToGive = planet.items[item] >= spaceshipState.takeItems[item] ?
+                        spaceshipState.takeItems[item] :
+                        planet.items[item]
+                    
+                    EntityManager.transferItem(planet, spaceship, item, maxToGive)
+                    /*if (planet.items[item] >= spaceshipState.takeItems[item]) {
+                        EntityManager.transferItem(planet, spaceship, item, maxToGive)
+                    }*/
                 }                
             }
 
@@ -248,7 +276,7 @@ export default class MoveSpaceshipSystem {
                     break
     
                 case "give":
-                    this.spaceshipGive()
+                    this.spaceshipGive(spaceshipState, spaceship, dt)
                     break
             }
 
