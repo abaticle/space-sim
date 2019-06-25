@@ -46,37 +46,6 @@ export default class MoveSpaceshipSystem {
     /**
      * Increment stateIndex, update states array if in repeat mode, and return new state
      * @param {object} spaceship Spaceship component
-     * @returns {object|undefined} New state or undefined
-     */
-    getNextStateOld(spaceship) {
-
-        //Update index, and put first element at end
-        if (spaceship.stateRepeat) {
-
-            const state = spaceship.states.shift()
-            spaceship.states.push(state)
-
-            spaceship.stateIndex++
-
-            if (spaceship.stateIndex >= spaceship.states.length) {
-                spaceship.stateIndex = 0
-            }
-        }
-
-        //Remove first element, no need to update index
-        else {
-            spaceship.states.shift()        
-        }
-
-        //Return first state
-        return spaceship.states[0]
-
-    }
-
-
-    /**
-     * Increment stateIndex, update states array if in repeat mode, and return new state
-     * @param {object} spaceship Spaceship component
      * @param {object} spaceshipState Spaceship state component
      * @returns {object|undefined} New state or undefined
      */
@@ -136,7 +105,7 @@ export default class MoveSpaceshipSystem {
             case this.ecs.has(spaceshipState.moveTo, "planet"):
 
                 //Set a distance for orbit
-                const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size") * 3
+                const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size")
 
                 //And planet is near 
                 if (Tools.distance(position, targetPosition) <= maxDistance) {
