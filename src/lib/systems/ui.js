@@ -36,7 +36,11 @@ export default class UISystem {
     decreaseSpeed(payload) {
         const game = this.entityManager.getGame();
 
-        game.speed -= 1
+        if (game.speed === 1) {
+            game.speed /= 2
+        }
+        //game.speed -= 1
+
 
         speeedStore.set(game.speed)
         

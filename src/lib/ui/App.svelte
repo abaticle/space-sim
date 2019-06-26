@@ -11,6 +11,8 @@
 	import EntityList from "./EntityList.svelte"
 	import Spaceship from "./Spaceship.svelte"
 	import Debug from "./Debug.svelte"
+
+	import { fly } from 'svelte/transition';
  
 	const game = new Game()
 
@@ -166,27 +168,31 @@
 				</button>
             </div>
         </div>
-
-		{#if $entityList.visible}
-			<EntityList
-				on:entitySelected={entitySelected}
-			></EntityList>
-		{/if}
-		
-		{#if $planet}
-			<Planet 
-				on:displayBuyBuilding={displayBuyBuilding}
-				on:displayChooseProduction={displayChooseProduction}>
-			</Planet>
-		{/if}
-
-		{#if $spaceship}
-			<Spaceship></Spaceship>
-		{/if}
-		
 	</div>
-	
 
+	{#if $entityList.visible}
+	<div class="right-panel" > 
+		<EntityList
+			on:entitySelected={entitySelected}
+		></EntityList>
+	</div> 
+	{/if}
+		
+	{#if $planet}
+	<div class="right-panel" transition:fly="{{ y: -100, duration: 500 }}"> 
+		<Planet 
+			on:displayBuyBuilding={displayBuyBuilding}
+			on:displayChooseProduction={displayChooseProduction}>
+		</Planet>
+	</div> 
+	{/if}
+
+	{#if $spaceship}
+	<div class="right-panel"> 
+		<Spaceship></Spaceship>
+	</div> 
+	{/if}
+		
 </div>
 
 

@@ -12,7 +12,8 @@ import {
     planet
 } from "./components/planet"
 import {
-    position
+    position,
+    vector
 } from "./components/position"
 import {
     spaceship,
@@ -54,6 +55,10 @@ export default class Game extends Observable {
         this.createBuildings();
         this.createSystems();
         this.createSpaceships();
+
+        //TODO:Tests Vectors
+        this.createVectors();
+
         this.initSystems();
         requestAnimationFrame(this.update.bind(this));
 
@@ -120,11 +125,39 @@ export default class Game extends Observable {
 
     registerComponents() {
 
-        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game];
+        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game, vector];
 
         components.forEach(c => this.ecs.registerComponent(c))
 
     }
+
+
+    createVectors() {
+
+        //const vectorId = this.ecs.createEntity(["position", "vector"]);
+
+
+        const id = this.ecs.createFromAssemblage({
+            components: ["position", "vector"],
+            data: {
+                position: {
+                    x: 200,
+                    y: 100
+                },
+                vector: {
+                    x: 1,
+                    y: 0
+                }
+            }
+        })
+
+
+        
+
+
+
+    }
+
 
     createSpaceships() {
 

@@ -40,7 +40,6 @@ export default class ECS {
         return entity
     }
 
-
     /**
      * Get new entity id
      */
@@ -53,7 +52,6 @@ export default class ECS {
             i++
         }
     }
-
 
     /**
      * Check entity exists
@@ -97,6 +95,12 @@ export default class ECS {
 
         return entityId
     }
+
+    //TODO Signleton entity ?
+    createSingletonEntity(name, components) {
+        
+    }
+
 
 
     /**

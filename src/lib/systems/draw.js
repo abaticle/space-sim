@@ -1,5 +1,6 @@
-import Tools from "../modules/tools";
-import constants from "../data/constants";
+import Tools from "../modules/tools"
+import constants from "../data/constants"
+import { getAngleAsDegree } from "../modules/vector"
 
 export default class DrawSystem {
 
@@ -340,35 +341,27 @@ export default class DrawSystem {
     drawSpaceship(entityId) {
 
         const size = constants.spaceshipSizeModifier
-
-        let layer = this.layer
-
-        let {
-            spaceship,
-            position
-        } = this.ecs.get(entityId)
+        const layer = this.layer
+        const spaceship = this.ecs.get(entityId, "spaceship")
 
         let shape = new Konva.Shape({
             id: "spaceship-" + entityId.toString(),
             name: "spaceship",
             fill: "#f1f8ff",
             stroke: "white",
+            offsetX: (5 * size) / 2,
+            offsetY: (-7 * size) / 2,
             sceneFunc: (ctx, shape) => {                        
 
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
                 ctx.lineTo(5 * size, 0);
                 ctx.lineTo(2.5 * size, -7 * size);
-
-                //ctx.quadraticCurveTo(150, 100, 260, 170);
                 ctx.closePath();
                 ctx.fillStrokeShape(shape);
+
             }
         })
-
-        //Shape center
-        shape.offsetX((5 * size) / 2)
-        shape.offsetY((-7 * size) / 2)
 
         layer.add(shape)
 
@@ -412,15 +405,6 @@ export default class DrawSystem {
         this.layer.add(selection)
     }
 
-    /**
-     * Init: draw everything
-     */
-    init() {
-        this.initKonva()
-        this.initPlanets()
-        this.initShips()
-        this.initSelection()
-    }
 
     /**
      * Update planet/text/orbits positions
@@ -437,7 +421,7 @@ export default class DrawSystem {
             } = this.ecs.get(planetId);
 
             //Move planet :
-            const planetDraw = this.layer.findOne("#planet-" + planetId);
+            const planetDraw = this.layer.findOne("#planet-" + planetId)
 
             planetDraw.position({
                 x: position.x,
@@ -445,24 +429,8 @@ export default class DrawSystem {
             })
 
 
-            //Move planet orbit :
-            if (planet.parentId !== undefined) {
-                const orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId);
-                const parentPosition = this.ecs.get(planet.parentId, "position");
-
-                orbiteDraw.position({
-                    x: parentPosition.x,
-                    y: parentPosition.y
-                })
-
-                const scale = this.stage.getScale();
-
-                orbiteDraw.setStrokeWidth(0.2 / scale.x);
-            }
-
-
             //Move planet text: 
-            let textDraw = this.layer.findOne("#planet-text-" + planetId);
+            let textDraw = this.layer.findOne("#planet-text-" + planetId)
 
             textDraw.position({
                 x: position.x,
@@ -470,6 +438,24 @@ export default class DrawSystem {
             })
 
             textDraw.offsetX(textDraw.width() / 2)
+
+
+            //Move planet orbit :
+            if (planet.parentId !== undefined) {
+
+                const orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId)
+                const parentPosition = this.ecs.get(planet.parentId, "position")
+
+                orbiteDraw.position({
+                    x: parentPosition.x,
+                    y: parentPosition.y
+                })
+
+                const scale = this.stage.getScale()
+
+                orbiteDraw.setStrokeWidth(0.2 / scale.x)
+            }
+
         });
 
     }
@@ -530,9 +516,85 @@ export default class DrawSystem {
         });
     }
 
+    /**
+     * Init: draw everything
+     */
+    init() {
+        this.initKonva()
+        //FIXME:VECTORS TO REMOVE !!!
+        //this.initPlanets()
+        //this.initShips()
+        this.initSelection()
+    }
+
+    /**
+     * TODO:Tests vectors
+     * @param {number} dt 
+     */
+    updateVectors(dt) {
+
+        
+        const vectors = this.ecs.searchEntities(["vector", "position"])
+
+        vectors.forEach(id => {
+
+            const {
+                position,
+                vector
+            } = this.ecs.get(id)
+
+            const size = 10;
+
+
+            let shape = this.layer.findOne("#vector-" + id.toString())
+
+            if (shape === undefined) {
+
+                shape = new Konva.Shape({
+                    id: "vector-" + id.toString(),
+                    name: "vector",
+                    fill: "#f1f8ff",
+                    stroke: "white",
+                    offsetX: (5 * size) / 2,
+                    offsetY: (-7 * size) / 2,
+                    x: position.x,
+                    y: position.y,
+                    //angle
+                    sceneFunc: (ctx, shape) => {                        
+    
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(5 * size, 0);
+                        ctx.lineTo(2.5 * size, -7 * size);
+                        ctx.closePath();
+                        ctx.fillStrokeShape(shape);
+    
+                    }
+                })
+
+                layer.add(shape)
+            }
+
+            else {
+                shape.position({
+                    x: position.x,
+                    y: position.y
+                })
+
+                shape.rotation(getAngleAsDegree(vector)) 
+
+                
+            }
+        })
+
+    }
+
     update(dt) {
-        this.updatePlanets(dt)
-        this.updateSpaceships(dt)
+
+        //FIXME:VECTORS TO REMOVE !!!
+        //this.updatePlanets(dt)
+        //this.updateSpaceships(dt)
+        this.updateVectors(dt)
         this.updateSelection(dt)
 
         this.layer.batchDraw()

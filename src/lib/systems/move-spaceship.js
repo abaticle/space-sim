@@ -1,7 +1,14 @@
-
 import Tools from "./../modules/tools"
+import {
+    add,
+    normalize,
+    scale
+} from "./../modules/vector"
 import constants from "../data/constants";
 import EntityManager from "../modules/entity-manager";
+import {
+    vector
+} from "../components/position";
 
 
 export default class MoveSpaceshipSystem {
@@ -99,7 +106,7 @@ export default class MoveSpaceshipSystem {
         position.y = nextPosition.y
         position.angle = nextPosition.angle
 
-        switch(true) {
+        switch (true) {
 
             //Target is a planet 
             case this.ecs.has(spaceshipState.moveTo, "planet"):
@@ -111,21 +118,21 @@ export default class MoveSpaceshipSystem {
                 if (Tools.distance(position, targetPosition) <= maxDistance) {
                     this.updateNextState(spaceship, spaceshipState)
                 }
-            
-            
-            //Target is a ship
-            case this.ecs.has(spaceshipState.moveTo, "spaceship"):
-                //TODO:Ship target move spaceship
-                break;
-            
 
-            //Target is a position
-            case typeof spaceshipState.moveTo === "object":
-                //TODO:Ship target move position
-                break;
 
-            default:
-                throw new Error(`${spaceshipState.moveTo} is not a valid target`)
+                //Target is a ship
+                case this.ecs.has(spaceshipState.moveTo, "spaceship"):
+                    //TODO:Ship target move spaceship
+                    break;
+
+
+                    //Target is a position
+                case typeof spaceshipState.moveTo === "object":
+                    //TODO:Ship target move position
+                    break;
+
+                default:
+                    throw new Error(`${spaceshipState.moveTo} is not a valid target`)
 
         }
 
@@ -145,13 +152,13 @@ export default class MoveSpaceshipSystem {
     }
 
     spaceshipGive(spaceshipState, spaceship, dt) {
-        
-        spaceshipState.giveCurrentTime += dt 
+
+        spaceshipState.giveCurrentTime += dt
 
         if (spaceshipState.giveCurrentTime >= spaceshipState.giveTime) {
 
             spaceshipState.giveCurrentTime = 0;
-            
+
             //Target items
             const planet = this.ecs.get(spaceshipState.giveTo, "planet")
 
@@ -163,19 +170,19 @@ export default class MoveSpaceshipSystem {
                         spaceshipState.giveItems[item]
 
                     EntityManager.transferItem(spaceship, planet, item, maxToGive)
-                    
+
                 }
 
             }
 
             this.updateNextState(spaceship, spaceshipState)
         }
-        
+
     }
 
     spaceshipTake(spaceshipState, spaceship, dt) {
-        
-        spaceshipState.takeCurrentTime += dt 
+
+        spaceshipState.takeCurrentTime += dt
 
 
         if (spaceshipState.takeCurrentTime >= spaceshipState.takeTime) {
@@ -192,18 +199,16 @@ export default class MoveSpaceshipSystem {
                     const maxToGive = planet.items[item] >= spaceshipState.takeItems[item] ?
                         spaceshipState.takeItems[item] :
                         planet.items[item]
-                    
+
                     EntityManager.transferItem(planet, spaceship, item, maxToGive)
                     /*if (planet.items[item] >= spaceshipState.takeItems[item]) {
                         EntityManager.transferItem(planet, spaceship, item, maxToGive)
                     }*/
-                }                
+                }
             }
 
             this.updateNextState(spaceship, spaceshipState)
-        }
-
-        else {
+        } else {
             //Wait in orbit
         }
     }
@@ -219,7 +224,7 @@ export default class MoveSpaceshipSystem {
     moveSpaceships(dt) {
 
         let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"])
-        
+
         spaceships.forEach(id => {
             const {
                 spaceship,
@@ -227,15 +232,15 @@ export default class MoveSpaceshipSystem {
                 spaceshipState
             } = this.ecs.get(id)
 
-            switch(this.getCurrentState(spaceship).state) {
+            switch (this.getCurrentState(spaceship).state) {
                 case "orbit":
                     this.spaceshipOrbit(spaceshipState, position, dt)
                     break
-    
+
                 case "move":
                     this.spaceshipMove(spaceshipState, position, spaceship, dt)
                     break
-    
+
                 case "take":
                     this.spaceshipTake(spaceshipState, spaceship, dt)
                     break
@@ -243,7 +248,7 @@ export default class MoveSpaceshipSystem {
                 case "refuel":
                     this.spaceshipRefuel()
                     break
-    
+
                 case "give":
                     this.spaceshipGive(spaceshipState, spaceship, dt)
                     break
@@ -251,12 +256,48 @@ export default class MoveSpaceshipSystem {
 
         })
 
-        
+
+    }
+
+    moveVectors(dt) {
+        if (this._tick === undefined) {
+            this._tick = 0
+        } else {
+            this._tick += 1
+        }
+        const vectors = this.ecs.searchEntities(["vector", "position"])
+
+        vectors.forEach(id => {
+
+            const {
+                vector,
+                position
+            } = this.ecs.get(id)
+
+            const speed = 5;
+
+            const nextPosition = add(position, scale(normalize(vector), speed))
+
+            position.x = nextPosition.x
+            position.y = nextPosition.y
+
+            
+            if (this._tick > 60) {
+                this._tick = 0
+                vector.x = Tools.random(-1, 1)
+                vector.y = Tools.random(-1, 1)
+            }
+
+        })
+
     }
 
 
     update(dt) {
         this.moveSpaceships(dt);
+
+        //TODO:Tests move vectors
+        this.moveVectors(dt)
     }
 
 
