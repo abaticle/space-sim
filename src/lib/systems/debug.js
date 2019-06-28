@@ -1,4 +1,5 @@
 import { debug as debugStore } from "./../ui/stores"
+import { getAngleAsDegree } from "../modules/vector";
 
 
 
@@ -22,17 +23,30 @@ export default class DebugSystem {
 
         if (this.spaceship === undefined) {
 
-            const id = this.ecs.searchEntities("spaceshipState")[0];
+            const [id] = this.ecs.searchEntities(["position", "vector"]);
 
-            this.spaceshipState = this.ecs.get(id, "spaceshipState")
-            this.spaceship = this.ecs.get(id, "spaceship")
+            this.spaceship = this.ecs.get(id)
         }
 
         debugStore.set({
             data: [{
                 name: "action",
                 value: JSON.stringify(this.actions.getActions())
-            }/*, {
+            }, {
+                name: "mouse x",
+                value: window.mouseX
+            }, {
+                name: "mouse y",
+                value: window.mouseY
+            }, {
+                name: "ship x",
+                value: this.spaceship.position.x || 0
+            }, {
+                name: "angle",
+                value: getAngleAsDegree(this.spaceship.vector)
+            }
+                
+            /*, {
                 name: "spaceshipState",
                 value: JSON.stringify(this.spaceshipState)   
             }, {

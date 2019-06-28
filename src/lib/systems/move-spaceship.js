@@ -1,6 +1,7 @@
 import Tools from "./../modules/tools"
 import {
     add,
+    substract,
     normalize,
     scale
 } from "./../modules/vector"
@@ -267,6 +268,9 @@ export default class MoveSpaceshipSystem {
         }
         const vectors = this.ecs.searchEntities(["vector", "position"])
 
+
+
+
         vectors.forEach(id => {
 
             const {
@@ -274,19 +278,43 @@ export default class MoveSpaceshipSystem {
                 position
             } = this.ecs.get(id)
 
-            const speed = 5;
+            const speed = 2;
 
-            const nextPosition = add(position, scale(normalize(vector), speed))
+            //const nextPosition = add(position, scale(normalize(vector), speed)) 
 
+            //position.x = nextPosition.x
+            //position.y = nextPosition.y
+
+
+
+            const target = {
+                x: window.mouseX,
+                y: window.mouseY
+            }
+
+            
+            const velocity = scale(normalize(substract(target, position)), speed)
+
+            vector.x = velocity.x
+            vector.y = velocity.y
+
+
+            const nextPosition = add(position, velocity);
             position.x = nextPosition.x
             position.y = nextPosition.y
 
+
+
+            //const desiredVelocity = normalize(substract(target, position))
+
+            //const steering = substract(desiredVelocity, velocity)
+
             
-            if (this._tick > 60) {
+            /*if (this._tick > 60) {
                 this._tick = 0
                 vector.x = Tools.random(-1, 1)
                 vector.y = Tools.random(-1, 1)
-            }
+            }*/
 
         })
 

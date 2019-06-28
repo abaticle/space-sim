@@ -10,7 +10,15 @@
  * @param {Vector} v1 
  */
 const getAngleAsDegree = (v1) => {
-    return convertRadianToDegree(Math.atan(v1.y / v1.x))
+    let deg = convertRadianToDegree(Math.atan(v1.y / v1.x))
+
+    if (deg > -90 && deg < 90 ) {
+        deg += 90
+    } else {
+        deg += 30
+    }
+    return deg
+
 }
 
 

@@ -75,6 +75,10 @@ export default class DrawSystem {
     onMouseMove(event) {
         const selection = this.layer.findOne("#selection");
 
+        let s = this.stage.getScale().x;
+        window.mouseX = (event.evt.offsetX / s - this.stage.x() / s)
+        window.mouseY = (event.evt.offsetY / s - this.stage.y() / s)
+
         if (selection.getVisible()) {
             const scale = this.stage.getScale().x;
 
