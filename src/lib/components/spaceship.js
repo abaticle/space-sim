@@ -12,7 +12,8 @@
 const spaceship = {
     name: "spaceship",
     desc: "",
-    speed: 0,
+    speed: 500,
+    mass: 5,
     stateIndex: 0,
     stateRepeat: true,
     states: [],

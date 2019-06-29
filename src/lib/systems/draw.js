@@ -1,6 +1,8 @@
 import Tools from "../modules/tools"
 import constants from "../data/constants"
-import { getAngleAsDegree } from "../modules/vector"
+import {
+    getAngleAsDegree
+} from "../modules/vector"
 
 export default class DrawSystem {
 
@@ -88,7 +90,7 @@ export default class DrawSystem {
             this.layer.batchDraw()
         }
     }
-    
+
     /**
      * Mouse down: 
      * - Start to draw selection
@@ -107,7 +109,7 @@ export default class DrawSystem {
 
             const scale = this.stage.getScale().x;
             const selection = this.layer.findOne("#selection");
-            
+
             if (!selection.getVisible()) {
 
                 selection.setVisible(true)
@@ -355,7 +357,7 @@ export default class DrawSystem {
             stroke: "white",
             offsetX: (5 * size) / 2,
             offsetY: (-7 * size) / 2,
-            sceneFunc: (ctx, shape) => {                        
+            sceneFunc: (ctx, shape) => {
 
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
@@ -390,7 +392,7 @@ export default class DrawSystem {
      */
     initShips() {
 
-        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);        
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
 
         spaceships.forEach(id => this.drawSpaceship(id))
     }
@@ -469,7 +471,7 @@ export default class DrawSystem {
      * @param {number} dt 
      */
     updateSelection(dt) {
-        
+
         const selection = this.layer.findOne("#selection")
 
         if (selection.getVisible()) {
@@ -537,14 +539,14 @@ export default class DrawSystem {
      */
     updateVectors(dt) {
 
-        
-        const vectors = this.ecs.searchEntities(["vector", "position"])
+
+        const vectors = this.ecs.searchEntities(["velocity", "position"])
 
         vectors.forEach(id => {
 
             const {
                 position,
-                vector
+                velocity
             } = this.ecs.get(id)
 
             const size = 10;
@@ -559,35 +561,33 @@ export default class DrawSystem {
                     name: "vector",
                     fill: "#f1f8ff",
                     stroke: "white",
-                    offsetX: (5 * size) / 2,
-                    offsetY: (-7 * size) / 2,
+                    offsetX: (2 * size) / 2,
+                    offsetY: 0,
                     x: position.x,
                     y: position.y,
                     //angle
-                    sceneFunc: (ctx, shape) => {                        
-    
+                    sceneFunc: (ctx, shape) => {
+
                         ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(5 * size, 0);
-                        ctx.lineTo(2.5 * size, -7 * size);
+                        ctx.moveTo(0, 1 * size);
+                        ctx.lineTo(2 * size, 0);
+                        ctx.lineTo(0, -1 * size);
                         ctx.closePath();
                         ctx.fillStrokeShape(shape);
-    
+
                     }
                 })
 
                 layer.add(shape)
-            }
-
-            else {
+            } else {
                 shape.position({
                     x: position.x,
                     y: position.y
                 })
 
-                shape.rotation(getAngleAsDegree(vector)) 
+                shape.rotation(getAngleAsDegree(velocity))
 
-                
+
             }
         })
 

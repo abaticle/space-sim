@@ -10,15 +10,9 @@
  * @param {Vector} v1 
  */
 const getAngleAsDegree = (v1) => {
-    let deg = convertRadianToDegree(Math.atan(v1.y / v1.x))
-
-    if (deg > -90 && deg < 90 ) {
-        deg += 90
-    } else {
-        deg += 30
-    }
-    return deg
-
+    var angle = Math.atan2(v1.y, v1.x);
+    var degrees = 180 * angle / Math.PI;
+    return (360 + Math.round(degrees)) % 360;
 }
 
 
@@ -59,10 +53,29 @@ const dot = (v1, v2) => {
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-const scale = (v1, scale) => {
+const multiply = (v1, multiply) => {
+    if (typeof multiply === "number") {
+        return {
+            x: v1.x * multiply,
+            y: v1.y * multiply
+        }
+    }
     return {
-        x: v1.x * scale,
-        y: v1.y * scale
+        x: v1.x * multiply,
+        y: v1.y * multiply
+    }
+}
+
+const divide = (v1, divide) => {
+    if (typeof divide === "number") {
+        return {
+            x: v1.x / divide,
+            y: v1.y / divide
+        }
+    }
+    return {
+        x: v1.x / divide,
+        y: v1.y / divide
     }
 }
 
@@ -75,11 +88,12 @@ const magnitude = (v1) => {
 }
 
 /**
- *Normalize a vector
+ * Normalize a vector
  * @param {Vector} v1 
+ * @returns {Vector}
  */
 const normalize = (v1) => {
-    var magnitude = Math.sqrt(v1.x * v1.x + v1.y * v1.y); //magnitude(v1);
+    let magnitude = Math.sqrt(v1.x * v1.x + v1.y * v1.y)
 
     if (magnitude === 0) {
         return {
@@ -94,13 +108,34 @@ const normalize = (v1) => {
     }
 }
 
+/**
+ * Truncate a vector (set a max magnitude)
+ * @param {Vector} v1 
+ * @param {number} maxLength Maximum vector magnitude
+ * @returns {Vector}
+ */
+const truncate = (v1, maxLength) => {
+    let magnitude = Math.sqrt(v1.x * v1.x + v1.y * v1.y)
+
+    if (magnitude <= maxLength) {
+        return {
+            x: v1.x,
+            y: v1.y
+        }
+    } else {
+        return multiply(normalize(v1), maxLength)
+    }
+}
+
 export {
     add,
     substract,
     dot,
-    scale,
+    multiply,
+    divide,
     magnitude,
     normalize,
+    truncate,
     getAngleAsDegree,
     convertRadianToDegree
 }

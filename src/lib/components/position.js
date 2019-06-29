@@ -5,10 +5,10 @@ const position = {
     angle: 0    //TODO:Do not use
 }
 
-const vector = {
-    name: "vector",
+const velocity = {
+    name: "velocity",
     x: 0,
     y: 0
 }
 
-export { position, vector };
+export { position, velocity };

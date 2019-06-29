@@ -3,13 +3,13 @@ import {
     add,
     substract,
     normalize,
-    scale
+    multiply,
+    divide,
+    truncate,
+    magnitude
 } from "./../modules/vector"
 import constants from "../data/constants";
 import EntityManager from "../modules/entity-manager";
-import {
-    vector
-} from "../components/position";
 
 
 export default class MoveSpaceshipSystem {
@@ -260,61 +260,60 @@ export default class MoveSpaceshipSystem {
 
     }
 
+    seek() {
+        
+    }
+
     moveVectors(dt) {
-        if (this._tick === undefined) {
-            this._tick = 0
-        } else {
-            this._tick += 1
-        }
-        const vectors = this.ecs.searchEntities(["vector", "position"])
-
-
-
+        
+        const vectors = this.ecs.searchEntities(["velocity", "position"])
 
         vectors.forEach(id => {
 
+            const maxVelocity = dt * 500    
+            const maxForce = 5
+            const mass = 5
+            const slowingRadius = 15 * mass
+
             const {
-                vector,
+                velocity,
                 position
             } = this.ecs.get(id)
 
-            const speed = 2;
-
-            //const nextPosition = add(position, scale(normalize(vector), speed)) 
-
-            //position.x = nextPosition.x
-            //position.y = nextPosition.y
-
-
-
             const target = {
-                x: window.mouseX,
-                y: window.mouseY
+                x: window.mouseX || 500,
+                y: window.mouseY || 500
             }
 
             
-            const velocity = scale(normalize(substract(target, position)), speed)
+            let desiredVelocity = substract(target, position)
+            const distance = magnitude(desiredVelocity)
 
-            vector.x = velocity.x
-            vector.y = velocity.y
+            if (distance < slowingRadius) {
+                desiredVelocity = multiply(multiply(normalize(desiredVelocity), maxVelocity), (distance / slowingRadius))
+            } else {
+                desiredVelocity = multiply(normalize(desiredVelocity), maxVelocity)    
+            }           
+
+            let steering = substract(desiredVelocity, velocity)
+
+            steering = truncate(steering, maxForce)
+            steering = divide(steering, mass)
 
 
-            const nextPosition = add(position, velocity);
-            position.x = nextPosition.x
-            position.y = nextPosition.y
+            //New velocity
+            const tmp = truncate(add(velocity, steering), maxVelocity)
+
+            velocity.x = tmp.x
+            velocity.y = tmp.y
 
 
+            //New position
+            const tmp2 = add(position, velocity)
 
-            //const desiredVelocity = normalize(substract(target, position))
+            position.x = tmp2.x
+            position.y = tmp2.y
 
-            //const steering = substract(desiredVelocity, velocity)
-
-            
-            /*if (this._tick > 60) {
-                this._tick = 0
-                vector.x = Tools.random(-1, 1)
-                vector.y = Tools.random(-1, 1)
-            }*/
 
         })
 

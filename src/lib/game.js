@@ -13,7 +13,7 @@ import {
 } from "./components/planet"
 import {
     position,
-    vector
+    velocity
 } from "./components/position"
 import {
     spaceship,
@@ -125,7 +125,7 @@ export default class Game extends Observable {
 
     registerComponents() {
 
-        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game, vector];
+        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game, velocity];
 
         components.forEach(c => this.ecs.registerComponent(c))
 
@@ -134,25 +134,31 @@ export default class Game extends Observable {
 
     createVectors() {
 
-        //const vectorId = this.ecs.createEntity(["position", "vector"]);
+        //const vectorId = this.ecs.createEntity(["position", "velocity"]);
 
+        //for (let i = 0; i < 10; i++)
 
-        const id = this.ecs.createFromAssemblage({
-            components: ["position", "vector"],
-            data: {
-                position: {
-                    x: 200,
-                    y: 100
-                },
-                vector: {
-                    x: 1,
-                    y: 0
+            this.ecs.createFromAssemblage({
+                components: ["position", "velocity", "spaceship"],
+                data: {
+                    position: {
+                        x: Tools.random(-500, 500),
+                        y: Tools.random(-500, 500)
+                    },
+                    velocity: {
+                        x: 1,
+                        y: 0
+                    }, 
+                    spaceship: {
+                        desc: "Space One",
+                        speed: 500,
+                        mass: 5
+                    }
                 }
-            }
-        })
+            })
 
 
-        
+
 
 
 
@@ -175,7 +181,7 @@ export default class Game extends Observable {
                 state: "move",
                 payload: {
                     moveTo: this.entityManager.getPlanet("Earth")
-                }                
+                }
             }, {
                 state: "take",
                 payload: {
@@ -184,7 +190,7 @@ export default class Game extends Observable {
                         ironBar: 2
                     }
                 }
-            },{
+            }, {
                 state: "move",
                 payload: {
                     moveTo: this.entityManager.getPlanet("Moon")
@@ -239,7 +245,7 @@ export default class Game extends Observable {
      * Create planet entities from a solar system
      */
     createSolarSystem(solarSystem) {
-        
+
         const modifiers = {
             size: constants.planetSizeModifier,
             distance: constants.planetDistanceModifier,
@@ -273,9 +279,9 @@ export default class Game extends Observable {
                 items: params["items"] ? params.items : {},
                 owned: params.owned
             })
-        } 
+        }
 
-        solarSystem 
+        solarSystem
             .forEach(params => {
                 //Create each planets 
                 const planet = createPlanetFromParams(params)
