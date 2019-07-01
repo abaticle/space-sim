@@ -139,7 +139,7 @@ class EntityManager {
         stateRepeat = false
     }) {
         let spaceshipId = this.ecs.createFromAssemblage({
-            components: ["spaceship", "spaceshipState", "position"],
+            components: ["spaceship", "spaceshipState", "position", "velocity"],
             data: {
                 spaceship: {
                     desc,

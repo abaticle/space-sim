@@ -55,30 +55,9 @@ export default class Game extends Observable {
         this.createBuildings();
         this.createSystems();
         this.createSpaceships();
-
-        //TODO:Tests Vectors
-        this.createVectors();
-
         this.initSystems();
         requestAnimationFrame(this.update.bind(this));
 
-        //this.tests();
-    }
-
-    tests() {
-        const ecs = this.ecs;
-
-        let manager = new EntityManager(ecs);
-
-        let p = manager.createPlanet({
-            desc: "test",
-            size: 400,
-            owned: true,
-            speed: 2
-        })
-
-        console.assert(ecs.get(p, "planet", "desc") === "test", `createPlanet with desc works`)
-        console.assert(ecs.get(p, "planet", "type") === "planet", `createPlanet default value`)
     }
 
     initSystems() {
@@ -100,6 +79,7 @@ export default class Game extends Observable {
      * @param {number} time 
      */
     update(time) {
+
         let dt = (time - this.timeOld) / 1000;
         this.timeOld = time;
 
@@ -107,7 +87,6 @@ export default class Game extends Observable {
         this.updateFPS(dt);
 
         //Update speed
-        //dt *= this.speed;
         dt *= this._gameEntity.speed
 
         _.each(this.systems, system => {
@@ -131,94 +110,57 @@ export default class Game extends Observable {
 
     }
 
-
-    createVectors() {
-
-        //const vectorId = this.ecs.createEntity(["position", "velocity"]);
-
-        //for (let i = 0; i < 10; i++)
-
-            this.ecs.createFromAssemblage({
-                components: ["position", "velocity", "spaceship"],
-                data: {
-                    position: {
-                        x: Tools.random(-500, 500),
-                        y: Tools.random(-500, 500)
-                    },
-                    velocity: {
-                        x: 1,
-                        y: 0
-                    }, 
-                    spaceship: {
-                        desc: "Space One",
-                        speed: 500,
-                        mass: 5
-                    }
-                }
-            })
-
-
-
-
-
-
-    }
-
-
     createSpaceships() {
 
-        const earthId = this.entityManager.getPlanet("Earth");
 
+        for (let i = 0; i < 2; i++)
 
-        this.entityManager.createSpaceship({
-            desc: "space-1",
-            x: Tools.random(-40000, 40000),
-            y: Tools.random(-40000, 40000),
-            moveTo: earthId,
-            stateIndex: 0,
-            stateRepeat: true,
-            states: [{
-                state: "move",
-                payload: {
+        this.ecs.createFromAssemblage({
+            components: ["spaceship", "spaceshipState", "position", "velocity"],
+            data: {
+                spaceship: {
+                    desc: "space " + i,
+                    speed: 1500,
+                    stateIndex: 0,
+                    stateRepeat: true,
+                    states: [{
+                        state: "move",
+                        payload: {
+                            moveTo: this.entityManager.getPlanet("Earth")
+                        }
+                    }, {
+                        state: "take",
+                        payload: {
+                            takeFrom: this.entityManager.getPlanet("Earth"),
+                            takeItems: {
+                                ironBar: 2
+                            }
+                        }
+                    }, {
+                        state: "move",
+                        payload: {
+                            moveTo: this.entityManager.getPlanet("Moon")
+                        }
+                    }, {
+                        state: "give",
+                        payload: {
+                            giveTo: this.entityManager.getPlanet("Moon"),
+                            giveItems: {
+                                ironBar: 2
+                            }
+                        }
+                    }]
+                },
+                spaceshipState: {
                     moveTo: this.entityManager.getPlanet("Earth")
+                },
+                position: {
+                    x: Tools.random(-40000, 40000),
+                    y: Tools.random(-40000, 40000)
                 }
-            }, {
-                state: "take",
-                payload: {
-                    takeFrom: this.entityManager.getPlanet("Earth"),
-                    takeItems: {
-                        ironBar: 2
-                    }
-                }
-            }, {
-                state: "move",
-                payload: {
-                    moveTo: this.entityManager.getPlanet("Moon")
-                }
-            }, {
-                state: "give",
-                payload: {
-                    giveTo: this.entityManager.getPlanet("Moon"),
-                    giveItems: {
-                        ironBar: 2
-                    }
-                }
-            }]
+            }
+
         })
-
-
-
-        /*for (let i = 1; i < 5; i++) {
-
-            this.entityManager.createSpaceship({
-                desc: "space-" + i,
-                x: Tools.random(-40000, 40000),
-                y: Tools.random(-40000, 40000),
-                state: "move",
-                moveTo: earthId
-            })
-
-        }*/
     }
 
 
@@ -257,7 +199,7 @@ export default class Game extends Observable {
         const sun = this.entityManager.createPlanet({
             type: "star",
             desc: "Sun",
-            size: 10 * modifiers.size,
+            size: constants.sunSize * modifiers.size,
             x: 0,
             y: 0
         })

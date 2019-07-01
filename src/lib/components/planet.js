@@ -1,7 +1,7 @@
 const planet = {
     name: "planet",
     desc: "",
-    type: "", //Star/Planet/Satellite
+    type: "", //Star, Planet, Satellite, etc.
     items: {},
     size: 0,
     speed: 0,

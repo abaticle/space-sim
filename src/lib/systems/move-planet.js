@@ -25,9 +25,6 @@ export default class MovePlanetSystem {
                 position.x = this.ecs.get(id, "position", "x") + 1000
             }
         })
-
-
-
         
     }
 
@@ -49,7 +46,7 @@ export default class MovePlanetSystem {
         if (planet.parentId !== undefined) {
 
             //Get parent posititon
-            const parentPos = this.ecs.get(planet.parentId, "position");
+            const parentPos = this.ecs.get(planet.parentId, "position")
 
             //Rotation target
             const rotation = Tools.rotate(parentPos, position, planet.speed * dt)

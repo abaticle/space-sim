@@ -7,14 +7,13 @@ import {
 export default class DrawSystem {
 
     constructor(ecs, actions) {
-        this.ecs = ecs;
-        this.actions = actions;
+        this.ecs = ecs
+        this.actions = actions
 
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.layer;
-        this.stage;
-        this.scaleBy = 1.3;
+        this.width = window.innerWidth
+        this.height = window.innerHeight
+        this.layer
+        this.stage
     }
 
     /**
@@ -197,7 +196,7 @@ export default class DrawSystem {
             y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
         };
 
-        const newScale = event.evt.deltaY > 0 ? oldScale / this.scaleBy : oldScale * this.scaleBy;
+        const newScale = event.evt.deltaY > 0 ? oldScale / constants.scaleBy : oldScale * constants.scaleBy;
 
         stage.scale({
             x: newScale,
@@ -222,6 +221,11 @@ export default class DrawSystem {
         stage.batchDraw();
     }
 
+
+    updateScales(oldScale = 1) {
+
+    }
+
     /**
      * Init Konva canva
      * TODO:Update with and heigth when moving window
@@ -234,6 +238,12 @@ export default class DrawSystem {
             height: this.height
         });
 
+        //TODO:Scale at start
+        /*this.stage.scale({
+            x: constants.initialScale,
+            y: constants.initialScale
+        });*/
+
         this.stage.on('contextmenu', event => {
             event.evt.preventDefault();
         })
@@ -241,6 +251,7 @@ export default class DrawSystem {
         this.layer = new Konva.Layer({
             id: "planet-layer"
         });
+
 
         this.stage.on("mousedown", this.onMouseDown.bind(this))
         this.stage.on("mousemove", this.onMouseMove.bind(this))
@@ -275,8 +286,6 @@ export default class DrawSystem {
             x: position.x,
             y: position.y,
             radius: planet.size,
-            //stroke: "white",
-            //strokeWidth: 2,
             id: "planet-" + id.toString(),
             name: "planet"
         });
@@ -286,9 +295,9 @@ export default class DrawSystem {
             circle.shadowColor("#fff5b1")
             circle.shadowBlur(500)
         } else {
-            circle.fill("#f1f8ff")
-            //circle.stroke("white")
-            //circle.strokeWidth(2)
+            circle.stroke("white")
+            circle.strokeWidth(8)
+            //circle.fill("#f1f8ff")
         }
 
         layer.add(circle);
@@ -330,20 +339,11 @@ export default class DrawSystem {
     }
 
     /**
-     * Draw planets:
-     * - Each planet is a circle
-     * - Each planet has an orbit
-     * - Each planet has a text
+     * Draw a spaceship
+     * - Each spaceship is a triangle
+     * - Each spaceship has a text
+     * @param {number} entityId 
      */
-    initPlanets() {
-        let planets = this.ecs.searchEntities(["planet", "position"])
-
-        planets.forEach(id => {
-            this.drawPlanet(id)
-        });
-    }
-
-
     drawSpaceship(entityId) {
 
         const size = constants.spaceshipSizeModifier
@@ -354,15 +354,15 @@ export default class DrawSystem {
             id: "spaceship-" + entityId.toString(),
             name: "spaceship",
             fill: "#f1f8ff",
-            stroke: "white",
-            offsetX: (5 * size) / 2,
-            offsetY: (-7 * size) / 2,
+            stroke: "black",
+            offsetX: size / 2,
+            offsetY: 0,
             sceneFunc: (ctx, shape) => {
 
                 ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(5 * size, 0);
-                ctx.lineTo(2.5 * size, -7 * size);
+                ctx.moveTo(0, 0.5 * size);
+                ctx.lineTo(size, 0);
+                ctx.lineTo(0, -0.5 * size);
                 ctx.closePath();
                 ctx.fillStrokeShape(shape);
 
@@ -387,17 +387,6 @@ export default class DrawSystem {
     }
 
     /**
-     * Draw ships
-     * - A ship is a triangle
-     */
-    initShips() {
-
-        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
-
-        spaceships.forEach(id => this.drawSpaceship(id))
-    }
-
-    /**
      * Init selection rectangle (not visible)
      */
     initSelection() {
@@ -412,6 +401,55 @@ export default class DrawSystem {
     }
 
 
+    updatePlanet(id) {
+
+        const {
+            position,
+            planet
+        } = this.ecs.get(id);
+
+        const scale = this.stage.getScale()
+
+
+        //Move planet :
+        const planetDraw = this.layer.findOne("#planet-" + id)
+
+        planetDraw.position({
+            x: position.x,
+            y: position.y
+        })
+
+        planetDraw.setStrokeWidth(2 / scale.x)
+
+
+        //Move planet text: 
+        let textDraw = this.layer.findOne("#planet-text-" + id)
+
+        textDraw.position({
+            x: position.x,
+            y: position.y + (planet.size * 1.1)
+        })
+
+        textDraw.offsetX(textDraw.width() / 2)
+
+
+        //Move planet orbit :
+        if (planet.parentId !== undefined) {
+
+            const orbiteDraw = this.layer.findOne("#planet-orbite-" + id)
+            const parentPosition = this.ecs.get(planet.parentId, "position")
+
+            orbiteDraw.position({
+                x: parentPosition.x,
+                y: parentPosition.y
+            })            
+
+            orbiteDraw.setStrokeWidth(0.2 / scale.x)
+        }
+
+    }
+
+
     /**
      * Update planet/text/orbits positions
      * @param {number} dt 
@@ -419,49 +457,17 @@ export default class DrawSystem {
     updatePlanets(dt) {
         let planets = this.ecs.searchEntities(["planet", "position"]);
 
-        planets.forEach(planetId => {
+        planets.forEach(id => {
 
-            const {
-                position,
-                planet
-            } = this.ecs.get(planetId);
+            const planetDraw = this.layer.findOne("#planet-" + id)
 
-            //Move planet :
-            const planetDraw = this.layer.findOne("#planet-" + planetId)
-
-            planetDraw.position({
-                x: position.x,
-                y: position.y
-            })
-
-
-            //Move planet text: 
-            let textDraw = this.layer.findOne("#planet-text-" + planetId)
-
-            textDraw.position({
-                x: position.x,
-                y: position.y + (planet.size * 1.1)
-            })
-
-            textDraw.offsetX(textDraw.width() / 2)
-
-
-            //Move planet orbit :
-            if (planet.parentId !== undefined) {
-
-                const orbiteDraw = this.layer.findOne("#planet-orbite-" + planetId)
-                const parentPosition = this.ecs.get(planet.parentId, "position")
-
-                orbiteDraw.position({
-                    x: parentPosition.x,
-                    y: parentPosition.y
-                })
-
-                const scale = this.stage.getScale()
-
-                orbiteDraw.setStrokeWidth(0.2 / scale.x)
+            if (planetDraw === undefined) {
+                this.drawPlanet(id)
             }
 
+            else {
+                this.updatePlanet(id)
+            }
         });
 
     }
@@ -481,43 +487,56 @@ export default class DrawSystem {
         }
     }
 
+
+    updateSpaceship(id) {
+
+        const {
+            spaceship,
+            position,
+            velocity
+        } = this.ecs.get(id)
+
+        //Ship position and rotation
+        const spaceshipDraw = this.layer.findOne("#spaceship-" + id)
+
+        spaceshipDraw.position({
+            x: position.x,
+            y: position.y
+        })
+
+        spaceshipDraw.rotation(getAngleAsDegree(velocity))
+
+
+        //Ship text
+        const textDraw = this.layer.findOne("#spaceship-text-" + id)
+
+        textDraw.position({
+            x: position.x,
+            y: position.y + constants.spaceshipSizeModifier + 10
+        })
+
+        textDraw.offsetX(textDraw.width() / 2)
+    }
+
     /**
      * Update ships positions
      * @param {number} dt 
      */
     updateSpaceships(dt) {
 
-        const spaceshipSize = constants.spaceshipSizeModifier
-
-        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"]);
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "velocity"]);
 
         spaceships.forEach(id => {
 
-            const {
-                spaceship,
-                position
-            } = this.ecs.get(id)
-
-            //Ship position
             const spaceshipDraw = this.layer.findOne("#spaceship-" + id)
 
-            spaceshipDraw.position({
-                x: position.x,
-                y: position.y
-            })
+            if (spaceshipDraw === undefined) {
+                this.drawSpaceship(id)
+            }
 
-            spaceshipDraw.rotation(position.angle + 90);
-
-
-            //Ship text
-            const textDraw = this.layer.findOne("#spaceship-text-" + id)
-
-            textDraw.position({
-                x: position.x,
-                y: position.y + 300 + spaceshipSize
-            })
-
-            textDraw.offsetX(textDraw.width() / 2)
+            else {
+                this.updateSpaceship(id)
+            }
 
         });
     }
@@ -527,9 +546,6 @@ export default class DrawSystem {
      */
     init() {
         this.initKonva()
-        //FIXME:VECTORS TO REMOVE !!!
-        //this.initPlanets()
-        //this.initShips()
         this.initSelection()
     }
 
@@ -595,9 +611,8 @@ export default class DrawSystem {
 
     update(dt) {
 
-        //FIXME:VECTORS TO REMOVE !!!
-        //this.updatePlanets(dt)
-        //this.updateSpaceships(dt)
+        this.updatePlanets(dt)
+        this.updateSpaceships(dt)
         this.updateVectors(dt)
         this.updateSelection(dt)
 

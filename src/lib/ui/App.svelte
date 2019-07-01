@@ -113,7 +113,6 @@
     	padding: 1em;
 		overflow: auto;
 		max-height: 95%;
-		min-width: 30%;
 		max-width: 60%;
 	}
 	::-webkit-scrollbar{
@@ -168,30 +167,28 @@
 				</button>
             </div>
         </div>
-	</div>
 
-	{#if $entityList.visible}
-	<div class="right-panel" > 
-		<EntityList
-			on:entitySelected={entitySelected}
-		></EntityList>
-	</div> 
-	{/if}
-		
-	{#if $planet}
-	<div class="right-panel" transition:fly="{{ y: -100, duration: 500 }}"> 
+
+		{#if $planet}
 		<Planet 
 			on:displayBuyBuilding={displayBuyBuilding}
 			on:displayChooseProduction={displayChooseProduction}>
 		</Planet>
-	</div> 
-	{/if}
+		{/if}	
+	
+		{#if $entityList.visible}
+		<EntityList
+			on:entitySelected={entitySelected}
+		></EntityList>
+		{/if}	
 
-	{#if $spaceship}
-	<div class="right-panel"> 
+		{#if $spaceship}
 		<Spaceship></Spaceship>
-	</div> 
-	{/if}
+		{/if}
+	</div>
+
+		
+
 		
 </div>
 

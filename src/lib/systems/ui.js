@@ -404,8 +404,51 @@ export default class UISystem {
 
         spaceshipStore.set({
             spaceship: {...spaceship},
-            spaceshipState: {...spaceshipState},
-            id: payload.spaceshipId
+            //spaceshipState: {...spaceshipState},
+
+            stateIndex: spaceship.stateIndex,
+
+            items: Object
+                .entries(spaceship.items)
+                .map(([key, val]) => {
+                    return {
+                        desc: items[key].desc,
+                        count: val
+                    }
+                }),
+
+            orders: spaceship.states.map(s => {
+
+                const {state, payload } = s
+
+                const ret = { }
+
+                switch(state) {
+                    case "move":
+                        ret.state = "Move to"
+                        ret.desc = this.ecs.get(payload.moveTo, "planet", "desc")                        
+                        break
+
+                    case "take":
+                        ret.state = "Take"
+                        ret.desc = Object
+                            .entries(payload.takeItems)
+                            .map(([key, val]) => key + "(" + val + ")")
+                            .join(" / ")
+                        break
+
+                    case "give":
+                        ret.state = "Give"
+                        ret.desc = Object
+                            .entries(payload.giveItems)
+                            .map(([key, val]) => key + "(" + val + ")")
+                            .join(" / ")
+                        break
+
+                }
+
+                return ret
+            })
         })
 
         

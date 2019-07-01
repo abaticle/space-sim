@@ -34,19 +34,22 @@
 }
 </style>
 
-
-<h1 class="title alignRight">{$planet.desc}</h1>
+<div class="columns">    
+    <div class="column ">
+        <h2 class="title is-pulled-right">{$planet.desc}</h2>
+    </div>
+</div>
 
 {#if $planet.owned}
 <div class="columns">    
     <div class="column">
 
         <!-- Planet items/resources :-->
-        <h2 class="subtitle">Items</h2>
+        <h2 class="subtitle is-pulled-right">Items</h2>
         {#if $planet.items.length === 0} 
             No item
         {:else}
-        <table class="table" width="100%">
+        <table class="table is-pulled-right" width="100%">
             <thead>
                 <tr>
                     <th>Type</th>
@@ -73,7 +76,7 @@
 <div class="columns">    
     <div class="column">
     
-        <h2 class="subtitle">Buildings</h2>
+        <h2 class="subtitle is-pulled-right">Buildings</h2>
 
         <!-- Buttons -->
         <div class="level">

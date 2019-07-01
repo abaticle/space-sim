@@ -3,16 +3,17 @@
     import { entityList } from "./stores"
 
     const dispatch = createEventDispatcher();
-
 </script>
 
+<div class="columns">    
+    <div class="column ">
+        <h2 class="subtitle is-pulled-right">Selected</h2>
+    </div>
+</div>
 
 <div class="columns">    
     <div class="column">
-
-        <h2 class="subtitle">Selected</h2>
-
-        <table class="table">
+        <table class="table is-pulled-right">
             <thead>
                 <tr>
                     <th>Desc</th>
@@ -31,6 +32,6 @@
                     </tr>
                 {/each}
             </tbody>
-        </table>	
+        </table>
     </div>
 </div>

@@ -96,16 +96,11 @@ export default class MoveSpaceshipSystem {
      * @param {object} spaceship 
      * @param {number} dt 
      */
-    spaceshipMove(spaceshipState, position, spaceship, dt) {
-
+    spaceshipMove(spaceshipState, position, spaceship, velocity, dt) {
 
         const targetPosition = this.ecs.get(spaceshipState.moveTo, "position");
 
-        const nextPosition = Tools.moveToward(position, targetPosition, spaceship.speed * dt * constants.spaceshipSpeedModifier);
-
-        position.x = nextPosition.x
-        position.y = nextPosition.y
-        position.angle = nextPosition.angle
+        this.seek(spaceship, position, velocity, targetPosition, dt)
 
         switch (true) {
 
@@ -113,46 +108,35 @@ export default class MoveSpaceshipSystem {
             case this.ecs.has(spaceshipState.moveTo, "planet"):
 
                 //Set a distance for orbit
-                const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size")
+                const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size") + constants.spaceshipSizeModifier
 
                 //And planet is near 
                 if (Tools.distance(position, targetPosition) <= maxDistance) {
                     this.updateNextState(spaceship, spaceshipState)
                 }
+                break
 
 
                 //Target is a ship
-                case this.ecs.has(spaceshipState.moveTo, "spaceship"):
-                    //TODO:Ship target move spaceship
-                    break;
+            case this.ecs.has(spaceshipState.moveTo, "spaceship"):
+                //TODO:Ship target move spaceship
+                break
 
 
-                    //Target is a position
-                case typeof spaceshipState.moveTo === "object":
-                    //TODO:Ship target move position
-                    break;
+                //Target is a position
+            case typeof spaceshipState.moveTo === "object":
+                //TODO:Ship target move position
+                break
 
-                default:
-                    throw new Error(`${spaceshipState.moveTo} is not a valid target`)
+            default:
+                throw new Error(`${spaceshipState.moveTo} is not a valid target`)
 
         }
-
-        /*
-        if (this.ecs.has(spaceshipState.moveTo, "planet")) {
-
-            //Set a distance for orbit
-            const maxDistance = this.ecs.get(spaceshipState.moveTo, "planet", "size") * 3
-
-            //And planet is near 
-            if (Tools.distance(position, targetPosition) <= maxDistance) {
-                this.updateNextState(spaceship, spaceshipState)
-            }
-        } else {
-
-        }*/
     }
 
     spaceshipGive(spaceshipState, spaceship, dt) {
+        
+        const spaceshipId = spaceship._id
 
         spaceshipState.giveCurrentTime += dt
 
@@ -176,22 +160,46 @@ export default class MoveSpaceshipSystem {
 
             }
 
+            this.removeFromOrbit(spaceshipId, spaceshipState.takeFrom)
+
             this.updateNextState(spaceship, spaceshipState)
+        } else {
+            //Wait in orbit
+            this.putInOrbit(spaceshipId, spaceshipState.takeFrom)
         }
 
     }
 
+
+    putInOrbit(spaceshipId, planetId) {
+        const planet = this.ecs.get(planetId, "planet")
+
+        if (!planet.childrenIds.includes(spaceshipId)) {
+            planet.childrenIds.push(spaceshipId)
+        }
+    }
+
+    removeFromOrbit(spaceshipId, planetId) {
+        const planet = this.ecs.get(planetId, "planet")
+        const index = planet.childrenIds.indexOf(spaceshipId) 
+
+        if (index !== -1) {
+            planet.childrenIds.splice(index, 1)
+        }
+    }
+
     spaceshipTake(spaceshipState, spaceship, dt) {
 
-        spaceshipState.takeCurrentTime += dt
+        const spaceshipId = spaceship._id
 
+        //Target items
+        const planet = this.ecs.get(spaceshipState.takeFrom, "planet")
+
+        spaceshipState.takeCurrentTime += dt
 
         if (spaceshipState.takeCurrentTime >= spaceshipState.takeTime) {
 
             spaceshipState.takeCurrentTime = 0;
-
-            //Target items
-            const planet = this.ecs.get(spaceshipState.takeFrom, "planet")
 
             //Transfer items to ship
             for (let item in spaceshipState.takeItems) {
@@ -202,15 +210,18 @@ export default class MoveSpaceshipSystem {
                         planet.items[item]
 
                     EntityManager.transferItem(planet, spaceship, item, maxToGive)
-                    /*if (planet.items[item] >= spaceshipState.takeItems[item]) {
-                        EntityManager.transferItem(planet, spaceship, item, maxToGive)
-                    }*/
                 }
+
             }
 
+            this.removeFromOrbit(spaceshipId, spaceshipState.takeFrom)
+
             this.updateNextState(spaceship, spaceshipState)
+
+            //Leave orbit
         } else {
             //Wait in orbit
+            this.putInOrbit(spaceshipId, spaceshipState.takeFrom)
         }
     }
 
@@ -224,13 +235,14 @@ export default class MoveSpaceshipSystem {
      */
     moveSpaceships(dt) {
 
-        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState"])
+        let spaceships = this.ecs.searchEntities(["spaceship", "position", "spaceshipState", "velocity"])
 
         spaceships.forEach(id => {
             const {
                 spaceship,
                 position,
-                spaceshipState
+                spaceshipState,
+                velocity
             } = this.ecs.get(id)
 
             switch (this.getCurrentState(spaceship).state) {
@@ -239,7 +251,7 @@ export default class MoveSpaceshipSystem {
                     break
 
                 case "move":
-                    this.spaceshipMove(spaceshipState, position, spaceship, dt)
+                    this.spaceshipMove(spaceshipState, position, spaceship, velocity, dt)
                     break
 
                 case "take":
@@ -260,30 +272,62 @@ export default class MoveSpaceshipSystem {
 
     }
 
-    seek() {
-        
+    seek(spaceship, position, velocity, target, dt) {
+
+        const maxForce = 50
+        const slowingRadius = 15 * spaceship.mass
+
+
+        let desiredVelocity = substract(target, position)
+
+        const distance = magnitude(desiredVelocity)
+
+        if (distance < slowingRadius) {
+            desiredVelocity = multiply(multiply(normalize(desiredVelocity), spaceship.speed * dt), (distance / slowingRadius))
+        } else {
+            desiredVelocity = multiply(normalize(desiredVelocity), spaceship.speed * dt)
+        }
+
+        let steering = substract(desiredVelocity, velocity)
+
+        steering = truncate(steering, maxForce)
+        steering = divide(steering, spaceship.mass)
+
+        //New velocity
+        const tmp = truncate(add(velocity, steering), spaceship.speed * dt)
+
+        velocity.x = tmp.x
+        velocity.y = tmp.y
+
+
+        //New position
+        const tmp2 = add(position, velocity)
+
+        position.x = tmp2.x
+        position.y = tmp2.y
+
     }
 
     moveVectors(dt) {
-        
-        const vectors = this.ecs.searchEntities(["velocity", "position"])
+
+        const vectors = this.ecs.searchEntities(["spaceship", "velocity", "position"])
 
         vectors.forEach(id => {
 
-            const maxVelocity = dt * 500    
-            const maxForce = 5
-            const mass = 5
-            const slowingRadius = 15 * mass
-
             const {
                 velocity,
-                position
+                position,
+                spaceship
             } = this.ecs.get(id)
 
             const target = {
                 x: window.mouseX || 500,
                 y: window.mouseY || 500
             }
+
+            this.seek(spaceship, position, velocity, target, dt)
+
+            /*
 
             
             let desiredVelocity = substract(target, position)
@@ -314,6 +358,8 @@ export default class MoveSpaceshipSystem {
             position.x = tmp2.x
             position.y = tmp2.y
 
+            */
+
 
         })
 
@@ -324,7 +370,7 @@ export default class MoveSpaceshipSystem {
         this.moveSpaceships(dt);
 
         //TODO:Tests move vectors
-        this.moveVectors(dt)
+        //  this.moveVectors(dt)
     }
 
 
