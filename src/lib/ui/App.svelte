@@ -18,12 +18,7 @@
 
 	onMount(() => {
 		game.init()
-
-		/*speed.subscribe(value => {
-			game.setSpeed(value);
-		})*/
 	});
-
 
 	function entitySelected(event) {
 		const { entity } = event.detail
@@ -41,10 +36,7 @@
 				})
 				break
 		}
-
 	}
-
-
 
 	function increaseSpeed() {
 		game.actions.addAction("increaseSpeed")
@@ -140,13 +132,11 @@
 	<!-- Map -->
 	<div id="map"/>	
 
-
 	<div class="debug-panel">
 		<Debug></Debug>
 	</div>
 
-	<!-- right panel -->
-	
+	<!-- right panel -->	
 	<div class="right-panel"> 
 		<div class="level">
             <div class="level-left">
@@ -167,7 +157,6 @@
 				</button>
             </div>
         </div>
-
 
 		{#if $planet}
 		<Planet 
