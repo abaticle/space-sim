@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store';
 
+export const performances = writable({})
 
+export const screen = writable("game")
 
 export const debug = writable({
     data: ""

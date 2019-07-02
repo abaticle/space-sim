@@ -187,12 +187,8 @@ export default class UISystem {
     removePanel() {
         
         planetStore.set(undefined)
-
         spaceshipStore.set(undefined)
-
-        entityListStore.set({
-            visible: false
-        })
+        entityListStore.set(undefined)
 
         this.actions.removeAction("displaySpaceship")
         this.actions.removeAction("displayPlanet")
@@ -385,7 +381,6 @@ export default class UISystem {
         })
         
         entityListStore.set({
-            visible: true,
             entities
         })
 

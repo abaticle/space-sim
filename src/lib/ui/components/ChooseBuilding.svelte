@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import { chooseBuilding } from "./stores"
-    import items from "./../data/items"
+    import { chooseBuilding } from "./../stores"
+    import items from "./../../data/items"
 
     const dispatch = createEventDispatcher();
 </script>

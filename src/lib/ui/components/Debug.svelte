@@ -1,5 +1,5 @@
 <script>
-import { debug as debugStore } from "./stores"
+import { debug as debugStore } from "./../stores"
 
 </script>
 

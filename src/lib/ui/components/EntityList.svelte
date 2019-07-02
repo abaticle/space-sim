@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte'
-    import { entityList } from "./stores"
+    import { entityList } from "./../stores"
 
     const dispatch = createEventDispatcher();
 </script>

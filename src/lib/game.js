@@ -27,16 +27,14 @@ import DrawSystem from "./systems/draw"
 import DebugSystem from "./systems/debug"
 import UISystem from "./systems/ui"
 import solarSystem from "./data/solar-system"
-import Observable from "./modules/observable"
 import ActionsManager from "./modules/actions"
 import EntityManager from "./modules/entity-manager"
 import constants from "./data/constants";
 import Tools from "./modules/tools";
 
-export default class Game extends Observable {
+export default class Game {
 
     constructor() {
-        super();
         this.ecs = new ECS();
         this.actions = new ActionsManager();
         this.systems = [];
@@ -89,9 +87,17 @@ export default class Game extends Observable {
         //Update speed
         dt *= this._gameEntity.speed
 
-        _.each(this.systems, system => {
+
+        this.systems.forEach(system => {
+
+            //let timeFrom = performance.now();
+
             system.update(dt);
-        });
+
+            //let timeTo = performance.now();
+            //console.log(system.constructor.name, " : ", (timeTo - timeFrom))
+
+        })
 
         requestAnimationFrame(this.update.bind(this));
     }
@@ -204,12 +210,7 @@ export default class Game extends Observable {
             y: 0
         })
 
-
-
         const createPlanetFromParams = (params, parentId) => {
-
-
-
             return this.entityManager.createPlanet({
                 type: "planet",
                 desc: params.name,
