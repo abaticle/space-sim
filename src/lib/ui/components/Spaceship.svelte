@@ -6,7 +6,7 @@
 </script>
 
 <div class="columns">    
-    <div class="column ">
+    <div class="column">
         <h2 class="title is-pulled-right">{$spaceship.spaceship.desc}</h2>
     </div>
 </div>  

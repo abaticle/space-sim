@@ -1,9 +1,9 @@
 <script>
     import ScreenGame from "./screens/Game.svelte"
     import ScreenECS from "./screens/ECS.svelte"
-    import { screen as screenStore } from "./stores"
+    import { screen } from "./stores"
     import Game from "./../game"
-	import { onMount } from 'svelte'
+	import { onMount } from "svelte"
 
 
 
@@ -15,8 +15,11 @@
 
 </script>
 
-{#if $screenStore === "game"}
-<ScreenGame game={game}/>
-{:else if $screenStore === "ecs"}
-<ScreenECS/>
-{/if}
+<div id="game" class="{ $screen !== 'game' ? 'hidden' : '' }">
+    <ScreenGame game={game} />
+</div>
+
+<div id="ecs" class="{ $screen !== 'ecs' ? 'hidden' : '' }">
+    <ScreenECS game={game}/>
+</div>
+

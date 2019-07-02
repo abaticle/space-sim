@@ -4,7 +4,8 @@ import {
     chooseProduction as chooseProductionStore,
     entityList as entityListStore,
     spaceship as spaceshipStore,
-    speed as speeedStore
+    speed as speeedStore,
+    ecs as ecsStore
 } from "../ui/stores"
 import items from "../data/items"
 import buildings from "../data/buildings"
@@ -495,58 +496,10 @@ export default class UISystem {
 
             this[action](payload);
 
-            /*
-            switch (action) {
-
-                case "displaySpaceship":
-                    this.displaySpaceship(payload)
-                    break
-
-                case "displayEntities":
-                    this.displayEntities(payload)
-                    break
-
-                case "selectedEntities":
-                    this.selectedEntities(payload)
-                    break
-
-                case "chooseProduction":
-                    this.chooseProduction(payload)
-                    break
-
-                case "buyBuilding":
-                    this.buyBuilding(payload)
-                    break
-
-                case "displayPlanet":
-                    this.displayPlanet(payload)
-                    break
-
-                case "removePlanet":
-                    this.removePlanet()
-                    break
-
-                case "displayChooseProduction":
-                    this.displayChooseProduction(payload)
-                    break
-
-                case "displayBuyBuilding":
-                    this.displayBuyBuilding(payload)
-                    break
-
-                case "removeBuyBuilding":
-                    this.removeBuyBuilding()
-                    break
-
-                case "removePanel":
-                    this.removePanel()
-                    break
-
-                case "removeChooseProduction":
-                    this.removeChooseProduction()
-                    break
-            }*/
         })
+
+
+        ecsStore.set(this.ecs)
 
     }
 
