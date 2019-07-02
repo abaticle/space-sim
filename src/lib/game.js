@@ -173,6 +173,7 @@ export default class Game {
     createBuildings() {
         let earth = this.entityManager.getPlanet("Earth");
 
+        this.entityManager.createBuildingFromData("spaceshipBuilderMk1", false, earth)
         this.entityManager.createBuildingFromData("extractorMk1", false, earth)
         this.entityManager.createBuildingFromData("extractorMk1", false, earth)
         this.entityManager.createBuildingFromData("furnaceMk1", false, earth)

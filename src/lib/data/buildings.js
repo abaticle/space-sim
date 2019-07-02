@@ -1,5 +1,29 @@
 export default {
 
+    //Ship builder
+    spaceshipBuilderMk1: {
+        components: ["building", "producer", "construction"],
+        data: {
+            building: {
+                buildingId: "spaceshipBuilderMk1",
+                type: "spaceshipBuilder",
+                desc: "Spaceship builder MK1",
+                longDesc: "A spaceship builder"
+            },
+            producer: {
+                speed: 10,
+                canProduce: ["spaceshipTest"]
+            },
+            construction: {
+                time: 5,
+                price: {
+                    ironBar: 10
+                }, 
+                items: {}
+            }
+        }
+    },
+
     //Laboratories
     laboratoryMk1: {
         components: ["building", "producer", "construction"],
@@ -15,10 +39,10 @@ export default {
                 canProduce: ["research"]
             },
             construction: {
-                time: 50,
+                time: 5,
                 price: {
-                    ironBar: 30,
-                    copperBar: 60
+                    ironBar: 1,
+                    copperBar: 1
                 }, 
                 items: {}
             }
@@ -88,9 +112,9 @@ export default {
                 canProduce: ["ironBar", "copperBar"]
             },
             construction: {
-                time: 50,
+                time: 5,
                 price: {
-                    ironBar: 50
+                    ironBar: 1
                 }, 
                 items: {}
             }
@@ -113,9 +137,9 @@ export default {
                 canProduce: ["electricComponent"]
             },
             construction: {
-                time: 50,
+                time: 5,
                 price: {
-                    ironBar: 100
+                    ironBar: 1
                 }, 
                 items: {}
             }

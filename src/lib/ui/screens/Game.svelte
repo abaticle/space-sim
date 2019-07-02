@@ -78,6 +78,16 @@
 		<Debug/>
 	</div>
 
+
+	<div class="left-panel">
+	
+		{#if $entityList}
+		<EntityList
+			on:entitySelected={entitySelected}/>
+		{/if}	
+	
+	</div>
+
 	<!-- right panel -->	
 	<div class="right-panel"> 
 		<div class="level">
@@ -106,10 +116,6 @@
 			on:displayChooseProduction={displayChooseProduction}/>
 		{/if}	
 	
-		{#if $entityList}
-		<EntityList
-			on:entitySelected={entitySelected}/>
-		{/if}	
 
 		{#if $spaceship}
 		<Spaceship/>

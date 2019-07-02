@@ -11,33 +11,21 @@
 
 {#if $ecs}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Entity</th>
-            {#each Object.values($ecs.components) as component}
-                <th>{component.name}</th>
-            {/each}
-        </tr>
-    </thead>
-    <tbody>
-        {#each $ecs.entities as id}
-            <tr>
-                <td>{id}</td>
-                {#each Object.values($ecs.components) as component}
-                    {#if $ecs.entitiesComponents[component.name][id] !== undefined}
-                    <td>
-                        {JSON.stringify($ecs.entitiesComponents[component.name][id])}
-                    </td>
-                    {:else}
-                    <td>
-                    </td>
-                    {/if}
-                {/each}                            
-            </tr>
+<div class="container">
+    <h1 class="title">Components groups</h1>
+    
+    {#each Object.entries($ecs._cache) as [key, val] }
+    <div class="notification">
+        <h1 class="subtitle">{key.split("|").join(" / ")}</h1>
+        <ul>
+        {#each val as id}
+            <li>{id}</li>
         {/each}
-    </tbody>
-</table>	
+        </ul>
+    
+    </div>
+    {/each}    
+</div>
 {/if}
 
 

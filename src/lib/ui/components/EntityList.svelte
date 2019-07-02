@@ -7,13 +7,13 @@
 
 <div class="columns">    
     <div class="column ">
-        <h2 class="subtitle is-pulled-right">Selected</h2>
+        <h2 class="subtitle is-pulled-left">Selected</h2>
     </div>
 </div>
 
 <div class="columns">    
     <div class="column">
-        <table class="table is-pulled-right">
+        <table class="table is-pulled-left">
             <thead>
                 <tr>
                     <th>Desc</th>

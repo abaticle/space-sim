@@ -1,5 +1,16 @@
 export default {
 
+    spaceshipTest: {
+        id: "spaceshipTest",
+        type: "spaceship",
+        desc: "Spaceship", 
+        recipe: {
+            ironBar: 10,
+            copperBar: 5
+        },
+        time: 5
+    },
+
     //Population
     population: {
         id: "population",
