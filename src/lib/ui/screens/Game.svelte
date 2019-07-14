@@ -59,6 +59,14 @@
 	function chooseProduction(event) {
 		game.actions.addAction("chooseProduction", event.detail);
 	}
+
+	function save() {
+		game.save()
+	}
+
+	function load() {
+		game.load()
+	}
 	
 
 	window.game = game;
@@ -75,7 +83,10 @@
 	<div id="map"/>	
 
 	<div class="debug-panel">
-		<Debug/>
+		<Debug 
+			on:save={save}
+			on:load={load}>
+		</Debug>
 	</div>
 
 

@@ -4,7 +4,7 @@ import _ from "lodash"
 export default class ECS {
 
     constructor() {
-        this.entities = [];
+        this.entities = []
         this.entitiesComponents = {}
         this.components = {}
         this._cache = {}
@@ -290,7 +290,7 @@ export default class ECS {
 
     /**
      * Get an entity, component or value from component
-     * @param {string} entityId Entity id
+     * @param {number} entityId Entity id
      * @param {string} componentName Component name
      * @param {string} path Path in component
      */
@@ -371,6 +371,46 @@ export default class ECS {
             return true
         }
         return false
+    }
+
+
+
+    toString() {  
+        //const entities = JSON.stringify(this.entities)
+        //const entitiesComponents = JSON.stringify(this.entitiesComponents)
+        
+        return JSON.stringify({
+            entities: this.entities,
+            entitiesComponents: this.entitiesComponents
+        }, (k, v) => v === undefined ? null : v)
+
+        /*return JSON.stringify({
+            entities: this.entities,
+            entitiesComponents: this.entitiesComponents
+        })*/
+    }
+
+
+    fromString(string) {
+        const data = JSON.parse(string)
+
+        this.entities = data.entities
+        this.entitiesComponents = data.entitiesComponents
+
+
+        //Replace null with undefined in arrays 
+        Object
+            .entries(this.entitiesComponents)
+            .forEach(([component, values]) => {
+                values.forEach((val, index) => {
+                    if (val === null) {
+                        this.entitiesComponents[component][index] = undefined
+                    }
+                })
+            })
+
+        this._cache = {}
+        this._cacheFunctions = {}
     }
 
 

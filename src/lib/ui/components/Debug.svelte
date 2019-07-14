@@ -1,9 +1,14 @@
 <script>
+import { createEventDispatcher } from 'svelte'
 import { debug, screen } from "./../stores"
+
+const dispatch = createEventDispatcher();
 
 const displayECS = () => {
     screen.set("ecs")
 }
+
+
 </script>
 
 
@@ -20,7 +25,15 @@ const displayECS = () => {
     <div class="column">
         <div class="level">
             <div class="level-left">
-                <button class="button is-light" on:click={displayECS}>ECS View</button>
+                <div class="level-item">
+                    <button class="button is-light" on:click={displayECS}>ECS View</button>
+                </div>
+                <div class="level-item">
+                    <button class="button is-light" on:click={() => dispatch("save")}>Save</button>
+                </div>
+                <div class="level-item">
+                    <button class="button is-light" on:click={() => dispatch("load")}>Load</button>
+                </div>
             </div>
         </div>        
     </div>

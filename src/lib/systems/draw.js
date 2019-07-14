@@ -16,6 +16,72 @@ export default class DrawSystem {
         this.stage
     }
 
+    
+    /**
+     * Init: draw everything
+     */
+    init() {
+        this.initKonva()
+        this.initSelection()
+    }
+
+
+    /**
+     * Init Konva canva
+     * TODO:Update with and heigth when moving window
+     */
+    initKonva() {
+
+        this.stage = new Konva.Stage({
+            container: 'map',
+            width: this.width,
+            height: this.height
+        });
+
+        //TODO:Scale at start
+        /*this.stage.scale({
+            x: constants.initialScale,
+            y: constants.initialScale
+        });*/
+
+        this.stage.on('contextmenu', this.onContextmenu.bind(this))
+
+        this.layer = new Konva.Layer({
+            id: "planet-layer"
+        });
+
+
+        this.stage.on("mousedown", this.onMouseDown.bind(this))
+        this.stage.on("mousemove", this.onMouseMove.bind(this))
+        this.stage.on("mouseup", this.onMouseUp.bind(this))
+        this.stage.on('wheel', this.onWheel.bind(this));
+        this.stage.on("click", this.onClick.bind(this))
+
+        this.stage.add(this.layer);
+
+        //TODO:Remove for build
+        window.stage = this.stage;
+        window.layer = this.layer;
+    }
+
+    /**
+     * Init selection rectangle (not visible)
+     */
+    initSelection() {
+        let selection = new Konva.Rect({
+            id: "selection",
+            stroke: "white",
+            visible: false,
+            listening: false
+        })
+
+        this.layer.add(selection)
+    }
+
+    onContextmenu(event) {
+        event.evt.preventDefault();
+    }
+
     /**
      * Click on planet : dispatch action to display it
      * @param {string} konvaId Konva object id
@@ -183,7 +249,7 @@ export default class DrawSystem {
      * TODO:Lease animation when zooming
      * @param {object} event Konva event
      */
-    onScroll(event) {
+    onWheel(event) {
 
         const stage = this.stage;
 
@@ -227,46 +293,6 @@ export default class DrawSystem {
     }
 
     /**
-     * Init Konva canva
-     * TODO:Update with and heigth when moving window
-     */
-    initKonva() {
-
-        this.stage = new Konva.Stage({
-            container: 'map',
-            width: this.width,
-            height: this.height
-        });
-
-        //TODO:Scale at start
-        /*this.stage.scale({
-            x: constants.initialScale,
-            y: constants.initialScale
-        });*/
-
-        this.stage.on('contextmenu', event => {
-            event.evt.preventDefault();
-        })
-
-        this.layer = new Konva.Layer({
-            id: "planet-layer"
-        });
-
-
-        this.stage.on("mousedown", this.onMouseDown.bind(this))
-        this.stage.on("mousemove", this.onMouseMove.bind(this))
-        this.stage.on("mouseup", this.onMouseUp.bind(this))
-        this.stage.on('wheel', this.onScroll.bind(this));
-        this.stage.on("click", this.onClick.bind(this))
-
-        this.stage.add(this.layer);
-
-        //TODO:Remove for build
-        window.stage = this.stage;
-        window.layer = this.layer;
-    }
-
-    /**
      * Draw a planet
      * - Each planet is a circle
      * - Each planet has an orbit
@@ -304,7 +330,7 @@ export default class DrawSystem {
 
 
         //Draw planet orbit
-        if (planet.parentId !== undefined) {
+        if (typeof planet.parentId === "number") {
             let positionParent = this.ecs.get(planet.parentId, "position")
 
             let radius = Tools.distance(position, positionParent)
@@ -386,19 +412,7 @@ export default class DrawSystem {
         layer.add(text)
     }
 
-    /**
-     * Init selection rectangle (not visible)
-     */
-    initSelection() {
-        let selection = new Konva.Rect({
-            id: "selection",
-            stroke: "white",
-            visible: false,
-            listening: false
-        })
 
-        this.layer.add(selection)
-    }
 
 
     updatePlanet(id) {
@@ -434,7 +448,7 @@ export default class DrawSystem {
 
 
         //Move planet orbit :
-        if (planet.parentId !== undefined) {
+        if (typeof planet.parentId === "number") {
 
             const orbiteDraw = this.layer.findOne("#planet-orbite-" + id)
             const parentPosition = this.ecs.get(planet.parentId, "position")
@@ -539,14 +553,6 @@ export default class DrawSystem {
             }
 
         });
-    }
-
-    /**
-     * Init: draw everything
-     */
-    init() {
-        this.initKonva()
-        this.initSelection()
     }
 
     /**

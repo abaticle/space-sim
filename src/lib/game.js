@@ -40,7 +40,6 @@ export default class Game {
         this.systems = [];
         this.timeOld = 0;
         this.entityManager = new EntityManager(this.ecs);
-        this._gameEntity = undefined;
     }
 
     /**
@@ -48,10 +47,10 @@ export default class Game {
      */
     init() {
         this.registerComponents();
-        this._gameEntity = this.createGame();
+        this.registerSystems();
+        this.createGame();
         this.createSolarSystem(solarSystem);
         this.createBuildings();
-        this.createSystems();
         this.createSpaceships();
         this.initSystems();
         requestAnimationFrame(this.update.bind(this));
@@ -62,7 +61,7 @@ export default class Game {
         this.systems.forEach(s => s.init());
     }
 
-    createSystems() {
+    registerSystems() {
         this.systems.push(new ConstructionSystem(this.ecs, this.actions))
         this.systems.push(new BuildingSystem(this.ecs, this.actions))
         this.systems.push(new MovePlanetSystem(this.ecs, this.actions))
@@ -85,17 +84,12 @@ export default class Game {
         this.updateFPS(dt);
 
         //Update speed
-        dt *= this._gameEntity.speed
+        dt *= this.getSpeed()
 
 
         this.systems.forEach(system => {
 
-            //let timeFrom = performance.now();
-
             system.update(dt);
-
-            //let timeTo = performance.now();
-            //console.log(system.constructor.name, " : ", (timeTo - timeFrom))
 
         })
 
@@ -190,6 +184,15 @@ export default class Game {
         return this.ecs.get(game, "game")
     }
 
+
+    setSpeed(speed) {
+        this.ecs.searchEntities("game").map(id => this.ecs.set(speed, id, "game", "speed"))
+    }
+
+    getSpeed() {
+        return this.ecs.searchEntities("game").map(id => this.ecs.get(id, "game", "speed"))[0]
+    }
+
     /**
      * Create planet entities from a solar system
      */
@@ -235,5 +238,19 @@ export default class Game {
             })
 
         this.entityManager.updatePlanetsChildrens();
+    }
+
+
+
+    save() {
+        localStorage.setItem("ecs", this.ecs.toString())
+        localStorage.setItem("timeOld", this.timeOld)
+    }
+
+    load() {
+        const save = localStorage.getItem("ecs")
+
+        this.ecs.fromString(save)
+        this.timeOld = localStorage.getItem("timeOld")
     }
 }

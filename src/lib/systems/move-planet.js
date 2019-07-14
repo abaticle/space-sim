@@ -43,7 +43,7 @@ export default class MovePlanetSystem {
         //Save planet position
         const t = {...position};
 
-        if (planet.parentId !== undefined) {
+        if (typeof planet.parentId === "number") {
 
             //Get parent posititon
             const parentPos = this.ecs.get(planet.parentId, "position")
