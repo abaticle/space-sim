@@ -1,5 +1,52 @@
 export default {
 
+
+    powerPlant: {
+        components: ["building", "electricityProducer", "electricityBattery", "construction"],
+        data: {
+            building: {
+                buildingId: "powerPlant",
+                type: "electricity",
+                desc: "Power plant",
+                longDesc: "Power plant"
+            },
+            electricityProducer: {
+                speed: 5
+            },
+            electricityBattery: {
+                capacity: 10
+            },
+            construction: {
+                time: 10,
+                price: {
+                    ironBar: 20,
+                    copperBar: 10
+                }
+            }
+        }
+    },
+
+    battery: {
+        components: ["building", "electricityBattery", "construction"],
+        data: {
+            building: {
+                buildingId: "battery",
+                type: "electricity",
+                desc: "Battery",
+                longDesc: "A simple battery to store electricity"
+            },
+            electricityBattery: {
+                capacity: 500
+            },
+            construction: {
+                time: 20,
+                price: {
+                    copperBar: 20
+                }
+            }
+        }
+    },
+
     //Ship builder
     spaceshipBuilderMk1: {
         components: ["building", "producer", "construction"],
@@ -8,7 +55,8 @@ export default {
                 buildingId: "spaceshipBuilderMk1",
                 type: "spaceshipBuilder",
                 desc: "Spaceship builder MK1",
-                longDesc: "A spaceship builder"
+                longDesc: "A spaceship builder",
+                electricityUsed: 2
             },
             producer: {
                 speed: 10,
@@ -32,7 +80,8 @@ export default {
                 buildingId: "laboratoryMk1",
                 type: "laboratory",
                 desc: "Laboratory MK1",
-                longDesc: "A laboratory to produce research"
+                longDesc: "A laboratory to produce research",
+                electricityUsed: 5
             },
             producer: {
                 speed: 10,
@@ -58,7 +107,8 @@ export default {
                 buildingId: "extractorMk1",
                 type: "extractor",
                 desc: "Extractor MKI",
-                longDesc: "An extractor to produce iron or copper ore"
+                longDesc: "An extractor to produce iron or copper ore",
+                electricityUsed: 2
             },
             producer: {
                 speed: 1,
@@ -80,7 +130,8 @@ export default {
                 buildingId: "extractorMk2",
                 desc: "Extractor MK2",
                 longDesc: "An extractor to produce iron or copper ore",
-                type: "extractor"
+                type: "extractor",
+                electricityUsed: 5
             },
             producer: {
                 speed: 5,
@@ -105,7 +156,8 @@ export default {
                 buildingId: "furnaceMk1",
                 desc: "Furnace MK1",
                 longDesc: "A furnace to produce iron or copper bar",
-                type: "factory"
+                type: "factory",
+                electricityUsed: 2
             },
             producer: {
                 speed: 1,
@@ -130,7 +182,8 @@ export default {
                 buildingId: "factoryMk1",
                 desc: "Factory MK1",
                 longDesc: "A factory to produce things",
-                type: "factory"
+                type: "factory",
+                electricityUsed: 5
             },
             producer: {
                 speed: 1,

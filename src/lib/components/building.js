@@ -1,16 +1,27 @@
 
-const building = {
+export const building = {
     name: "building",
     buildingId: "",
     type: "",
     desc: "",
     longDesc: "",
     planetId: 0,
-    energyUsed: 0,
+    electricityUsed: 0,
     populationUsed: 0
 }
 
-const producer = {
+export const electricityProducer = {
+    name: "electricityProducer",
+    speed: 1,
+    state: ""
+}
+
+export const electricityBattery = {
+    name: "electricityBattery",
+    capacity: 0
+}
+
+export const producer = {
     name: "producer",
     workstep: 0,
     items: {},
@@ -20,7 +31,7 @@ const producer = {
     state: ""   //inactive/active/filled
 }
 
-const construction = {
+export const construction = {
     name: "construction",
     building: "",
     workstep: 0,
@@ -28,8 +39,3 @@ const construction = {
     time: 0,
     items: {}
 }
-
-
-
-export { building, producer, construction };
-

@@ -6,7 +6,9 @@ import {
 import {
     building,
     producer,
-    construction
+    construction,
+    electricityBattery,
+    electricityProducer
 } from "./components/building"
 import {
     planet
@@ -23,6 +25,7 @@ import BuildingSystem from "./systems/building"
 import ConstructionSystem from "./systems/construction"
 import MovePlanetSystem from "./systems/move-planet"
 import MoveSpaceshipSystem from "./systems/move-spaceship"
+import ElectricitySystem from "./systems/electricity"
 import DrawSystem from "./systems/draw"
 import DebugSystem from "./systems/debug"
 import UISystem from "./systems/ui"
@@ -46,13 +49,14 @@ export default class Game {
      * Initialize and start game
      */
     init() {
-        this.registerComponents();
-        this.registerSystems();
-        this.createGame();
-        this.createSolarSystem(solarSystem);
-        this.createBuildings();
-        this.createSpaceships();
-        this.initSystems();
+        this.registerComponents()
+        this.registerSystems()
+        this.createGame()
+        this.createSolarSystem(solarSystem)
+        this.createBuildings()
+        this.createSpaceships()
+        this.initSystems()
+        this.randomizePlanets()
         requestAnimationFrame(this.update.bind(this));
 
     }
@@ -63,6 +67,7 @@ export default class Game {
 
     registerSystems() {
         this.systems.push(new ConstructionSystem(this.ecs, this.actions))
+        this.systems.push(new ElectricitySystem(this.ecs, this.actions))
         this.systems.push(new BuildingSystem(this.ecs, this.actions))
         this.systems.push(new MovePlanetSystem(this.ecs, this.actions))
         this.systems.push(new MoveSpaceshipSystem(this.ecs, this.actions))
@@ -104,9 +109,24 @@ export default class Game {
 
     registerComponents() {
 
-        const components = [building, producer, planet, position, spaceship, spaceshipState, construction, game, velocity];
+        const components = [
+            building,
+            producer,
+            planet,
+            position,
+            spaceship,
+            spaceshipState,
+            construction,
+            game,
+            velocity,
+            electricityBattery,
+            electricityProducer
+        ];
 
-        components.forEach(c => this.ecs.registerComponent(c))
+
+        components.forEach(component => {
+            this.ecs.registerComponent(component)
+        })
 
     }
 
@@ -115,52 +135,52 @@ export default class Game {
 
         for (let i = 0; i < 2; i++)
 
-        this.ecs.createFromAssemblage({
-            components: ["spaceship", "spaceshipState", "position", "velocity"],
-            data: {
-                spaceship: {
-                    desc: "space " + i,
-                    speed: 1500,
-                    stateIndex: 0,
-                    stateRepeat: true,
-                    states: [{
-                        state: "move",
-                        payload: {
-                            moveTo: this.entityManager.getPlanet("Earth")
-                        }
-                    }, {
-                        state: "take",
-                        payload: {
-                            takeFrom: this.entityManager.getPlanet("Earth"),
-                            takeItems: {
-                                ironBar: 2
+            this.ecs.createFromAssemblage({
+                components: ["spaceship", "spaceshipState", "position", "velocity"],
+                data: {
+                    spaceship: {
+                        desc: "space " + i,
+                        speed: 1500,
+                        stateIndex: 0,
+                        stateRepeat: true,
+                        states: [{
+                            state: "move",
+                            payload: {
+                                moveTo: this.entityManager.getPlanet("Earth")
                             }
-                        }
-                    }, {
-                        state: "move",
-                        payload: {
-                            moveTo: this.entityManager.getPlanet("Moon")
-                        }
-                    }, {
-                        state: "give",
-                        payload: {
-                            giveTo: this.entityManager.getPlanet("Moon"),
-                            giveItems: {
-                                ironBar: 2
+                        }, {
+                            state: "take",
+                            payload: {
+                                takeFrom: this.entityManager.getPlanet("Earth"),
+                                takeItems: {
+                                    ironBar: 2
+                                }
                             }
-                        }
-                    }]
-                },
-                spaceshipState: {
-                    moveTo: this.entityManager.getPlanet("Earth")
-                },
-                position: {
-                    x: Tools.random(-40000, 40000),
-                    y: Tools.random(-40000, 40000)
+                        }, {
+                            state: "move",
+                            payload: {
+                                moveTo: this.entityManager.getPlanet("Moon")
+                            }
+                        }, {
+                            state: "give",
+                            payload: {
+                                giveTo: this.entityManager.getPlanet("Moon"),
+                                giveItems: {
+                                    ironBar: 2
+                                }
+                            }
+                        }]
+                    },
+                    spaceshipState: {
+                        moveTo: this.entityManager.getPlanet("Earth")
+                    },
+                    position: {
+                        x: Tools.random(-40000, 40000),
+                        y: Tools.random(-40000, 40000)
+                    }
                 }
-            }
 
-        })
+            })
     }
 
 
@@ -172,6 +192,7 @@ export default class Game {
         this.entityManager.createBuildingFromData("extractorMk1", false, earth)
         this.entityManager.createBuildingFromData("furnaceMk1", false, earth)
         this.entityManager.createBuildingFromData("factoryMk1", false, earth)
+        this.entityManager.createBuildingFromData("powerPlant", false, earth)
     }
 
 
@@ -242,6 +263,15 @@ export default class Game {
 
 
 
+    randomizePlanets() {
+        //Randomize planet position in solar system
+        const movePlanets = this.systems.find(system => system instanceof MovePlanetSystem)
+
+        movePlanets.randomizePlanets()
+    }
+
+
+
     save() {
         localStorage.setItem("ecs", this.ecs.toString())
         localStorage.setItem("timeOld", this.timeOld)
@@ -252,5 +282,7 @@ export default class Game {
 
         this.ecs.fromString(save)
         this.timeOld = localStorage.getItem("timeOld")
+
+        this.initSystems()
     }
 }

@@ -38,24 +38,16 @@ export default class DrawSystem {
             height: this.height
         });
 
-        //TODO:Scale at start
-        /*this.stage.scale({
-            x: constants.initialScale,
-            y: constants.initialScale
-        });*/
-
-        this.stage.on('contextmenu', this.onContextmenu.bind(this))
-
         this.layer = new Konva.Layer({
             id: "planet-layer"
         });
-
 
         this.stage.on("mousedown", this.onMouseDown.bind(this))
         this.stage.on("mousemove", this.onMouseMove.bind(this))
         this.stage.on("mouseup", this.onMouseUp.bind(this))
         this.stage.on('wheel', this.onWheel.bind(this));
         this.stage.on("click", this.onClick.bind(this))
+        this.stage.on('contextmenu', this.onContextmenu.bind(this))
 
         this.stage.add(this.layer);
 
@@ -203,8 +195,25 @@ export default class DrawSystem {
             ...this.layer.find(".spaceship")
         ]
 
+
+        let left, right, top, bottom;
+
+        if (selection.getWidth() > 0) {
+            left = selection.getX() - selection.getWidth()
+            right = selection.getX()
+        }
+        else {
+            left = selection.getX()
+            right = selection.getX() - selection.getWidth()
+        }
+
+        console.log("left: ", left)
+        console.log("right: ", right)
+
         return shapes
             .filter(shape => {
+
+
                 const xInSelection = () => shape.getX() >= selection.getX() && shape.getX() <= (selection.getX() + selection.getWidth())
                 const yInSelection = () => shape.getY() >= selection.getY() && shape.getY() <= (selection.getY() + selection.getWidth())
 
@@ -619,7 +628,7 @@ export default class DrawSystem {
 
         this.updatePlanets(dt)
         this.updateSpaceships(dt)
-        this.updateVectors(dt)
+        //this.updateVectors(dt)
         this.updateSelection(dt)
 
         this.layer.batchDraw()

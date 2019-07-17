@@ -10,7 +10,7 @@ export default class DebugSystem {
         this.ecs = ecs
         this.actions = actions
 
-        this.spaceship = undefined
+        this.spaceship = null
     }
 
     init() {
@@ -21,7 +21,7 @@ export default class DebugSystem {
 
     update(dt) {
 
-        if (this.spaceship === undefined) {
+        if (this.spaceship === null) {
 
             const [id] = this.ecs.searchEntities(["position", "velocity"]);
 

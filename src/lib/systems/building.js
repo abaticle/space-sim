@@ -5,8 +5,8 @@ import EntityManager from "../modules/entity-manager";
 export default class BuildingSystem {
 
     constructor(ecs, actions) {
-        this.ecs = ecs;
-        this.actions = actions;
+        this.ecs = ecs
+        this.actions = actions
     }
 
     init() {
@@ -36,7 +36,7 @@ export default class BuildingSystem {
                         break
 
                     case "active":
-                        this.producerActive(building, producer)
+                        this.producerActive(building, producer, dt)
                         break
 
                     case "filled":
@@ -55,7 +55,7 @@ export default class BuildingSystem {
 
     }
 
-    producerActive(building, producer) {
+    producerActive(building, producer, dt) {
 
         const planetItems = this.ecs.get(building.planetId, "planet", "items");
         const planet = this.ecs.get(building.planetId, "planet")
@@ -67,13 +67,26 @@ export default class BuildingSystem {
         let check = true
 
         for (const key in recipe) {
+
+            //Planet has NO item
             if (!planetItems[key]) {
                 check = false;
             } else {
+                //Planet has not enough item
                 if (planetItems[key] < recipe[key]) {
                     check = false;
                 }
             }
+        }
+
+
+        //Check if planet has enough electricity
+        if (check) {
+
+            if (planet.electricity < (dt * building.electricityUsed)) {
+                check = false
+            }
+
         }
 
         //And take from planet items
@@ -91,16 +104,26 @@ export default class BuildingSystem {
         const planet = this.ecs.get(building.planetId, "planet");
         const itemToProduce = items[producer.produce];
 
-        producer.workstep += (producer.speed * dt);
+        producer.workstep += (producer.speed * dt)
+        
+        planet.electricity -= (building.electricityUsed * dt)
 
-        //Work done
-        if (producer.workstep > itemToProduce.time) {
-            producer.items[producer.produce] = 1;
+        if (planet.electricity <= 0) {
+            planet.electricity = 0
+        }
 
-            EntityManager.transferItem(producer, planet, producer.produce, 1)
+        else {
 
-            producer.workstep = 0;
-            producer.state = "active";
+            //Work done
+            if (producer.workstep > itemToProduce.time) {
+                producer.items[producer.produce] = 1;
+
+                EntityManager.transferItem(producer, planet, producer.produce, 1)
+
+                producer.workstep = 0;
+                producer.state = "active";
+            }
+
         }
     }
 

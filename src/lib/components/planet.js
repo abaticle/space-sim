@@ -5,9 +5,11 @@ const planet = {
     items: {},
     size: 0,
     speed: 0,
-    parentId: undefined,
+    parentId: null,
     childrenIds: [],
-    owned: false
+    owned: false,
+    electricity: 0,
+    maxElectricity: 0
 }
 
 export { planet };

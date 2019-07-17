@@ -4,11 +4,11 @@ export default {
     initialScale: 0.007,
     
     sunSize: 20,
-    planetSizeModifier: 50,
-    planetSpeedModifier: 0.001,
-    planetDistanceModifier: 60000,
+    planetSizeModifier: 150,
+    planetSpeedModifier: 0.0005,
+    planetDistanceModifier: 180000,
 
-    spaceshipSizeModifier:150,
-    spaceshipSpeedModifier: 4,
+    spaceshipSizeModifier:40,
+    spaceshipSpeedModifier: 3,
     spaceshipOrbitRotationSpeed: 1
 }

@@ -77,6 +77,11 @@ class EntityManager {
      * @returns {number} New building id
      */
     createBuildingFromData(buildingId, withConstruction = true, planet) {
+
+        if (planet === undefined) {
+            throw new Error("Building need a planet !")
+        }
+
         let buildingData = buildings[buildingId];
 
         const building = this.ecs.createFromAssemblage({
@@ -88,17 +93,11 @@ class EntityManager {
             this.ecs.remove(building, "construction")
         }
 
-        if (planet !== undefined) {
-            this.ecs.set(planet, building, "building", "planetId")
-        }
+        this.ecs.set(planet, building, "building", "planetId")
 
-        //TODO:Better handling state !! 
-        //TODO:Remove check..
-        if (!this.ecs.has(building, "producer")) {
-            throw new Error('TODO/Remove:No producer ')
-        }
-
-        this.ecs.set("inactive", building, "producer", "state");
+        if (this.ecs.has(building, "producer")) {
+            this.ecs.set("inactive", building, "producer", "state");
+        }        
 
         return building
     }
@@ -173,8 +172,10 @@ class EntityManager {
         y = 0,
         speed = 1,
         owned = false,
-        parentId = undefined,
-        items = {}
+        parentId = null,
+        items = {},
+        maxElectricity = 0,
+        electricity = 0
     }) {
         let planetId = this.ecs.createFromAssemblage({
             components: ["planet", "position"],
@@ -186,7 +187,9 @@ class EntityManager {
                     speed,
                     owned,
                     parentId,
-                    items
+                    items,
+                    maxElectricity,
+                    electricity
                 },
                 position: {
                     x,

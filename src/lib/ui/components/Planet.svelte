@@ -21,6 +21,10 @@
         }
     }
 
+    const integerFormatter = (number) => {
+        return number.toFixed(0)
+    }
+
     const statFormatter = (stat) => {
         return stat.toFixed(2) + " /s"
     }
@@ -58,6 +62,12 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td>Electricity</td>
+                    <td></td>
+                    <td class="alignRight">{integerFormatter($planet.electricity)} / {$planet.maxElectricity}</td>
+                    <td></td>
+                </tr>
                 {#each $planet.items as item}
                     <tr>
                         <td>{item.type}</td>
@@ -124,20 +134,24 @@
                 <tr>
                     <td>{building.desc}</td>
                     
-                    <td>                    
-                        <a href="javascript:void(0)" on:click={() => dispatch('displayChooseProduction', {buildingId: building.id})}>
-                        {#if building.produce === ""} 
-                            Nothing
-                        {:else}
-                            {building.produce}
-                        {/if}                                
-                        </a>
+                    <td>               
+                        {#if building.produce !== undefined}     
+                            <a href="javascript:void(0)" on:click={() => dispatch('displayChooseProduction', {buildingId: building.id})}>
+                            {#if building.produce === ""} 
+                                Nothing
+                            {:else}
+                                {building.produce}
+                            {/if}                                
+                            </a>
+                        {/if}
                     </td>
                         
                     <td>
-                    {#if building.produce !== ""} 
-                        <progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}>
-                        </progress>
+                    {#if building.produce !== undefined}     
+                        {#if building.produce !== ""} 
+                            <progress class="progress is-primary" value={workstepFormatter(building.workstep, building.time)}>
+                            </progress>
+                        {/if}
                     {/if}
                     </td>
                     

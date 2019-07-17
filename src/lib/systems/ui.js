@@ -20,7 +20,7 @@ export default class UISystem {
     }
 
     init() {
-
+        this.removePanel()
     }
 
 
@@ -69,6 +69,8 @@ export default class UISystem {
             y: position.y,
             desc: planet.desc,
             owned: planet.owned,
+            electricity: planet.electricity,
+            maxElectricity: planet.maxElectricity,
             constructions: [],
             buildings: [],
             items: []
@@ -87,7 +89,8 @@ export default class UISystem {
 
                 let map = {
                     id: buildingId,
-                    desc: building.desc
+                    desc: building.desc,
+                    electricityUsed: building.electricityUsed
                 }
 
                 if (construction) {
@@ -100,7 +103,7 @@ export default class UISystem {
                     result.constructions.push(map)
                 } 
 
-                else {
+                else if (producer) {
                     const item = items[producer.produce]
 
                     map = {
@@ -111,6 +114,10 @@ export default class UISystem {
                         time: producer.produce === "" ? "" : item.time
                     }
 
+                    result.buildings.push(map)
+                }
+
+                else {
                     result.buildings.push(map)
                 }
                 

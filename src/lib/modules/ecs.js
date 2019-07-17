@@ -98,7 +98,7 @@ export default class ECS {
 
     //TODO Signleton entity ?
     createSingletonEntity(name, components) {
-        
+
     }
 
 
@@ -148,7 +148,7 @@ export default class ECS {
         }
 
         componentNames.forEach(name => {
-            if (!this.existComponent(name)) { 
+            if (!this.existComponent(name)) {
                 throw new Error(`Component "${name}" doesn't exists`)
             }
             if (this.entitiesComponents[name][entityId]) {
@@ -375,24 +375,26 @@ export default class ECS {
 
 
 
-    toString() {  
-        //const entities = JSON.stringify(this.entities)
-        //const entitiesComponents = JSON.stringify(this.entitiesComponents)
-        
-        return JSON.stringify({
-            entities: this.entities,
-            entitiesComponents: this.entitiesComponents
-        }, (k, v) => v === undefined ? null : v)
+    toString() {
 
-        /*return JSON.stringify({
+        const stringify = (data) => {
+            return JSON.stringify(data, (key, value) => value === undefined ? null : value)
+        }
+
+        return stringify({
             entities: this.entities,
             entitiesComponents: this.entitiesComponents
-        })*/
+        })
     }
 
 
     fromString(string) {
-        const data = JSON.parse(string)
+
+        const parse = (str) => {
+            return JSON.parse(str)
+        }
+
+        const data = parse(string)
 
         this.entities = data.entities
         this.entitiesComponents = data.entitiesComponents

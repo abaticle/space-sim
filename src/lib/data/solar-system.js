@@ -26,8 +26,8 @@ export default [
         items: {
             iron: 30000,
             copper: 20000,
-            ironBar: 1000,
-            copperBar: 1000
+            ironBar: 20,
+            copperBar: 10
         },
         owned: true,
         satellites: [{

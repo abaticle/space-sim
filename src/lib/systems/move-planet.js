@@ -5,27 +5,32 @@ export default class MovePlanetSystem {
     constructor(ecs, actions) {
         this.ecs = ecs;
         this.actions = actions;
-        
+
         this.planets = [];
     }
 
     init() {
-
-        //Randomize planet positions 
-        let planets = this.ecs.searchEntities(["planet", "position"])
-
-        planets.forEach(id => {
-            this.movePlanet(id, Math.random() * 10000)
-
-            if (this.ecs.get(id, "planet", "desc") === "Earth") {
-                const ship = this.ecs.searchEntities("spaceshipState")[0];
-
-                const position = this.ecs.get(ship, "position")
-
-                position.x = this.ecs.get(id, "position", "x") + 1000
-            }
-        })
         
+
+
+    }
+
+
+    randomizePlanets() {
+        //Randomize planet positions 
+        let planets = this.ecs
+            .searchEntities(["planet", "position"])
+            .forEach(id => {
+                this.movePlanet(id, Math.random() * 10000)
+
+                if (this.ecs.get(id, "planet", "desc") === "Earth") {
+                    const ship = this.ecs.searchEntities("spaceshipState")[0];
+
+                    const position = this.ecs.get(ship, "position")
+
+                    position.x = this.ecs.get(id, "position", "x") + 1000
+                }
+            })
     }
 
     /**
@@ -34,14 +39,16 @@ export default class MovePlanetSystem {
      * @param {*} dt Time difference
      */
     movePlanet(id, dt) {
-        
+
         const {
             position,
             planet
         } = this.ecs.get(id);
 
         //Save planet position
-        const t = {...position};
+        const t = {
+            ...position
+        };
 
         if (typeof planet.parentId === "number") {
 
@@ -50,7 +57,7 @@ export default class MovePlanetSystem {
 
             //Rotation target
             const rotation = Tools.rotate(parentPos, position, planet.speed * dt)
-            
+
             position.x = rotation.x
             position.y = rotation.y
 
@@ -60,7 +67,7 @@ export default class MovePlanetSystem {
 
             planet.childrenIds.forEach(childrenId => {
                 let p = this.ecs.get(childrenId, "position");
-                
+
                 p.x += t.x
                 p.y += t.y
             })
